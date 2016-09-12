@@ -1,0 +1,4 @@
+
+modEntry = {
+	FileHooks = "Las/FileHooks.lua"
+};
