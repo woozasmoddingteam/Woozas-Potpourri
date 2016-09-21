@@ -1,2 +1,0 @@
-shader = "shaders/Emissive.surface_shader"
-emissiveMap = "materials/effects/healheart.dds"

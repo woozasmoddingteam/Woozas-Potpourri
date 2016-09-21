@@ -1,2 +1,0 @@
-shader = "shaders/Emissive.surface_shader"
-emissiveMap = "ui/axe.dds"
