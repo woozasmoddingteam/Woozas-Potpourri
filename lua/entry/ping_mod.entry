@@ -1,6 +1,0 @@
-modEntry = [[
-	 Client: lua/PingClient.lua,
-	 Server: lua/PingServer.lua,
-	 Predict: lua/PingPredict.lua,
-	 Priority: 4
-]]

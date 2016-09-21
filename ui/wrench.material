@@ -1,2 +1,0 @@
-shader = "shaders/Emissive.surface_shader"
-emissiveMap = "ui/badges/wrench.dds"
