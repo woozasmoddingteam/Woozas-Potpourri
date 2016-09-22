@@ -90,4 +90,5 @@ v.3.0
 Big Update!? Brings a lot of new stuff to let the Potpourri even look more beautiful.
 -Added Shine Mod Selection made by KeatsAndYeats. Special thanks to this handy mod. Setup and configuration can be found here: https://github.com/keatsandyeats/Shine-ModSelector
 -Added Cuter Gorge Eyes (Why haven't we used them earlier?!)
--Added Ready Room Rave from Samus Orphan Black. Special thanks for creating this mod as well as making it compatible with Shine User Config. Time do dance!
+-Added Ready Room Rave from Samus Orphan Black. Special thanks for creating this mod as well as making it compatible with Shine User Config. 
+Time do dance!
