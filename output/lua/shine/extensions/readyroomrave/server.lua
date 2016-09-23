@@ -18,6 +18,9 @@ Plugin.CheckConfigTypes = false --Should we check the types of values in the con
 function Plugin:Initialise()
 
     self.commandTime = -999
+    self.tauntVolume = 1
+    self.musicVolume = 0.4
+    self.raveVolume = 0.6
 
     self:PrecacheAssets()
 
@@ -27,28 +30,21 @@ function Plugin:Initialise()
     return true
 end
 
+local soundList = {
+    "mess",
+    "better",
+    "dead",
+    "dance",
+    "dosomething",
+    "ayumi",
+    "nancy",
+}
 
 function Plugin:PrecacheAssets()
-    PrecacheAsset("sound/comtaunts.fev/taunts/mess")
-    PrecacheAsset("sound/comtaunts.fev/taunts/nancy")
-    PrecacheAsset("sound/comtaunts.fev/taunts/ayumi")
-    PrecacheAsset("sound/comtaunts.fev/taunts/better")
-    PrecacheAsset("sound/comtaunts.fev/taunts/dance")
-    PrecacheAsset("sound/comtaunts.fev/taunts/dead")
-    PrecacheAsset("sound/comtaunts.fev/taunts/dosomething")
-    PrecacheAsset("cinematics/RAVE.cinematic")
-    local soundList = {
-        "mess",
-        "better",
-        "dead",
-        "dance",
-        "dosomething",
-        "ayumi",
-        "nancy",
-    }
     for _, sound in ipairs(soundList) do
-        PrecacheAsset("sound/comtaunts.fev/taunts" .. sound)
+        PrecacheAsset("sound/comtaunts.fev/taunts/" .. sound)
     end
+    PrecacheAsset("cinematics/RAVE.cinematic")
 end
 
 
@@ -61,18 +57,21 @@ function Plugin:OnConsoleSound(client, name)
     -- spam protection
     if (Shared.GetTime() - self.commandTime < 3.5) then return end
 
-    -- only during pregame or in readyroom
-    if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
-
     if name == "ayumi" or name == "nancy" then
         -- only during pregame or in readyroom
         if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
 
-        StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin)
+        StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.musicVolume)
         self.commandTime = Shared.GetTime()
     else
-        StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin)
-        self.commandTime = Shared.GetTime()
+        for _,v in pairs(soundList) do
+            if name == v then
+                StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.tauntVolume)
+                self.commandTime = Shared.GetTime()
+                return
+            end
+        end
+        Shared.Message(" Error: Sound " .. name .. " does not exist")
     end
 
 end
@@ -90,7 +89,7 @@ function Plugin:OnConsoleRave(client)
     -- only during pregame or in readyroom
     if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
 
-    StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/nancy", origin)
+    StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/nancy", origin, self.raveVolume)
     -- local nearbyPlayers = GetEntitiesWithinRange("Player", origin, 20)
     -- for p = 1, #nearbyPlayers do
     --    self:SendNetworkMessage( nearbyPlayers[p], "RaveCinematic", { origin = origin, stop = false }, true )
