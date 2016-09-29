@@ -2,7 +2,6 @@ local Shine = Shine
 
 local TableQuickCopy = table.QuickCopy
 local TableQuickShuffle = table.QuickShuffle
-local TableRemove = table.remove
 local pairs = pairs;
 local ipairs = ipairs;
 local Plugin = Plugin;
@@ -65,7 +64,7 @@ function Plugin:Initialise()
 
 	local globalName = self.Config.GlobalName or "All";
 
-	local adverts = parseAdverts(globalName, self.Config.Adverts, {
+	local adverts = parseAdverts(nil, self.Config.Adverts, {
 		prefix = "";
 		pr = 255;
 		pg = 255;
@@ -73,7 +72,7 @@ function Plugin:Initialise()
 		r = 255;
 		g = 255;
 		b = 255;
-		group = "";
+		group = globalName;
 	});
 
 	local len = #adverts;
@@ -102,11 +101,12 @@ function Plugin:Initialise()
 		msg_id = msg_id + 1;
 
 		local msg = adverts[msg_id];
-		Shared.Message("Group of advert: " .. msg.group);
 		Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
 	end
 
-	self:SimpleTimer(self.Config.Interval, self.PrintNextAdvert);
+	Shared.Message(tostring(interval));
+
+	self:SimpleTimer(interval, self.PrintNextAdvert);
 
 	self:BindCommand("sh_print_next_advert", "PrintNextAdvert", Plugin.PrintNextAdvert, true, true);
 
