@@ -27,18 +27,18 @@ local function parseAdverts(group, adverts, default)
 		prefix = adverts.Prefix or default.prefix;
 	};
 	if group then
-		template.group = {
-			parent = default.group;
-			name = group;
-		};
+		template.group = default.group .. "|" .. group;
 	else
 		template.group = default.group;
 	end
+
+	assert(string.len(template.group) <= (kMaxChatLength * 4 + 1), "Too deep a group nesting and/or too long group names!");
 
 	adverts.Messages = adverts.Messages or {};
 	for _, v in ipairs(adverts.Messages) do
 		local message = {
 			prefix = template.prefix;
+			group = template.group;
 			pr = template.pr;
 			pg = template.pg;
 			pb = template.pb;
@@ -62,29 +62,18 @@ local function parseAdverts(group, adverts, default)
 end
 
 function Plugin:Initialise()
-	local StringMessage = string.format("string (%i)", kMaxChatLength * 4 + 1);
-
-	Shared.RegisterNetworkMessage("ADVERTS_LAS_ADVERT", {
-		pr = "integer (0 to 255)";
-		pg = "integer (0 to 255)";
-		pb = "integer (0 to 255)";
-		r = "integer (0 to 255)";
-		g = "integer (0 to 255)";
-		b = "integer (0 to 255)";
-		prefix = StringMessage;
-		message = StringMessage;
-	});
 
 	local globalName = self.Config.GlobalName or "All";
 
 	local adverts = parseAdverts(globalName, self.Config.Adverts, {
-		prefix = "",
-		pr = 255,
-		pg = 255,
-		pb = 255,
-		r = 255,
-		g = 255,
-		b = 255,
+		prefix = "";
+		pr = 255;
+		pg = 255;
+		pb = 255;
+		r = 255;
+		g = 255;
+		b = 255;
+		group = "";
 	});
 
 	local len = #adverts;
@@ -113,6 +102,7 @@ function Plugin:Initialise()
 		msg_id = msg_id + 1;
 
 		local msg = adverts[msg_id];
+		Shared.Message("Group of advert: " .. msg.group);
 		Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
 	end
 
