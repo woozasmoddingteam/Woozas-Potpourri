@@ -1,5 +1,3 @@
-assert(false);
-
 local Shine = Shine;
 local Plugin = {}
 Plugin.Version = "1.0"
