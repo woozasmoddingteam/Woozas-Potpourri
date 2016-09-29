@@ -10,18 +10,21 @@ local Plugin = Plugin;
 Plugin.HasConfig = true;
 Plugin.ConfigName = "AdvertsLas.json";
 
+Plugin.PrintNextAdvert = nil; -- This will be set to a function in Initialise.
+
+
 -- Recursive function that does a deep traversal of the adverts.
 local function parseAdverts(group, adverts, default)
 	local messages = {};
 
 	local template = {
-		prefix = adverts.Prefix or default.prefix;
 		pr = adverts.PrefixR or default.pr;
 		pg = adverts.PrefixG or default.pg;
 		pb = adverts.PrefixB or default.pg;
 		r = adverts.R or default.r;
 		g = adverts.G or default.g;
 		b = adverts.B or default.b;
+		prefix = adverts.Prefix or default.prefix;
 	};
 	if group then
 		template.group = {
@@ -58,9 +61,18 @@ local function parseAdverts(group, adverts, default)
 	return messages;
 end
 
-Plugin.PrintNextAdvert = nil; -- This will be set to a function in Initialise.
-
 function Plugin:Initialise()
+
+	Shared.RegisterNetworkMessage("ADVERTS_LAS_ADVERT", {
+		pr = "integer (0 to 255)";
+		pg = "integer (0 to 255)";
+		pb = "integer (0 to 255)";
+		r = "integer (0 to 255)";
+		r = "integer (0 to 255)";
+		b = "integer (0 to 255)";
+		prefix = StringMessage;
+		message = StringMessage;
+	});
 
 	local globalName = self.Config.GlobalName or "All";
 
@@ -103,8 +115,10 @@ function Plugin:Initialise()
 
 		Shine:NotifyDualColour(nil,
 			msg.pr,	msg.pg,	msg.pb,	msg.prefix,
-			msg.r,	msg.g,	msg.b,	msg.message,
+			msg.r,	msg.g,	msg.b,	msg.message
 		);
+
+		Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
 	end
 
 	self:SimpleTimer(self.Config.Interval, self.PrintNextAdvert);
