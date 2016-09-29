@@ -62,13 +62,14 @@ local function parseAdverts(group, adverts, default)
 end
 
 function Plugin:Initialise()
+	local StringMessage = string.format("string (%i)", kMaxChatLength * 4 + 1);
 
 	Shared.RegisterNetworkMessage("ADVERTS_LAS_ADVERT", {
 		pr = "integer (0 to 255)";
 		pg = "integer (0 to 255)";
 		pb = "integer (0 to 255)";
 		r = "integer (0 to 255)";
-		r = "integer (0 to 255)";
+		g = "integer (0 to 255)";
 		b = "integer (0 to 255)";
 		prefix = StringMessage;
 		message = StringMessage;
@@ -112,12 +113,6 @@ function Plugin:Initialise()
 		msg_id = msg_id + 1;
 
 		local msg = adverts[msg_id];
-
-		Shine:NotifyDualColour(nil,
-			msg.pr,	msg.pg,	msg.pb,	msg.prefix,
-			msg.r,	msg.g,	msg.b,	msg.message
-		);
-
 		Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
 	end
 
