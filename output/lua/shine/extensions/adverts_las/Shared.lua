@@ -8,6 +8,7 @@ Plugin.Conflicts = {
 	}
 };
 
+
 local StringMessage = string.format("string (%i)", kMaxChatLength * 4 + 1);
 
 Shared.RegisterNetworkMessage("ADVERTS_LAS_ADVERT", {

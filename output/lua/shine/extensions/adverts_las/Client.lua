@@ -2,6 +2,11 @@ local Plugin = Plugin;
 
 local unwanted = {};
 
+function Plugin:Initialise()
+	Shared.Message("shine adverts client init")
+	return true
+end
+
 Client.HookNetworkMessage("ADVERTS_LAS_ADVERT", function(msg)
 	local group = string.Explode(msg.group, "|");
 	for _, v in ipairs(group) do
