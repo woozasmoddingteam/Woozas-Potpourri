@@ -6,8 +6,18 @@ local pairs = pairs;
 local ipairs = ipairs;
 local Plugin = Plugin;
 
-Plugin.HasConfig = true;
-Plugin.ConfigName = "AdvertsLas.json";
+Plugin.Version = "1.0"
+Plugin.HasConfig = true --Does this plugin have a config file?
+Plugin.ConfigName = "AdvertsLas.json" --What's the name of the file?
+Plugin.DefaultState = true --Should the plugin be enabled when it is first added to the config?
+Plugin.NS2Only = false --Set to true to disable the plugin in NS2: Combat if you want to use the same code for both games in a mod.
+Plugin.DefaultConfig = {
+    Interval = 30,
+    GlobalName = "Something",
+	RandomiseOrder = true,
+}
+Plugin.CheckConfig = false --Should we check for missing/unused entries when loading?
+Plugin.CheckConfigTypes = false --Should we check the types of values in the config to make sure they match our default's types?
 
 Plugin.PrintNextAdvert = nil; -- This will be set to a function in Initialise.
 
@@ -15,6 +25,7 @@ Plugin.PrintNextAdvert = nil; -- This will be set to a function in Initialise.
 -- Recursive function that does a deep traversal of the adverts.
 local function parseAdverts(group, adverts, default)
 	local messages = {};
+	if adverts == nil then adverts = {} end
 
 	local template = {
 		pr = adverts.PrefixR or default.pr;
@@ -61,7 +72,7 @@ local function parseAdverts(group, adverts, default)
 end
 
 function Plugin:Initialise()
-
+	Shared.Message("shine adverts server init")
 	local globalName = self.Config.GlobalName or "All";
 
 	local adverts = parseAdverts(nil, self.Config.Adverts, {
@@ -77,23 +88,18 @@ function Plugin:Initialise()
 
 	local len = #adverts;
 
-	local randomiseOrder = self.Config.RandomiseOrder;
-	local interval = self.Config.Interval;
+	local interval = self.Config.Interval or 10;
 
 	local msg_id_func;
 	local msg_id = 0;
 
-	if randomiseOrder then
-		msg_id_func = function()
-			if msg_id == len then
+	msg_id_func = function()
+		if self.Config.RandomiseOrder or false then
+			if msg_id == 0 then
 				TableQuickShuffle(adverts);
-				msg_id = 0;
 			end
 		end
-	else
-		msg_id_func = function()
-			msg_id = msg_id % len;
-		end
+		msg_id = msg_id % len;
 	end
 
 	self.PrintNextAdvert = function()
@@ -101,7 +107,9 @@ function Plugin:Initialise()
 		msg_id = msg_id + 1;
 
 		local msg = adverts[msg_id];
-		Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
+		if msg then
+			Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
+		end
 	end
 
 	Shared.Message(tostring(interval));
