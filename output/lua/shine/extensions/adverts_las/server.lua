@@ -6,26 +6,42 @@ local pairs = pairs;
 local ipairs = ipairs;
 local Plugin = Plugin;
 
-Plugin.Version = "1.0"
-Plugin.HasConfig = true --Does this plugin have a config file?
-Plugin.ConfigName = "AdvertsLas.json" --What's the name of the file?
-Plugin.DefaultState = true --Should the plugin be enabled when it is first added to the config?
-Plugin.NS2Only = false --Set to true to disable the plugin in NS2: Combat if you want to use the same code for both games in a mod.
+Plugin.ConfigName = "AdvertsLas.json"; --What's the name of the file?
 Plugin.DefaultConfig = {
-    Interval = 30,
-    GlobalName = "Something",
-	RandomiseOrder = true,
+	Interval = 60;
+	RandomiseOrder = true;
+	GlobalName = "all";
+	ServerID = "Your (semi-) unique server ID.";
+	Adverts = {
+		R = 255;
+		G = 0;
+		B = 0;
+		PrefixR = 0;
+		PrefixG = 255;
+		PrefixB = 255;
+		Prefix = "[Prefix] ";
+		Messages = {
+			"A standard message.";
+		};
+		Nested = {
+			["Warnings"] = {
+				B = 255;
+				Prefix = "[PrefixWarning] ";
+				Messages = {
+					"A standard warning.";
+				}
+			}
+		}
+	}
 }
-Plugin.CheckConfig = false --Should we check for missing/unused entries when loading?
-Plugin.CheckConfigTypes = false --Should we check the types of values in the config to make sure they match our default's types?
 
 Plugin.PrintNextAdvert = nil; -- This will be set to a function in Initialise.
 
+local Groups = {};
 
 -- Recursive function that does a deep traversal of the adverts.
 local function parseAdverts(group, adverts, default)
 	local messages = {};
-	if adverts == nil then adverts = {} end
 
 	local template = {
 		pr = adverts.PrefixR or default.pr;
@@ -43,6 +59,8 @@ local function parseAdverts(group, adverts, default)
 	end
 
 	assert(string.len(template.group) <= (kMaxChatLength * 4 + 1), "Too deep a group nesting and/or too long group names!");
+
+	Groups[template.group] = true; -- The groups table is server-side a hash-table to make every group a unique member.
 
 	adverts.Messages = adverts.Messages or {};
 	for _, v in ipairs(adverts.Messages) do
@@ -72,10 +90,18 @@ local function parseAdverts(group, adverts, default)
 end
 
 function Plugin:Initialise()
-	Shared.Message("shine adverts server init")
+	Shared.Message("shine adverts server init");
+	local serverID = self.Config.ServerID;
+	if (string.len(serverID) == 0) or serverID == "Your (semi-) unique server ID." then
+		return false, "No valid ServerID given!";
+	end
+	self.dt.ServerID = serverID;
 	local globalName = self.Config.GlobalName or "All";
 
-	local adverts = parseAdverts(nil, self.Config.Adverts, {
+	local configAdverts = self.Config.Adverts;
+	if not configAdverts then return false, "No adverts!" end
+
+	local adverts = parseAdverts(nil, configAdverts, {
 		prefix = "";
 		pr = 255;
 		pg = 255;
@@ -86,6 +112,12 @@ function Plugin:Initialise()
 		group = globalName;
 	});
 
+	local newGroups = {};
+	for k, _ in pairs(Groups) do
+		table.insert(newGroups, k);
+	end
+	Groups = newGroups;
+
 	local len = #adverts;
 
 	local interval = self.Config.Interval or 10;
@@ -93,13 +125,17 @@ function Plugin:Initialise()
 	local msg_id_func;
 	local msg_id = 0;
 
-	msg_id_func = function()
-		if self.Config.RandomiseOrder or false then
+	if self.Config.RandomiseOrder then
+		msg_id_func = function()
 			if msg_id == 0 then
 				TableQuickShuffle(adverts);
+				msg_id = 0;
 			end
 		end
-		msg_id = msg_id % len;
+	else
+		msg_id_func = function()
+			msg_id = msg_id % len;
+		end
 	end
 
 	self.PrintNextAdvert = function()
@@ -107,12 +143,9 @@ function Plugin:Initialise()
 		msg_id = msg_id + 1;
 
 		local msg = adverts[msg_id];
-		if msg then
-			Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
-		end
+		--Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
+		self:SendNetworkMessage(nil, "Advert", msg, true);
 	end
-
-	Shared.Message(tostring(interval));
 
 	self:SimpleTimer(interval, self.PrintNextAdvert);
 
@@ -121,4 +154,11 @@ function Plugin:Initialise()
 	self.Enabled = true;
 
 	return true;
+end
+
+function Plugin:ReceiveRequestForGroups(Client)
+	for _, v in ipairs(Groups) do
+		self:SendNetworkMessage(Client, "GroupsPart", {msg = v}, true)
+	end
+	self:SendNetworkMessage(Client, "GroupsEnd", {}, true);
 end
