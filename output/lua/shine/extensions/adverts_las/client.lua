@@ -1,6 +1,5 @@
 local Plugin = Plugin;
 
-Plugin.ConfigName = "AdvertsLasClient.json";
 Plugin.DefaultConfig = {
 	-- true: always skip
 	-- false: always show
@@ -18,29 +17,101 @@ Plugin.DefaultConfig = {
 local serverID;
 local config;
 local all_groups_gotten = false;
-local groups = {}; -- A table of all the groups with all values set to true
+local groups = {}; -- A table of all the groups with all values set to their suffixes
+
+local function disableGroup(group)
+	config[group] = true;
+	Shared.Message("Disabled advert group '" .. group .. "'.");
+	Plugin:SaveConfig();
+end
+
+local function enableGroup(group)
+	config[group] = false;
+	Shared.Message("Enabled advert group '" .. group .. "'.");
+	Plugin:SaveConfig();
+end
+
+local function unsetGroup(group)
+	config[group] = nil;
+	Shared.Message("Unset advert group '" .. group .. "'.");
+	Plugin:SaveConfig();
+end
+
+local function unsetGroupRecursively(group)
+	for k, _ in pairs(config) do
+		if k:StartsWith(group) then
+			config[k] = nil;
+		end
+	end
+	Shared.Message("Unset advert group '" .. group .. "' & children.");
+	Plugin:SaveConfig();
+end
+
+local function populateAdvertPage(self, str)
+	self:AddTopButton("[Cancel]", function()
+		self:SetPage("Advert Config");
+	end);
+	self:AddSideButton("Enable", function()
+		enableGroup(str);
+		self:SetPage("Advert Config");
+	end);
+	self:AddSideButton("Disable", function()
+		disableGroup(str);
+		self:SetPage("Advert Config");
+	end);
+	self:AddSideButton("Unset", function()
+		unsetGroup(str);
+		self:SetPage("Advert Config");
+	end);
+	self:AddSideButton("Unset + Children", function()
+		unsetGroupRecursively(str);
+		self:SetPage("Advert Config");
+	end);
+	local current = config[str];
+	local str;
+	if current == false then
+		str = "Status: Enabled";
+	elseif current == true then
+		str = "Status: Disabled";
+	else
+		str = "Status: Unset";
+	end
+	self:AddBottomButton(str, function() end);
+end
 
 function Plugin:Initialise()
-	Shared.Message("shine adverts client init");
 	serverID = self.dt.ServerID;
 	self.Config[serverID] = self.Config[serverID] or {};
 	config = self.Config[serverID];
-	assert(config);
 	-- self:SaveConfig(); -- Commented out so that we don't bloat the config with unconfigured servers.
 
 	self:SendNetworkMessage("RequestForGroups", {}, true);
 
-	Shine.VoteMenu:AddPage("Configure advert groups", function(self)
+	Shine.VoteMenu:AddPage("Advert Config All", function(self)
+		populateAdvertPage(self, "");
+	end);
+
+	Shine.VoteMenu:AddPage("Advert Config", function(self)
 		self:AddTopButton("[Return]", function()
 			self:SetPage("Main");
 		end);
-	end)
+		self:AddBottomButton("All", function()
+			self:SetPage("Advert Config All");
+		end);
+	end);
+
+	Shine.VoteMenu:EditPage("Main", function(self)
+		self:AddSideButton("Advert Config", function()
+			self:SetPage("Advert Config");
+		end);
+	end);
 
 	self.Enabled = true;
 	return true;
 end
 
 function Plugin:ReceiveAdvert(msg)
+	if not self.Enabled then return end
 	local substr = msg.group;
 	while true do
 		local v = config[substr];
@@ -50,68 +121,34 @@ function Plugin:ReceiveAdvert(msg)
 		elseif v == false then -- Nil doesn't count!
 			break;
 		end
-		if substr:len() == 0 then
+		substr = substr:match("(.*)(|.*)");
+		if not substr then
+			if config[""] == true then
+				Shared.Message("AdvertsLasClient: Skipped an advert.");
+				return;
+			end
 			break;
 		end
-		substr = substr:sub(1,
-			(substr:find("×", 1, true) or 1)-1
-		);
 	end
 	Shine.AddChatText(msg.pr, msg.pg, msg.pb, msg.prefix, msg.r/255, msg.g/255, msg.b/255, msg.message);
 end
 
 function Plugin:ReceiveGroupsEnd()
 	all_groups_gotten = true;
+	Shine.VoteMenu:EditPage("Advert Config", function(self)
+		for full, suffix in pairs(groups) do
+			self:AddSideButton(suffix, function()
+				self:SetPage("Advert: " .. full);
+			end);
+		end
+	end);
 end
 
 function Plugin:ReceiveGroupsPart(msg)
-	groups[msg.msg] = true;
+	local str = msg.msg;
+	local suffix = str:match("(.*|)(.*|.*)") or str;
+	groups[str] = suffix;
+	Shine.VoteMenu:AddPage("Advert: " .. str, function(self)
+		populateAdvertPage(self, str);
+	end);
 end
-
-local function noGroup()
-	if all_groups_gotten then
-		Shared.Message("Can not configure a non-existent group!");
-	else
-		Shared.Message("Either not all groups haven't been received or the group isn't valid.");
-	end
-end
-
-Event.Hook("Console_sh_disable_advert_group", function(group)
-	if not groups[group] then
-		noGroup();
-		return nil;
-	end
-	config[group] = true;
-	Shared.Message("Disabled advert group '" .. group .. "'.");
-	Plugin.SaveConfig(Plugin);
-end)
-
-Event.Hook("Console_sh_enable_advert_group", function(group)
-	if not groups[group] then
-		noGroup();
-		return nil;
-	end
-	config[group] = false;
-	Plugin.SaveConfig(Plugin);
-end)
-
-Event.Hook("Console_sh_unset_advert_group", function(group)
-	if not groups[group] then
-		noGroup();
-		return nil;
-	end
-	config[group] = nil;
-	Plugin.SaveConfig(Plugin);
-end)
-
-Event.Hook("Console_sh_print_advert_groups", function()
-	if not all_groups_gotten then
-		Shared.Message("Still waiting for some groups!");
-	end
-	local delimiter = "-------------------";
-	Shared.Message(delimiter);
-	for group, _ in pairs(groups) do
-		Shared.Message(group .. ": " .. tostring(config[group]));
-	end
-	Shared.Message(delimiter);
-end)

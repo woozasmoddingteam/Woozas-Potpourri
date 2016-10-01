@@ -6,7 +6,6 @@ local pairs = pairs;
 local ipairs = ipairs;
 local Plugin = Plugin;
 
-Plugin.ConfigName = "AdvertsLas.json"; --What's the name of the file?
 Plugin.DefaultConfig = {
 	Interval = 60;
 	RandomiseOrder = true;
@@ -34,13 +33,15 @@ Plugin.DefaultConfig = {
 	}
 }
 
-Plugin.PrintNextAdvert = nil; -- This will be set to a function in Initialise.
-
 local Groups = {};
 
 -- Recursive function that does a deep traversal of the adverts.
 local function parseAdverts(group, adverts, default)
 	local messages = {};
+
+	local grouplen = group:len();
+
+	assert(grouplen <= (kMaxChatLength * 4 + 1), "Too deep a group nesting and/or too long group names!");
 
 	local template = {
 		pr = adverts.PrefixR or default.pr;
@@ -50,12 +51,12 @@ local function parseAdverts(group, adverts, default)
 		g = adverts.G or default.g;
 		b = adverts.B or default.b;
 		prefix = adverts.Prefix or default.prefix;
+		group = group;
 	};
-	template.group = group;
 
-	assert(template.group:len() <= (kMaxChatLength * 4 + 1), "Too deep a group nesting and/or too long group names!");
-
-	Groups[template.group] = true; -- The groups table is server-side a hash-table to make every group a unique member.
+	if grouplen ~= 0 then -- Avoid setting "" to true.
+		Groups[template.group] = true; -- The groups table is server-side a hash-table to make every group a unique member.
+	end
 
 	adverts.Messages = adverts.Messages or {};
 	for _, v in ipairs(adverts.Messages) do
@@ -77,7 +78,7 @@ local function parseAdverts(group, adverts, default)
 	for k, v in pairs(adverts.Nested) do
 		local newgroup;
 		if template.group ~= "" then
-			newgroup = template.group .. "×" .. k;
+			newgroup = template.group .. "|" .. k;
 		else
 			newgroup = k;
 		end
@@ -91,7 +92,6 @@ local function parseAdverts(group, adverts, default)
 end
 
 function Plugin:Initialise()
-	Shared.Message("shine adverts server init");
 	local serverID = self.Config.ServerID;
 	if (serverID:len() == 0) or serverID == "Your (semi-) unique server ID." then
 		return false, "No valid ServerID given!";
@@ -119,14 +119,14 @@ function Plugin:Initialise()
 
 	local len = #adverts;
 
-	local interval = self.Config.Interval or 10;
+	local interval = self.Config.Interval or 60;
 
 	local msg_id_func;
 	local msg_id = 0;
 
 	if self.Config.RandomiseOrder then
 		msg_id_func = function()
-			if msg_id == 0 then
+			if msg_id == len then
 				TableQuickShuffle(adverts);
 				msg_id = 0;
 			end
@@ -137,18 +137,15 @@ function Plugin:Initialise()
 		end
 	end
 
-	self.PrintNextAdvert = function()
+	local function printNextAdvert()
 		msg_id_func();
 		msg_id = msg_id + 1;
 
 		local msg = adverts[msg_id];
-		--Server.SendNetworkMessage("ADVERTS_LAS_ADVERT", msg, true);
 		self:SendNetworkMessage(nil, "Advert", msg, true);
 	end
 
-	self:SimpleTimer(interval, self.PrintNextAdvert);
-
-	self:BindCommand("sh_print_next_advert", "PrintNextAdvert", Plugin.PrintNextAdvert, true, true);
+	self:CreateTimer("Adverts timer", interval, -1, printNextAdvert);
 
 	self.Enabled = true;
 
@@ -156,9 +153,7 @@ function Plugin:Initialise()
 end
 
 function Plugin:ReceiveRequestForGroups(Client)
-	Shared.Message("Client requested for groups!");
 	for _, v in ipairs(Groups) do
-		Shared.Message("Group: " .. v);
 		self:SendNetworkMessage(Client, "GroupsPart", {msg = v}, true)
 	end
 	self:SendNetworkMessage(Client, "GroupsEnd", {}, true);
