@@ -10,7 +10,6 @@ Plugin.ConfigName = "AdvertsLas.json"; --What's the name of the file?
 Plugin.DefaultConfig = {
 	Interval = 60;
 	RandomiseOrder = true;
-	GlobalName = "all";
 	ServerID = "Your (semi-) unique server ID.";
 	Adverts = {
 		R = 255;
@@ -52,13 +51,9 @@ local function parseAdverts(group, adverts, default)
 		b = adverts.B or default.b;
 		prefix = adverts.Prefix or default.prefix;
 	};
-	if group then
-		template.group = default.group .. "|" .. group;
-	else
-		template.group = default.group;
-	end
+	template.group = group;
 
-	assert(string.len(template.group) <= (kMaxChatLength * 4 + 1), "Too deep a group nesting and/or too long group names!");
+	assert(template.group:len() <= (kMaxChatLength * 4 + 1), "Too deep a group nesting and/or too long group names!");
 
 	Groups[template.group] = true; -- The groups table is server-side a hash-table to make every group a unique member.
 
@@ -80,7 +75,13 @@ local function parseAdverts(group, adverts, default)
 
 	adverts.Nested = adverts.Nested or {};
 	for k, v in pairs(adverts.Nested) do
-		local nested = parseAdverts(k, v, template);
+		local newgroup;
+		if template.group ~= "" then
+			newgroup = template.group .. "×" .. k;
+		else
+			newgroup = k;
+		end
+		local nested = parseAdverts(newgroup, v, template);
 		for _, v in ipairs(nested) do
 			table.insert(messages, v);
 		end
@@ -92,16 +93,15 @@ end
 function Plugin:Initialise()
 	Shared.Message("shine adverts server init");
 	local serverID = self.Config.ServerID;
-	if (string.len(serverID) == 0) or serverID == "Your (semi-) unique server ID." then
+	if (serverID:len() == 0) or serverID == "Your (semi-) unique server ID." then
 		return false, "No valid ServerID given!";
 	end
 	self.dt.ServerID = serverID;
-	local globalName = self.Config.GlobalName or "All";
 
 	local configAdverts = self.Config.Adverts;
-	if not configAdverts then return false, "No adverts!" end
+	if not configAdverts then return false, "No adverts to show!" end
 
-	local adverts = parseAdverts(nil, configAdverts, {
+	local adverts = parseAdverts("", configAdverts, {
 		prefix = "";
 		pr = 255;
 		pg = 255;
@@ -109,7 +109,6 @@ function Plugin:Initialise()
 		r = 255;
 		g = 255;
 		b = 255;
-		group = globalName;
 	});
 
 	local newGroups = {};
@@ -157,7 +156,9 @@ function Plugin:Initialise()
 end
 
 function Plugin:ReceiveRequestForGroups(Client)
+	Shared.Message("Client requested for groups!");
 	for _, v in ipairs(Groups) do
+		Shared.Message("Group: " .. v);
 		self:SendNetworkMessage(Client, "GroupsPart", {msg = v}, true)
 	end
 	self:SendNetworkMessage(Client, "GroupsEnd", {}, true);
