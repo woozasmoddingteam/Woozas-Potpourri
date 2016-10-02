@@ -74,17 +74,22 @@ local function parseAdverts(group, adverts, default)
 		table.insert(messages, message);
 	end
 
-	adverts.Nested = adverts.Nested or {};
-	for k, v in pairs(adverts.Nested) do
-		local newgroup;
-		if template.group ~= "" then
-			newgroup = template.group .. "|" .. k;
-		else
-			newgroup = k;
-		end
-		local nested = parseAdverts(newgroup, v, template);
-		for _, v in ipairs(nested) do
-			table.insert(messages, v);
+	--adverts.Nested = adverts.Nested or {};
+	local childstr = "CHILD: ";
+	for k, v in pairs(adverts) do
+		if k:sub(1, childstr:len()) == childstr then
+			k = k:sub(childstr:len()+1, -1);
+			assert(k:len() ~= 0, "Empty group identifier not allowed!");
+			local newgroup;
+			if template.group ~= "" then
+				newgroup = template.group .. "|" .. k;
+			else
+				newgroup = k;
+			end
+			local nested = parseAdverts(newgroup, v, template);
+			for _, v in ipairs(nested) do
+				table.insert(messages, v);
+			end
 		end
 	end
 
@@ -146,6 +151,8 @@ function Plugin:Initialise()
 	end
 
 	self:CreateTimer("Adverts timer", interval, -1, printNextAdvert);
+
+	self:BindCommand("sh_print_next_advert", "PrintNextAdvert", printNextAdvert, true, true);
 
 	self.Enabled = true;
 
