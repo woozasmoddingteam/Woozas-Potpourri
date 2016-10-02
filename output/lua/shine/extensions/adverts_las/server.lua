@@ -152,7 +152,7 @@ function Plugin:Initialise()
 
 	self:CreateTimer("Adverts timer", interval, -1, printNextAdvert);
 
-	self:BindCommand("sh_print_next_advert", "PrintNextAdvert", printNextAdvert, true, true);
+	--self:BindCommand("sh_print_next_advert", "PrintNextAdvert", printNextAdvert, true, true);
 
 	self.Enabled = true;
 
