@@ -1,0 +1,86 @@
+﻿<shader>
+
+	<inputs>
+        <!-- should be specified via material file -->
+        <input name="numRows" type="float">4</input>			
+        <input name="numColumns" type="float">4</input>			
+		<input name="atlas" type="texture" address="wrap"/>
+		<input name="opacityMap" type="texture" address="wrap"/>
+		<input name="emissiveMap" type="texture" address="wrap"/>
+		<input name="hiddenAmount" type="float">0.0</input>
+		<input name="highlight" type="float">0.0</input>
+
+        <!-- should be specified via game -->
+        <!-- Row major index. 0 is the top-left rect -->
+        <!-- pass in -1 for no patch -->
+        <input name="patchIndex" type="float">1</input>
+
+		<input name="spePatchesMap" type="texture" address="wrap"/>
+        <input name="spePatchIndex" type="float">0.0</input>
+        <input name="spePatchEffect" type="float">1.0</input>
+        <input name="speGrid" type="float2">(1.0,1.0)</input>
+	</inputs>
+
+	<params>
+		<param name="alphaTest">true</param>
+	</params>
+
+	<code>
+	<![CDATA[
+		float2 DecodeUV(float2 uv, float2 grid, float index)
+		{
+            float row = floor(index / grid.y);
+            float col = index - row * grid.y;
+			uv.x = (col + uv.x) / grid.y;
+            uv.y = (row + uv.y) / grid.x;
+			return uv;
+		}
+
+		void rotate (inout float2 uv) {
+			float2 origin = DecodeUV(float2(0.5, 0.5), speGrid, spePatchIndex);
+			float2 norm = (uv - origin) / speGrid;
+			
+			float t = ((0.5 * time));
+			float s = sin ( t );
+			float c = cos ( t );
+			
+			float2 rotated = float2(
+				norm.x * c - norm.y * s,
+				norm.y * c + norm.x * s);
+		
+			uv = (rotated * speGrid + origin);
+		}
+
+		void MaterialShader( in Material_Input input, inout Material material )
+		{
+			float highlightId = highlight;
+			float f = 1 - hiddenAmount;
+            
+            if(spePatchIndex > 0)
+			{
+                float2 uv = DecodeUV(input.texCoord, speGrid, spePatchIndex);
+				if(spePatchEffect == 1.0) { rotate(uv); }
+				material.albedo	= tex2D(atlas, uv).rgb;
+                material.opacity = tex2D(spePatchesMap, uv).a * f;
+                material.emissive = tex2D(spePatchesMap, uv).rgb;
+			}
+			else if( patchIndex >= 0 )
+            {
+				float2 grid = float2(numRows, numColumns);
+                float2 uv = DecodeUV(input.texCoord, grid, patchIndex);
+                material.albedo	= tex2D(atlas, uv).rgb;
+                material.opacity = tex2D(opacityMap, uv).r * f;
+                material.emissive = tex2D(emissiveMap, uv).rgb;
+            }
+			else
+            {
+                material.albedo = float3(1,0,0);
+				material.opacity = 0;
+            }
+
+            material.id = 1*highlightId;    // for alien vision
+		}
+	]]>
+	</code>
+
+</shader>
