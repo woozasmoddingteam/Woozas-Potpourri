@@ -153,7 +153,7 @@ end
 function Plugin:Cleanup()
 	self.BaseClass.Cleanup( self )
   
-  self:SetRate(30, 23, 20)
+  self:SetRate(30, 26, 20)
 end
 
 --
@@ -179,19 +179,19 @@ function Plugin:GetMoveRate()
 end
 
 function Plugin:ResetRate()
-  self:SetRate(30, 30, 25)
+  self:SetRate(30, 26, 20)
 end
 
 function Plugin:RefreshRate()
-  Shared.Message("Tick Rate Checked")
+ -- Shared.Message("Tick Rate Checked")
 
   local perfData = Shared.GetServerPerformanceData()
-  Shared.Message(perfData:GetNumPlayers())
+ -- Shared.Message(perfData:GetNumPlayers())
   if (perfData:GetNumPlayers() > 24) then  -- Handle > 24 players
-    if (self:GetMoveRate() >= 30) then  -- Base - Activate immediately
-      self:SetRate(26, 26, 23)
-    elseif (self:GetMoveRate() >= 26) then  -- Limit 1 - Activate > 1500 entities
-      if (perfData:GetEntityCount() >= 1500) then
+    if (self:GetMoveRate() >= 26) then  -- Base - Activate immediately
+      self:SetRate(30, 23, 18)
+    elseif (self:GetMoveRate() >= 23) then  -- Limit 1 - Activate > 1350 entities
+      if (perfData:GetEntityCount() >= 1250) then
         self:SetRate(21, 21, 17)
       end
     end
