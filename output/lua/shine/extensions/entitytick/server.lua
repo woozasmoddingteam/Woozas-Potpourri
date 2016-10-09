@@ -191,7 +191,7 @@ function Plugin:RefreshRate()
     if (self:GetMoveRate() >= 26) then  -- Base - Activate immediately
       self:SetRate(30, 23, 18)
     elseif (self:GetMoveRate() >= 23) then  -- Limit 1 - Activate > 1350 entities
-      if (perfData:GetEntityCount() >= 1250) then
+      if (perfData:GetEntityCount() >= 1200) then
         self:SetRate(21, 21, 17)
       end
     end

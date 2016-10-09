@@ -92,3 +92,5 @@ Big Update!? Brings a lot of new stuff to let the Potpourri even look more beaut
 -Added Cuter Gorge Eyes (Why haven't we used them earlier?!)
 -Added Ready Room Rave from Samus Orphan Black. Special thanks for creating this mod as well as making it compatible with Shine User Config. Time do dance!
 
+v.3.1
+Merged ShoulderPatchesExtra by ZycaR into Potpourri. Setup and Information can be found here: https://github.com/ZycaR/ShoulderPatchesExtra
