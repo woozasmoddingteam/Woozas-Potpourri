@@ -24,7 +24,7 @@ Plugin.DefaultConfig = {
 				"message1",
 				"message2"
 			};
-		}
+		};
 		PowerHints = {
 			Randomise = true;
 			Prefix = "POWER!";
@@ -59,12 +59,12 @@ function Plugin:Initialise()
 		table.insert(groups, {
 			name = k;
 			prefix = v.Prefix or "";
-			pr = v.PrefixColor[1] or 255;
-			pg = v.PrefixColor[2] or 255;
-			pb = v.PrefixColor[3] or 255;
-			r = v.Color[1] or 255;
-			g = v.Color[2] or 255;
-			b = v.Color[3] or 255;
+			pr = v.PrefixColor and v.PrefixColor[1] or 255;
+			pg = v.PrefixColor and v.PrefixColor[2] or 255;
+			pb = v.PrefixColor and v.PrefixColor[3] or 255;
+			r = v.Color and v.Color[1] or 255;
+			g = v.Color and v.Color[2] or 255;
+			b = v.Color and v.Color[3] or 255;
 			hidable = v.Hidable;
 		});
 		local msg_n = 1;
@@ -81,6 +81,7 @@ function Plugin:Initialise()
 				str = msg;
 				group = k;
 			}, true);
+			msg_n = msg_n + 1;
 		end
 		self:CreateTimer("Adverts timer " .. k, v.Interval, -1, func);
 	end
