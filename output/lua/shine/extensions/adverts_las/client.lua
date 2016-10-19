@@ -6,6 +6,22 @@ local serverID;
 local should_hide;
 local groups = {};
 
+local VoteMenuFunction = function(self)
+	local str;
+	if should_hide then
+		str = "Show Hints";
+	else
+		str = "Hide Hints";
+	end
+
+	self:AddSideButton(str, function()
+		should_hide = not should_hide;
+		Plugin.Config[serverID] = should_hide;
+		Plugin:SaveConfig();
+		self:SetIsVisible(false);
+	end);
+end
+
 function Plugin:Initialise()
 	serverID = self.dt.ServerID;
 	should_hide = self.Config[serverID] or false; -- Being nil also counts!
@@ -13,19 +29,7 @@ function Plugin:Initialise()
 	self:SendNetworkMessage("RequestForGroups", {}, true);
 
 	Shine.VoteMenu:EditPage("Main", function(self)
-		local str;
-		if should_hide then
-			str = "Show Hints";
-		else
-			str = "Hide Hints";
-		end
-
-		self:AddSideButton(str, function()
-			should_hide = not should_hide;
-			Plugin.Config[serverID] = should_hide;
-			Plugin:SaveConfig();
-			self:SetIsVisible(false);
-		end);
+		VoteMenuFunction(self);
 	end);
 
 	self.Enabled = true;
@@ -40,7 +44,7 @@ function Plugin:ReceiveAdvert(msg)
 		return;
 	end
 	if should_hide and group.hidable then
-		Shared.Message("AdvertsLasClient: Skipped an advert.");
+		Shared.Message("AdvertsLasClient: Skipped an advert from the group '" .. msg.group .. "'.");
 		return;
 	end
 	Shine.AddChatText(group.pr, group.pg, group.pb, group.prefix, group.r/255, group.g/255, group.b/255, msg.str);
