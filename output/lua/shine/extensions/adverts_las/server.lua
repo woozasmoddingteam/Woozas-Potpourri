@@ -69,20 +69,28 @@ function Plugin:Initialise()
 		});
 		local msg_n = 1;
 		local randomise = v.Randomise or true;
-		local messages = TableQuickCopy(v.Messages);
+		local messages = {};
+		for i = 1, #v.Messages do
+			messages[i] = v.Messages[i];
+		end
 		local len = #messages;
 		local func = function()
-			if msg_n == len then
-				msg_n = 1;
-				TableQuickShuffle(messages);
-			end
+			Shared.Message("Timer! " .. k);
+			Shared.Message("Length: " .. len);
+			Shared.Message("index: " .. msg_n);
 			local msg = messages[msg_n];
+			Shared.Message("__________________");
 			self:SendNetworkMessage(nil, "Advert", {
 				str = msg;
 				group = k;
 			}, true);
 			msg_n = msg_n + 1;
+			if msg_n > len then
+				msg_n = 1;
+				TableQuickShuffle(messages);
+			end
 		end
+		Shared.Message(k);
 		self:CreateTimer("Adverts timer " .. k, v.Interval, -1, func);
 	end
 
