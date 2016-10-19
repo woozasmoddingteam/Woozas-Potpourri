@@ -8,8 +8,7 @@ local groups = {};
 
 function Plugin:Initialise()
 	serverID = self.dt.ServerID;
-	self.Config[serverID] = self.Config[serverID] or {};
-	should_hide = self.Config[serverID]; -- Being nil also counts!
+	should_hide = self.Config[serverID] or false; -- Being nil also counts!
 
 	self:SendNetworkMessage("RequestForGroups", {}, true);
 
