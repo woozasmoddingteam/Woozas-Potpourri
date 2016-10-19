@@ -75,11 +75,7 @@ function Plugin:Initialise()
 		end
 		local len = #messages;
 		local func = function()
-			Shared.Message("Timer! " .. k);
-			Shared.Message("Length: " .. len);
-			Shared.Message("index: " .. msg_n);
 			local msg = messages[msg_n];
-			Shared.Message("__________________");
 			self:SendNetworkMessage(nil, "Advert", {
 				str = msg;
 				group = k;
@@ -90,7 +86,6 @@ function Plugin:Initialise()
 				TableQuickShuffle(messages);
 			end
 		end
-		Shared.Message(k);
 		self:CreateTimer("Adverts timer " .. k, v.Interval, -1, func);
 	end
 
