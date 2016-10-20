@@ -53,6 +53,7 @@ function Plugin:ReceiveGroup(msg)
 					config[name] = not config[name];
 					Plugin:SaveConfig();
 					self:SetIsVisible(false);
+					self:SetPage("Main");
 				end);
 			end);
 		elseif hidable_group_count == 2 then
@@ -65,6 +66,7 @@ function Plugin:ReceiveGroup(msg)
 					config[name] = not config[name];
 					Plugin:SaveConfig();
 					self:SetIsVisible(false);
+					self:SetPage("Main");
 				end);
 			end);
 			VoteMenuFunction = function(self)
