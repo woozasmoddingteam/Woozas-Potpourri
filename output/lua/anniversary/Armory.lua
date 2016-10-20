@@ -29,7 +29,7 @@ Script.Load("lua/UnitStatusMixin.lua")
 Script.Load("lua/DissolveMixin.lua")
 Script.Load("lua/PowerConsumerMixin.lua")
 Script.Load("lua/GhostStructureMixin.lua")
-Script.Load("lua/MapBlipMixin.lua")
+--Script.Load("lua/MapBlipMixin.lua")
 Script.Load("lua/VortexAbleMixin.lua")
 Script.Load("lua/CombatMixin.lua")
 Script.Load("lua/InfestationTrackerMixin.lua")
@@ -157,8 +157,9 @@ function Armory:OnCreate()
     self.timeScannedWest = 0
     self.timeScannedSouth = 0
 
-    self.deployed = false
+    self.deployed = true;
 
+	self.startsBuilt = true;
 end
 
 -- Check if friendly players are nearby and facing armory and heal/resupply them
@@ -195,9 +196,9 @@ function Armory:OnInitialized()
         self:AddTimedCallback(LoginAndResupply, kLoginAndResupplyTime)
 
         -- This Mixin must be inited inside this OnInitialized() function.
-        if not HasMixin(self, "MapBlip") then
-            InitMixin(self, MapBlipMixin)
-        end
+        --if not HasMixin(self, "MapBlip") then
+        --    InitMixin(self, MapBlipMixin)
+        --end
 
         InitMixin(self, StaticTargetMixin)
         InitMixin(self, InfestationTrackerMixin)
