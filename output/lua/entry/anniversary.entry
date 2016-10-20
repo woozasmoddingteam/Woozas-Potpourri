@@ -1,0 +1,3 @@
+modEntry = {
+	Shared = "lua/anniversary/Shared.lua",
+};
