@@ -15,9 +15,9 @@ setmetatable(_ENV, {
 });
 setfenv(1, _ENV);
 
---[[
-
 local kHealthIndicatorModelName = PrecacheAsset("models/marine/armory/health_indicator.model")
+
+--[[
 
 function GetResearchPercentage(techId)
 
