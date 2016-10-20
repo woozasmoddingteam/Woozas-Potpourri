@@ -34,7 +34,6 @@ function Plugin:SetupDataTable()
 		b = uint8;
 		hidable = "boolean";
 	}, "Client");
-	self:AddNetworkMessage("GroupTerminator", {}, "Client");
 end
 
 Shine:RegisterExtension("adverts_las", Plugin);
