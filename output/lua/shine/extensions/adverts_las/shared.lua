@@ -1,6 +1,6 @@
 local Shine = Shine;
 local Plugin = {};
-Plugin.Version = "1.0";
+Plugin.Version = "2.1";
 Plugin.PrintName = "AdvertsLas";
 Plugin.HasConfig = true;
 Plugin.ConfigName = "AdvertsLas.json";
