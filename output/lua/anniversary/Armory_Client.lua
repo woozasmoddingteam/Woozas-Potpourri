@@ -10,64 +10,6 @@
 
 local kHealthIndicatorModelName = PrecacheAsset("models/marine/armory/health_indicator.model")
 
---[[
-
-function GetResearchPercentage(techId)
-
-    local techNode = GetTechTree():GetTechNode(techId)
-
-    if(techNode ~= nil) then
-
-        if(techNode:GetAvailable()) then
-            return 1
-        elseif(techNode:GetResearching()) then
-            return techNode:GetResearchProgress()
-        end
-
-    end
-
-    return 0
-
-end
-
-function Armory_Debug()
-
-    -- Draw armory points
-
-    local indexToUseOrigin = {
-        Vector(Armory.kResupplyUseRange, 0, 0),
-        Vector(0, 0, Armory.kResupplyUseRange),
-        Vector(-Armory.kResupplyUseRange, 0, 0),
-        Vector(0, 0, -Armory.kResupplyUseRange)
-    }
-
-    local indexToColor = {
-        Vector(1, 0, 0),
-        Vector(0, 1, 0),
-        Vector(0, 0, 1),
-        Vector(1, 1, 1)
-    }
-
-    function isaArmory(entity) return entity:isa("Armory") end
-
-    for index, armory in ientitylist(Shared.GetEntitiesWithClassname("Armory")) do
-
-        local startPoint = WoozArmory:GetOrigin()
-
-        for loop = 1, 4 do
-
-            local endPoint = startPoint + indexToUseOrigin[loop]
-            local color = indexToColor[loop]
-            DebugLine(startPoint, endPoint, .2, color.x, color.y, color.z, 1)
-
-        end
-
-    end
-
-end
-
---]]
-
 function WoozArmory:OnInitClient()
 
     if not self.clientConstructionComplete then
@@ -80,32 +22,6 @@ end
 function WoozArmory:GetWarmupCompleted()
     return not self.timeConstructionCompleted or (self.timeConstructionCompleted + 0.7 < Shared.GetTime())
 end
-
---[[
-function WoozArmory:OnUse(player, elapsedTime, useSuccessTable)
-
-    self:UpdateArmoryWarmUp()
-
-    if GetIsUnitActive(self) and not Shared.GetIsRunningPrediction() and not player.buyMenu and self:GetWarmupCompleted() then
-
-        if Client.GetLocalPlayer() == player then
-
-            Client.SetCursor("ui/Cursor_MarineCommanderDefault.dds", 0, 0)
-
-            -- Play looping "active" sound while logged in
-            -- Shared.PlayPrivateSound(player, Armory.kResupplySound, player, 1.0, Vector(0, 0, 0))
-
-            MouseTracker_SetIsVisible(true, "ui/Cursor_MenuDefault.dds", true)
-
-            -- tell the player to show the lua menu
-            player:BuyMenu(self)
-
-        end
-
-    end
-
-end
---]]
 
 function WoozArmory:OnUse(player)
 	if Client.GetLocalPlayer() ~= player then

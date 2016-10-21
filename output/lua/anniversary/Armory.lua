@@ -155,21 +155,6 @@ function WoozArmory:OnCreate()
 	--self.startsBuilt = true;
 end
 
--- Check if friendly players are nearby and facing armory and heal/resupply them
-local function LoginAndResupply(self)
-
-    self:UpdateLoggedIn()
-
-    -- Make sure players are still close enough, alive, marines, etc.
-    -- Give health and ammo to nearby players.
-    if GetIsUnitActive(self) then
-        self:ResupplyPlayers()
-    end
-
-    return true
-
-end
-
 function WoozArmory:OnInitialized()
 
     ScriptActor.OnInitialized(self)
@@ -186,7 +171,7 @@ function WoozArmory:OnInitialized()
         -- Use entityId as index, store time last resupplied
         self.resuppliedPlayers = { }
 
-        self:AddTimedCallback(LoginAndResupply, kLoginAndResupplyTime)
+        --self:AddTimedCallback(LoginAndResupply, kLoginAndResupplyTime)
 
         -- This Mixin must be inited inside this OnInitialized() function.
         --if not HasMixin(self, "MapBlip") then
@@ -211,46 +196,17 @@ function WoozArmory:OnInitialized()
 
 end
 
-function WoozArmory:GetCanBeUsed(player, useSuccessTable)
-
-    if player:isa("Exo") then
-        useSuccessTable.useSuccess = false
-    end
-
-end
-
+function WoozArmory:GetCanBeUsed(player, useSuccessTable) end
 function WoozArmory:GetCanBeUsedConstructed(byPlayer)
-    return not byPlayer:isa("Exo")
+    return true;
 end
 
 function WoozArmory:GetRequiresPower()
-    return true
-end
-
-function WoozArmory:GetTechIfResearched(buildId, researchId)
-
-    local techTree = nil
-    if Server then
-        techTree = self:GetTeam():GetTechTree()
-    else
-        techTree = GetTechTree()
-    end
-    ASSERT(techTree ~= nil)
-
-    -- If we don't have the research, return it, otherwise return buildId
-    local researchNode = techTree:GetTechNode(researchId)
-    ASSERT(researchNode ~= nil)
-    ASSERT(researchNode:GetIsResearch())
-    return ConditionalValue(researchNode:GetResearched(), buildId, researchId)
-
+    return true;
 end
 
 function WoozArmory:GetTechButtons(techId)
     return {}
-end
-
-function WoozArmory:GetTechAllowed(techId, techNode, player)
-	return true, true
 end
 
 function WoozArmory:OnUpdatePoseParameters()
@@ -328,25 +284,6 @@ end
 
 function WoozArmory:GetReceivesStructuralDamage()
     return true
-end
-
-function WoozArmory:GetDamagedAlertId()
-    return kTechId.MarineAlertStructureUnderAttack
-end
-
-function WoozArmory:GetItemList(forPlayer)
-
-    local itemList = {
-        kTechId.Welder,
-        kTechId.LayMines,
-        kTechId.Shotgun,
-        kTechId.ClusterGrenade,
-        kTechId.GasGrenade,
-        kTechId.PulseGrenade
-    }
-
-    return itemList
-
 end
 
 function WoozArmory:GetHealthbarOffset()
