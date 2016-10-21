@@ -6,13 +6,6 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-local _ENV = {Armory = WoozArmory};
-setmetatable(_ENV, {
-	__index = getfenv();
-	__newindex = getfenv();
-});
-setfenv(1, _ENV);
-
 local function OnDeploy(self)
 
     self.deployed = true
@@ -22,7 +15,7 @@ end
 
 local kDeployTime = 3
 
-function Armory:OnConstructionComplete()
+function WoozArmory:OnConstructionComplete()
     self:AddTimedCallback(OnDeploy, kDeployTime)
 end
 
@@ -41,7 +34,7 @@ local indexToUseOrigin =
     Vector(-Armory.kResupplyUseRange, 0, 0)
 }
 
-function Armory:GetTimeToResupplyPlayer(player)
+function WoozArmory:GetTimeToResupplyPlayer(player)
 
     assert(player ~= nil)
 
@@ -60,7 +53,7 @@ function Armory:GetTimeToResupplyPlayer(player)
 
 end
 
-function Armory:GetShouldResupplyPlayer(player)
+function WoozArmory:GetShouldResupplyPlayer(player)
 
     if not player:GetIsAlive() then
         return false
@@ -119,7 +112,7 @@ function Armory:GetShouldResupplyPlayer(player)
 
 end
 
-function Armory:ResupplyPlayer(player)
+function WoozArmory:ResupplyPlayer(player)
 
     local resuppliedPlayer = false
 
@@ -181,7 +174,7 @@ function Armory:ResupplyPlayer(player)
 
 end
 
-function Armory:ResupplyPlayers()
+function WoozArmory:ResupplyPlayers()
 
     local playersInRange = GetEntitiesForTeamWithinRange("Marine", self:GetTeamNumber(), self:GetOrigin(), Armory.kResupplyUseRange)
     for index, player in ipairs(playersInRange) do
@@ -194,7 +187,7 @@ function Armory:ResupplyPlayers()
 
 end
 
-function Armory:UpdateResearch()
+function WoozArmory:UpdateResearch()
 
 	--[[
 
@@ -227,7 +220,7 @@ end
 
 --]]
 
-function Armory:OnResearch(researchId)
+function WoozArmory:OnResearch(researchId)
 
 	--[[
 
@@ -242,7 +235,7 @@ function Armory:OnResearch(researchId)
 
 end
 
-function Armory:OnResearchCancel(researchId)
+function WoozArmory:OnResearchCancel(researchId)
 
 	--[[
 
@@ -280,7 +273,7 @@ function Armory:OnResearchCancel(researchId)
 end
 
 -- Called when research or upgrade complete
-function Armory:OnResearchComplete(researchId)
+function WoozArmory:OnResearchComplete(researchId)
 
 	--[[
 
@@ -306,7 +299,7 @@ function Armory:OnResearchComplete(researchId)
 
 end
 
-function Armory:UpdateLoggedIn()
+function WoozArmory:UpdateLoggedIn()
 
     local players = GetEntitiesForTeamWithinRange("Marine", self:GetTeamNumber(), self:GetOrigin(), 2 * Armory.kResupplyUseRange)
     local armoryCoords = self:GetAngles():GetCoords()

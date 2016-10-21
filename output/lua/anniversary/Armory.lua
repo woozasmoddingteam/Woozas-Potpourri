@@ -39,33 +39,26 @@ Script.Load("lua/ParasiteMixin.lua")
 
 class 'WoozArmory' (ScriptActor)
 
-local _ENV = {Armory = WoozArmory};
-setmetatable(_ENV, {
-	__index = getfenv();
-	__newindex = getfenv();
-});
-setfenv(1, _ENV);
+WoozArmory.kMapName = "woozarmory"
 
-Armory.kMapName = "woozarmory"
-
-Armory.kModelName = PrecacheAsset("models/marine/armory/armory.model")
+WoozArmory.kModelName = PrecacheAsset("models/marine/armory/armory.model")
 local kAnimationGraph = PrecacheAsset("models/marine/armory/armory.animation_graph")
 
 -- Looping sound while using the armory
-Armory.kResupplySound = PrecacheAsset("sound/NS2.fev/marine/structures/armory_resupply")
+WoozArmory.kResupplySound = PrecacheAsset("sound/NS2.fev/marine/structures/armory_resupply")
 
-Armory.kArmoryBuyMenuUpgradesTexture = "ui/marine_buymenu_upgrades.dds"
-Armory.kAttachPoint = "Root"
+WoozArmory.kArmoryBuyMenuUpgradesTexture = "ui/marine_buymenu_upgrades.dds"
+WoozArmory.kAttachPoint = "Root"
 
-Armory.kBuyMenuFlash = "ui/marine_buy.swf"
-Armory.kBuyMenuTexture = "ui/marine_buymenu.dds"
-Armory.kBuyMenuUpgradesTexture = "ui/marine_buymenu_upgrades.dds"
+WoozArmory.kBuyMenuFlash = "ui/marine_buy.swf"
+WoozArmory.kBuyMenuTexture = "ui/marine_buymenu.dds"
+WoozArmory.kBuyMenuUpgradesTexture = "ui/marine_buymenu_upgrades.dds"
 local kLoginAndResupplyTime = 0.3
-Armory.kHealAmount = 25
-Armory.kResupplyInterval = .8
+WoozArmory.kHealAmount = 25
+WoozArmory.kResupplyInterval = .8
 gArmoryHealthHeight = 1.4
 -- Players can use menu and be supplied by armor inside this range
-Armory.kResupplyUseRange = 2.5
+WoozArmory.kResupplyUseRange = 2.5
 
 if Server then
     Script.Load("lua/anniversary/Armory_Server.lua")
@@ -108,7 +101,7 @@ AddMixinNetworkVars(CombatMixin, networkVars)
 AddMixinNetworkVars(IdleMixin, networkVars)
 AddMixinNetworkVars(ParasiteMixin, networkVars)
 
-function Armory:OnCreate()
+function WoozArmory:OnCreate()
 
     ScriptActor.OnCreate(self)
 
@@ -157,9 +150,9 @@ function Armory:OnCreate()
     self.timeScannedWest = 0
     self.timeScannedSouth = 0
 
-    self.deployed = true;
+    --self.deployed = true;
 
-	self.startsBuilt = true;
+	--self.startsBuilt = true;
 end
 
 -- Check if friendly players are nearby and facing armory and heal/resupply them
@@ -177,11 +170,11 @@ local function LoginAndResupply(self)
 
 end
 
-function Armory:OnInitialized()
+function WoozArmory:OnInitialized()
 
     ScriptActor.OnInitialized(self)
 
-    self:SetModel(Armory.kModelName, kAnimationGraph)
+    self:SetModel(WoozArmory.kModelName, kAnimationGraph)
 
     InitMixin(self, WeldableMixin)
     InitMixin(self, NanoShieldMixin)
@@ -214,9 +207,11 @@ function Armory:OnInitialized()
 
     InitMixin(self, IdleMixin)
 
+	self:SetConstructionComplete();
+
 end
 
-function Armory:GetCanBeUsed(player, useSuccessTable)
+function WoozArmory:GetCanBeUsed(player, useSuccessTable)
 
     if player:isa("Exo") then
         useSuccessTable.useSuccess = false
@@ -224,15 +219,15 @@ function Armory:GetCanBeUsed(player, useSuccessTable)
 
 end
 
-function Armory:GetCanBeUsedConstructed(byPlayer)
+function WoozArmory:GetCanBeUsedConstructed(byPlayer)
     return not byPlayer:isa("Exo")
 end
 
-function Armory:GetRequiresPower()
+function WoozArmory:GetRequiresPower()
     return true
 end
 
-function Armory:GetTechIfResearched(buildId, researchId)
+function WoozArmory:GetTechIfResearched(buildId, researchId)
 
     local techTree = nil
     if Server then
@@ -250,15 +245,15 @@ function Armory:GetTechIfResearched(buildId, researchId)
 
 end
 
-function Armory:GetTechButtons(techId)
+function WoozArmory:GetTechButtons(techId)
     return {}
 end
 
-function Armory:GetTechAllowed(techId, techNode, player)
+function WoozArmory:GetTechAllowed(techId, techNode, player)
 	return true, true
 end
 
-function Armory:OnUpdatePoseParameters()
+function WoozArmory:OnUpdatePoseParameters()
 
     if GetIsUnitActive(self) and self.deployed then
 
@@ -311,7 +306,7 @@ local function UpdateArmoryAnim(self, extension, loggedIn, scanTime, timePassed)
 
 end
 
-function Armory:OnUpdate(deltaTime)
+function WoozArmory:OnUpdate(deltaTime)
 
     if Client then
         self:UpdateArmoryWarmUp()
@@ -331,15 +326,15 @@ function Armory:OnUpdate(deltaTime)
 
 end
 
-function Armory:GetReceivesStructuralDamage()
+function WoozArmory:GetReceivesStructuralDamage()
     return true
 end
 
-function Armory:GetDamagedAlertId()
+function WoozArmory:GetDamagedAlertId()
     return kTechId.MarineAlertStructureUnderAttack
 end
 
-function Armory:GetItemList(forPlayer)
+function WoozArmory:GetItemList(forPlayer)
 
     local itemList = {
         kTechId.Welder,
@@ -354,13 +349,13 @@ function Armory:GetItemList(forPlayer)
 
 end
 
-function Armory:GetHealthbarOffset()
+function WoozArmory:GetHealthbarOffset()
     return gArmoryHealthHeight
 end
 
 if Server then
     --[[ not used anymore since all animation are now client side
-    function Armory:OnTag(tagName)
+    function WoozArmory:OnTag(tagName)
         if tagName == "deploy_end" then
             self.deployed = true
         end
@@ -369,17 +364,19 @@ if Server then
 
 end
 
+Shared.RegisterNetworkMessage("WoozArmoryFound");
+
 if Server then
-	Server.HookNetworkMessage("WoozaButtonPressed", function(client)
-		local name = client:GetControllingPlayer().name;
-		local id = GetSteamIdForClientIndex(client:GetClientIndex());
-		Shared.Message(name .. " (steam id: " .. id .. ") won!");
+	Server.HookNetworkMessage("WoozArmoryFound", function(client)
+		local player = client:GetControllingPlayer();
+		local id = GetSteamIdForClientIndex(player:GetClientIndex());
+		Shared.Message(player.name .. " (steam id: " .. id .. ") won!");
 	end);
 
 	Event.Hook("Console_plantarmory", function(client)
 		local ent = CreateEntity("woozarmory", client:GetControllingPlayer():GetOrigin());
 		assert(ent);
-	end)
+	end);
 end
 
-Shared.LinkClassToMap("WoozArmory", Armory.kMapName, networkVars)
+Shared.LinkClassToMap("WoozArmory", WoozArmory.kMapName, networkVars)
