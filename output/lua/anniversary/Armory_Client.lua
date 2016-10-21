@@ -8,13 +8,6 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-local _ENV = {Armory = WoozArmory};
-setmetatable(_ENV, {
-	__index = getfenv();
-	__newindex = getfenv();
-});
-setfenv(1, _ENV);
-
 local kHealthIndicatorModelName = PrecacheAsset("models/marine/armory/health_indicator.model")
 
 --[[
@@ -59,7 +52,7 @@ function Armory_Debug()
 
     for index, armory in ientitylist(Shared.GetEntitiesWithClassname("Armory")) do
 
-        local startPoint = armory:GetOrigin()
+        local startPoint = WoozArmory:GetOrigin()
 
         for loop = 1, 4 do
 
@@ -75,7 +68,7 @@ end
 
 --]]
 
-function Armory:OnInitClient()
+function WoozArmory:OnInitClient()
 
     if not self.clientConstructionComplete then
         self.clientConstructionComplete = self.constructionComplete
@@ -84,11 +77,12 @@ function Armory:OnInitClient()
 
 end
 
-function Armory:GetWarmupCompleted()
+function WoozArmory:GetWarmupCompleted()
     return not self.timeConstructionCompleted or (self.timeConstructionCompleted + 0.7 < Shared.GetTime())
 end
 
-function Armory:OnUse(player, elapsedTime, useSuccessTable)
+--[[
+function WoozArmory:OnUse(player, elapsedTime, useSuccessTable)
 
     self:UpdateArmoryWarmUp()
 
@@ -111,8 +105,17 @@ function Armory:OnUse(player, elapsedTime, useSuccessTable)
     end
 
 end
+--]]
 
-function Armory:SetOpacity(amount, identifier)
+function WoozArmory:OnUse(player)
+	if Client.GetLocalPlayer() ~= player then
+		return
+	end
+
+	Client.SendNetworkMessage("WoozArmoryFound", {});
+end
+
+function WoozArmory:SetOpacity(amount, identifier)
 
     for i = 0, self:GetNumChildren() - 1 do
 
@@ -125,7 +128,7 @@ function Armory:SetOpacity(amount, identifier)
 
 end
 
-function Armory:UpdateArmoryWarmUp()
+function WoozArmory:UpdateArmoryWarmUp()
 
     if self.clientConstructionComplete ~= self.constructionComplete and self.constructionComplete then
         self.clientConstructionComplete = self.constructionComplete
@@ -136,9 +139,9 @@ end
 
 local kUpVector = Vector(0, 1, 0)
 
-function Armory:OnUpdateRender()
+function WoozArmory:OnUpdateRender()
 
-    PROFILE("Armory:OnUpdateRender")
+    PROFILE("WoozArmory:OnUpdateRender")
 
     local player = Client.GetLocalPlayer()
     local showHealthIndicator = false
@@ -169,7 +172,7 @@ function Armory:OnUpdateRender()
 
 end
 
-function Armory:OnDestroy()
+function WoozArmory:OnDestroy()
 
     if self.healthIndicator then
         Client.DestroyRenderModel(self.healthIndicator)
