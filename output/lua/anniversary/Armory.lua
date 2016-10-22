@@ -17,24 +17,17 @@ Script.Load("lua/LOSMixin.lua")
 Script.Load("lua/CorrodeMixin.lua")
 Script.Load("lua/ConstructMixin.lua")
 Script.Load("lua/ResearchMixin.lua")
-Script.Load("lua/RecycleMixin.lua")
 Script.Load("lua/CommanderGlowMixin.lua")
 
 Script.Load("lua/ScriptActor.lua")
 Script.Load("lua/RagdollMixin.lua")
-Script.Load("lua/NanoShieldMixin.lua")
 Script.Load("lua/ObstacleMixin.lua")
-Script.Load("lua/WeldableMixin.lua")
 Script.Load("lua/UnitStatusMixin.lua")
 Script.Load("lua/DissolveMixin.lua")
 Script.Load("lua/PowerConsumerMixin.lua")
---Script.Load("lua/GhostStructureMixin.lua")
-Script.Load("lua/VortexAbleMixin.lua")
-Script.Load("lua/CombatMixin.lua")
 Script.Load("lua/InfestationTrackerMixin.lua")
 Script.Load("lua/SupplyUserMixin.lua")
 Script.Load("lua/IdleMixin.lua")
-Script.Load("lua/ParasiteMixin.lua")
 
 class 'WoozArmory' (ScriptActor)
 
@@ -59,10 +52,6 @@ gArmoryHealthHeight = 1.4
 -- Players can use menu and be supplied by armor inside this range
 WoozArmory.kResupplyUseRange = 2.5
 
-if Client then
-    Script.Load("lua/anniversary/Armory_Client.lua")
-end
-
 PrecacheAsset("models/marine/armory/health_indicator.surface_shader")
 
 local networkVars =
@@ -85,18 +74,12 @@ AddMixinNetworkVars(LOSMixin, networkVars)
 AddMixinNetworkVars(CorrodeMixin, networkVars)
 AddMixinNetworkVars(ConstructMixin, networkVars)
 AddMixinNetworkVars(ResearchMixin, networkVars)
---AddMixinNetworkVars(RecycleMixin, networkVars)
 AddMixinNetworkVars(SelectableMixin, networkVars)
 
---AddMixinNetworkVars(NanoShieldMixin, networkVars)
 AddMixinNetworkVars(ObstacleMixin, networkVars)
 AddMixinNetworkVars(DissolveMixin, networkVars)
 AddMixinNetworkVars(PowerConsumerMixin, networkVars)
---AddMixinNetworkVars(GhostStructureMixin, networkVars)
---AddMixinNetworkVars(VortexAbleMixin, networkVars)
---AddMixinNetworkVars(CombatMixin, networkVars)
 AddMixinNetworkVars(IdleMixin, networkVars)
---AddMixinNetworkVars(ParasiteMixin, networkVars)
 
 function WoozArmory:OnCreate()
 
@@ -116,15 +99,10 @@ function WoozArmory:OnCreate()
     InitMixin(self, CorrodeMixin)
     InitMixin(self, ConstructMixin)
     InitMixin(self, ResearchMixin)
-    --InitMixin(self, RecycleMixin)
     InitMixin(self, RagdollMixin)
     InitMixin(self, ObstacleMixin)
     InitMixin(self, DissolveMixin)
-    --InitMixin(self, GhostStructureMixin)
-    --InitMixin(self, VortexAbleMixin)
-    --InitMixin(self, CombatMixin)
     InitMixin(self, PowerConsumerMixin)
-    --InitMixin(self, ParasiteMixin)
 
     if Client then
         InitMixin(self, CommanderGlowMixin)
@@ -146,10 +124,6 @@ function WoozArmory:OnCreate()
     self.timeScannedNorth = 0
     self.timeScannedWest = 0
     self.timeScannedSouth = 0
-
-    --self.deployed = true;
-
-	--self.startsBuilt = true;
 end
 
 function WoozArmory:OnInitialized()
@@ -157,9 +131,6 @@ function WoozArmory:OnInitialized()
     ScriptActor.OnInitialized(self)
 
     self:SetModel(WoozArmory.kModelName, kAnimationGraph)
-
-    --InitMixin(self, WeldableMixin)
-    --InitMixin(self, NanoShieldMixin)
 
     if Server then
 
@@ -184,6 +155,15 @@ function WoozArmory:OnInitialized()
 
 	self:SetConstructionComplete();
 
+	self:SetPoseParam("log_n", 0);
+	self:SetPoseParam("log_e", 0);
+	self:SetPoseParam("log_w", 0);
+	self:SetPoseParam("log_s", 0);
+
+	self:SetPoseParam("scan_n", 0);
+	self:SetPoseParam("scan_e", 0);
+	self:SetPoseParam("scan_w", 0);
+	self:SetPoseParam("scan_s", 0);
 end
 
 function WoozArmory:GetCanBeUsed(player, useSuccessTable) end
@@ -193,91 +173,6 @@ end
 
 function WoozArmory:GetRequiresPower()
     return true;
-end
-
-function WoozArmory:GetTechButtons(techId)
-    return {}
-end
-
-function WoozArmory:OnUpdatePoseParameters()
-
-    if GetIsUnitActive(self) and self.deployed then
-
-        if self.loginNorthAmount then
-            self:SetPoseParam("log_n", self.loginNorthAmount)
-        end
-
-        if self.loginSouthAmount then
-            self:SetPoseParam("log_s", self.loginSouthAmount)
-        end
-
-        if self.loginEastAmount then
-            self:SetPoseParam("log_e", self.loginEastAmount)
-        end
-
-        if self.loginWestAmount then
-            self:SetPoseParam("log_w", self.loginWestAmount)
-        end
-
-        if self.scannedParamValue then
-
-            for extension, value in pairs(self.scannedParamValue) do
-                self:SetPoseParam("scan_" .. extension, value)
-            end
-
-        end
-
-    end
-
-end
-
-local function UpdateArmoryAnim(self, extension, loggedIn, scanTime, timePassed)
-
-    local loggedInName = "log_" .. extension
-    local loggedInParamValue = ConditionalValue(loggedIn, 1, 0)
-
-    if extension == "n" then
-        self.loginNorthAmount = Clamp(Slerp(self.loginNorthAmount, loggedInParamValue, timePassed * 2), 0, 1)
-    elseif extension == "s" then
-        self.loginSouthAmount = Clamp(Slerp(self.loginSouthAmount, loggedInParamValue, timePassed * 2), 0, 1)
-    elseif extension == "e" then
-        self.loginEastAmount = Clamp(Slerp(self.loginEastAmount, loggedInParamValue, timePassed * 2), 0, 1)
-    elseif extension == "w" then
-        self.loginWestAmount = Clamp(Slerp(self.loginWestAmount, loggedInParamValue, timePassed * 2), 0, 1)
-    end
-
-    local scannedName = "scan_" .. extension
-    self.scannedParamValue = self.scannedParamValue or { }
-    self.scannedParamValue[extension] = ConditionalValue(scanTime == 0 or (Shared.GetTime() > scanTime + 3), 0, 1)
-
-end
-
-function WoozArmory:OnUpdate(deltaTime)
-
-    if Client then
-        self:UpdateArmoryWarmUp()
-    end
-
-    if GetIsUnitActive(self) and self.deployed then
-
-        -- Set pose parameters according to if we're logged in or not
-        UpdateArmoryAnim(self, "e", self.loggedInEast, self.timeScannedEast, deltaTime)
-        UpdateArmoryAnim(self, "n", self.loggedInNorth, self.timeScannedNorth, deltaTime)
-        UpdateArmoryAnim(self, "w", self.loggedInWest, self.timeScannedWest, deltaTime)
-        UpdateArmoryAnim(self, "s", self.loggedInSouth, self.timeScannedSouth, deltaTime)
-
-    end
-
-    ScriptActor.OnUpdate(self, deltaTime)
-
-end
-
-function WoozArmory:GetReceivesStructuralDamage()
-    return true
-end
-
-function WoozArmory:GetHealthbarOffset()
-    return gArmoryHealthHeight
 end
 
 Shared.RegisterNetworkMessage("WoozArmoryFound");
@@ -297,6 +192,24 @@ if Server then
 		local ent = CreateEntity("woozarmory", client:GetControllingPlayer():GetOrigin());
 		assert(ent);
 	end);
+
+elseif Client then
+	function WoozArmory:OnInitClient()
+
+	    if not self.clientConstructionComplete then
+	        self.clientConstructionComplete = self.constructionComplete
+	    end
+
+
+	end
+
+	function WoozArmory:OnUse(player)
+		if Client.GetLocalPlayer() ~= player then
+			return
+		end
+
+		Client.SendNetworkMessage("WoozArmoryFound", {});
+	end
 end
 
 Shared.LinkClassToMap("WoozArmory", WoozArmory.kMapName, networkVars)
