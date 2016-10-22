@@ -6,18 +6,8 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-local function OnDeploy(self)
-
-    self.deployed = true
-    return false
-
-end
-
-local kDeployTime = 3
-
 function WoozArmory:OnConstructionComplete()
-	Shared.Message("WoozArmory built");
-    self:AddTimedCallback(OnDeploy, kDeployTime)
+	self.deployed = true;
 end
 
 -- west/east = x/-x
