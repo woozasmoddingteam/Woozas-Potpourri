@@ -88,15 +88,15 @@ AddMixinNetworkVars(ResearchMixin, networkVars)
 --AddMixinNetworkVars(RecycleMixin, networkVars)
 AddMixinNetworkVars(SelectableMixin, networkVars)
 
-AddMixinNetworkVars(NanoShieldMixin, networkVars)
+--AddMixinNetworkVars(NanoShieldMixin, networkVars)
 AddMixinNetworkVars(ObstacleMixin, networkVars)
 AddMixinNetworkVars(DissolveMixin, networkVars)
 AddMixinNetworkVars(PowerConsumerMixin, networkVars)
 --AddMixinNetworkVars(GhostStructureMixin, networkVars)
-AddMixinNetworkVars(VortexAbleMixin, networkVars)
-AddMixinNetworkVars(CombatMixin, networkVars)
+--AddMixinNetworkVars(VortexAbleMixin, networkVars)
+--AddMixinNetworkVars(CombatMixin, networkVars)
 AddMixinNetworkVars(IdleMixin, networkVars)
-AddMixinNetworkVars(ParasiteMixin, networkVars)
+--AddMixinNetworkVars(ParasiteMixin, networkVars)
 
 function WoozArmory:OnCreate()
 
@@ -121,10 +121,10 @@ function WoozArmory:OnCreate()
     InitMixin(self, ObstacleMixin)
     InitMixin(self, DissolveMixin)
     --InitMixin(self, GhostStructureMixin)
-    InitMixin(self, VortexAbleMixin)
-    InitMixin(self, CombatMixin)
+    --InitMixin(self, VortexAbleMixin)
+    --InitMixin(self, CombatMixin)
     InitMixin(self, PowerConsumerMixin)
-    InitMixin(self, ParasiteMixin)
+    --InitMixin(self, ParasiteMixin)
 
     if Client then
         InitMixin(self, CommanderGlowMixin)
@@ -158,8 +158,8 @@ function WoozArmory:OnInitialized()
 
     self:SetModel(WoozArmory.kModelName, kAnimationGraph)
 
-    InitMixin(self, WeldableMixin)
-    InitMixin(self, NanoShieldMixin)
+    --InitMixin(self, WeldableMixin)
+    --InitMixin(self, NanoShieldMixin)
 
     if Server then
 
@@ -297,10 +297,6 @@ if Server then
 		local ent = CreateEntity("woozarmory", client:GetControllingPlayer():GetOrigin());
 		assert(ent);
 	end);
-
-	for k, v in pairs(getmetatable(Entity)) do
-		Shared.Message(type(k) .. " " .. tostring(k) .. " : " .. type(v) .. " " .. tostring(v));
-	end
 end
 
 Shared.LinkClassToMap("WoozArmory", WoozArmory.kMapName, networkVars)
