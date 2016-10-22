@@ -1,14 +1,7 @@
 Script.Load("lua/Mixins/ClientModelMixin.lua")
 Script.Load("lua/LiveMixin.lua")
 Script.Load("lua/GameEffectsMixin.lua")
---Script.Load("lua/ConstructMixin.lua")
-
 Script.Load("lua/ScriptActor.lua")
-Script.Load("lua/RagdollMixin.lua")
-Script.Load("lua/ObstacleMixin.lua")
-Script.Load("lua/UnitStatusMixin.lua")
-Script.Load("lua/DissolveMixin.lua")
-Script.Load("lua/IdleMixin.lua")
 
 class 'WoozArmory' (ScriptActor)
 
@@ -20,12 +13,8 @@ local networkVars = {};
 
 AddMixinNetworkVars(BaseModelMixin, networkVars)
 AddMixinNetworkVars(ClientModelMixin, networkVars)
-AddMixinNetworkVars(LiveMixin, networkVars)
-AddMixinNetworkVars(GameEffectsMixin, networkVars)
-AddMixinNetworkVars(TeamMixin, networkVars)
-AddMixinNetworkVars(ObstacleMixin, networkVars)
-AddMixinNetworkVars(DissolveMixin, networkVars)
-AddMixinNetworkVars(IdleMixin, networkVars)
+
+local emptyFunction = function() end
 
 function WoozArmory:OnCreate()
 
@@ -33,17 +22,15 @@ function WoozArmory:OnCreate()
 
     InitMixin(self, BaseModelMixin)
     InitMixin(self, ClientModelMixin)
-    InitMixin(self, LiveMixin)
-    InitMixin(self, GameEffectsMixin)
-    InitMixin(self, TeamMixin)
-    InitMixin(self, EntityChangeMixin)
-    InitMixin(self, RagdollMixin)
-    InitMixin(self, ObstacleMixin)
-    InitMixin(self, DissolveMixin)
 
     self:SetLagCompensated(false)
     self:SetPhysicsType(PhysicsType.Kinematic)
     self:SetPhysicsGroup(PhysicsGroup.BigStructuresGroup)
+
+	if Server then
+		assert(not self.callback); -- Assert that we aren't overriding an already existing variable.
+		self.callback = emptyFunction;
+	end
 end
 
 function WoozArmory:OnInitialized()
@@ -52,40 +39,13 @@ function WoozArmory:OnInitialized()
 
     self:SetModel(WoozArmory.kModelName);
 
-    if Server then
-        InitMixin(self, StaticTargetMixin);
-    elseif Client then
-		InitMixin(self, UnitStatusMixin); -- to be removed; removes health bar
-	end
-
-    InitMixin(self, IdleMixin)
-
-	--self:SetPoseParam("log_n", 0);
-	--self:SetPoseParam("log_e", 0);
-	--self:SetPoseParam("log_w", 0);
-	--self:SetPoseParam("log_s", 0);
-
-	--self:SetPoseParam("scan_n", 0);
-	--self:SetPoseParam("scan_e", 0);
-	--self:SetPoseParam("scan_w", 0);
-	--self:SetPoseParam("scan_s", 0);
-
 	local mask = bit.bor(kRelevantToTeam1Unit, kRelevantToTeam2Unit);
 	self:SetExcludeRelevancyMask(mask);
-
-	self:SetTeamNumber(kTeamInvalid);
 end
 
 function WoozArmory:GetCanBeUsed(player, useSuccessTable) end
-function WoozArmory:GetCanBeUsedConstructed(byPlayer)
-    return true;
-end
 
-function WoozArmory:GetCanDie()
-	return true;
-end
-
-function WoozArmory:GetCanTakeDamage()
+function WoozArmory:GetCanTakeDamage() -- Require for bullet effects somehow...
 	return true;
 end
 
@@ -94,18 +54,31 @@ Shared.RegisterNetworkMessage("WoozArmoryFound", {
 });
 
 if Server then
+	function WoozArmory:SetCallback(newcallback)
+		self.callback = newcallback;
+	end
+
+	function WoozArmory:GetCallback()
+		return self.callback;
+	end
+
 	Server.HookNetworkMessage("WoozArmoryFound", function(client, msg)
 		local player = client:GetControllingPlayer();
+		local woozarmory = Shared.GetEntity(msg.entityId);
+		self.callback(player, woozarmory);
 		local steamid = GetSteamIdForClientIndex(player:GetClientIndex());
 		Shared.Message(player.name .. " (steam id: " .. steamid .. ") won!");
-		local woozarmory = Shared.GetEntity(msg.entityId);
 		DestroyEntity(woozarmory);
-		Shared.Message(type(msg.entityId));
 	end);
+
+	local function logMessage(player, woozamory)
+		local steamid = GetSteamIdForClientIndex(player:GetClientIndex());
+		Shared.Message(player.name .. " (steam id: " .. steamid .. ") won!");
+	end
 
 	Event.Hook("Console_plantarmory", function(client)
 		local ent = CreateEntity("woozarmory", client:GetControllingPlayer():GetOrigin());
-		assert(ent);
+		ent:SetCallback(logMessage);
 	end);
 
 elseif Client then

@@ -51,6 +51,7 @@ local function FireBullets(self, player)
 
 			if Client and target:isa("WoozArmory") then
 				target:OnUse(player, self);
+				goto continue;
 			end
 
             local hitPoint = hitPoints[i]
@@ -61,6 +62,8 @@ local function FireBullets(self, player)
             if not Shared.GetIsRunningPrediction() and client.hitRegEnabled then
                 RegisterHitEvent(player, bullet, startPoint, trace, damage)
             end
+
+			::continue::
         end
 
     end
