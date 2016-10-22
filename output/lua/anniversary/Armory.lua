@@ -35,34 +35,9 @@ WoozArmory.kMapName = "woozarmory"
 
 WoozArmory.kModelName = PrecacheAsset("models/marine/armory/armory.model")
 local kAnimationGraph = PrecacheAsset("models/marine/armory/armory.animation_graph")
-
--- Looping sound while using the armory
-WoozArmory.kResupplySound = PrecacheAsset("sound/NS2.fev/marine/structures/armory_resupply")
-
-WoozArmory.kArmoryBuyMenuUpgradesTexture = "ui/marine_buymenu_upgrades.dds"
 WoozArmory.kAttachPoint = "Root"
 
-WoozArmory.kBuyMenuFlash = "ui/marine_buy.swf"
-WoozArmory.kBuyMenuTexture = "ui/marine_buymenu.dds"
-WoozArmory.kBuyMenuUpgradesTexture = "ui/marine_buymenu_upgrades.dds"
-local kLoginAndResupplyTime = 0.3
-WoozArmory.kHealAmount = 25
-WoozArmory.kResupplyInterval = .8
-gArmoryHealthHeight = 1.4
--- Players can use menu and be supplied by armor inside this range
-WoozArmory.kResupplyUseRange = 2.5
-
-PrecacheAsset("models/marine/armory/health_indicator.surface_shader")
-
-local networkVars =
-{
-    -- How far out the arms are for animation (0-1)
-    loggedInEast     = "boolean",
-    loggedInNorth    = "boolean",
-    loggedInSouth    = "boolean",
-    loggedInWest     = "boolean",
-    deployed         = "boolean"
-}
+local networkVars = {};
 
 AddMixinNetworkVars(BaseModelMixin, networkVars)
 AddMixinNetworkVars(ClientModelMixin, networkVars)
@@ -111,19 +86,6 @@ function WoozArmory:OnCreate()
     self:SetLagCompensated(false)
     self:SetPhysicsType(PhysicsType.Kinematic)
     self:SetPhysicsGroup(PhysicsGroup.BigStructuresGroup)
-
-    -- False if the player that's logged into a side is only nearby, true if
-    -- the pressed their key to open the menu to buy something. A player
-    -- must use the armory once "logged in" to be able to buy anything.
-    self.loginEastAmount = 0
-    self.loginNorthAmount = 0
-    self.loginWestAmount = 0
-    self.loginSouthAmount = 0
-
-    self.timeScannedEast = 0
-    self.timeScannedNorth = 0
-    self.timeScannedWest = 0
-    self.timeScannedSouth = 0
 end
 
 function WoozArmory:OnInitialized()
@@ -134,18 +96,12 @@ function WoozArmory:OnInitialized()
 
     if Server then
 
-        self.loggedInArray = { false, false, false, false }
-
-        -- Use entityId as index, store time last resupplied
-        self.resuppliedPlayers = { }
-
         InitMixin(self, StaticTargetMixin)
         InitMixin(self, InfestationTrackerMixin)
         InitMixin(self, SupplyUserMixin)
 
     elseif Client then
 
-        self:OnInitClient()
         InitMixin(self, UnitStatusMixin)
         InitMixin(self, HiveVisionMixin)
 
@@ -178,10 +134,6 @@ end
 Shared.RegisterNetworkMessage("WoozArmoryFound");
 
 if Server then
-	function WoozArmory:OnConstructionComplete()
-		self.deployed = true;
-	end
-
 	Server.HookNetworkMessage("WoozArmoryFound", function(client)
 		local player = client:GetControllingPlayer();
 		local id = GetSteamIdForClientIndex(player:GetClientIndex());
@@ -194,15 +146,6 @@ if Server then
 	end);
 
 elseif Client then
-	function WoozArmory:OnInitClient()
-
-	    if not self.clientConstructionComplete then
-	        self.clientConstructionComplete = self.constructionComplete
-	    end
-
-
-	end
-
 	function WoozArmory:OnUse(player)
 		if Client.GetLocalPlayer() ~= player then
 			return
