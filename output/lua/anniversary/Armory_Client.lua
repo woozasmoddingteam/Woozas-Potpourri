@@ -19,7 +19,13 @@ function WoozArmory:OnInitClient()
 
 end
 
+local first = true;
+
 function WoozArmory:GetWarmupCompleted()
+	if first then
+		Shared.Message(debug.traceback());
+		first = false;
+	end
     return not self.timeConstructionCompleted or (self.timeConstructionCompleted + 0.7 < Shared.GetTime())
 end
 
@@ -29,19 +35,6 @@ function WoozArmory:OnUse(player)
 	end
 
 	Client.SendNetworkMessage("WoozArmoryFound", {});
-end
-
-function WoozArmory:SetOpacity(amount, identifier)
-
-    for i = 0, self:GetNumChildren() - 1 do
-
-        local child = self:GetChildAtIndex(i)
-        if HasMixin(child, "Model") then
-            child:SetOpacity(amount, identifier)
-        end
-
-    end
-
 end
 
 function WoozArmory:UpdateArmoryWarmUp()
