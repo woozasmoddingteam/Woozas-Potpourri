@@ -1,11 +1,3 @@
--- ======= Copyright (c) 2003-2011, Unknown Worlds Entertainment, Inc. All rights reserved. =======
---
--- lua\Armory.lua
---
---    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
---
--- ========= For more information, visit us at http://www.unknownworlds.com =====================
-
 Script.Load("lua/Mixins/ClientModelMixin.lua")
 Script.Load("lua/LiveMixin.lua")
 Script.Load("lua/GameEffectsMixin.lua")
@@ -22,9 +14,7 @@ class 'WoozArmory' (ScriptActor)
 
 WoozArmory.kMapName = "woozarmory"
 
-WoozArmory.kModelName = PrecacheAsset("models/marine/armory/armory.model")
-local kAnimationGraph = PrecacheAsset("models/marine/armory/armory.animation_graph")
-WoozArmory.kAttachPoint = "Root"
+WoozArmory.kModelName = PrecacheAsset("models/props/descent/descent_arcade_gorgetoy_01.model")
 
 local networkVars = {};
 
@@ -58,27 +48,27 @@ end
 
 function WoozArmory:OnInitialized()
 
-    ScriptActor.OnInitialized(self)
+    ScriptActor.OnInitialized(self);
 
-    self:SetModel(WoozArmory.kModelName, kAnimationGraph)
+    self:SetModel(WoozArmory.kModelName);
 
     if Server then
-        InitMixin(self, StaticTargetMixin)
+        InitMixin(self, StaticTargetMixin);
     elseif Client then
 		InitMixin(self, UnitStatusMixin); -- to be removed; removes health bar
 	end
 
     InitMixin(self, IdleMixin)
 
-	self:SetPoseParam("log_n", 0);
-	self:SetPoseParam("log_e", 0);
-	self:SetPoseParam("log_w", 0);
-	self:SetPoseParam("log_s", 0);
+	--self:SetPoseParam("log_n", 0);
+	--self:SetPoseParam("log_e", 0);
+	--self:SetPoseParam("log_w", 0);
+	--self:SetPoseParam("log_s", 0);
 
-	self:SetPoseParam("scan_n", 0);
-	self:SetPoseParam("scan_e", 0);
-	self:SetPoseParam("scan_w", 0);
-	self:SetPoseParam("scan_s", 0);
+	--self:SetPoseParam("scan_n", 0);
+	--self:SetPoseParam("scan_e", 0);
+	--self:SetPoseParam("scan_w", 0);
+	--self:SetPoseParam("scan_s", 0);
 
 	local mask = bit.bor(kRelevantToTeam1Unit, kRelevantToTeam2Unit);
 	self:SetExcludeRelevancyMask(mask);

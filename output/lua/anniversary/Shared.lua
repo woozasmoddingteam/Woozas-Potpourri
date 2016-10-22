@@ -1,1 +1,1 @@
-Script.Load("lua/anniversary/Armory.lua");
+Script.Load("lua/anniversary/WoozArmory.lua");
