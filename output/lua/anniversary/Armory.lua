@@ -29,7 +29,6 @@ Script.Load("lua/UnitStatusMixin.lua")
 Script.Load("lua/DissolveMixin.lua")
 Script.Load("lua/PowerConsumerMixin.lua")
 Script.Load("lua/GhostStructureMixin.lua")
---Script.Load("lua/MapBlipMixin.lua")
 Script.Load("lua/VortexAbleMixin.lua")
 Script.Load("lua/CombatMixin.lua")
 Script.Load("lua/InfestationTrackerMixin.lua")
@@ -170,13 +169,6 @@ function WoozArmory:OnInitialized()
 
         -- Use entityId as index, store time last resupplied
         self.resuppliedPlayers = { }
-
-        --self:AddTimedCallback(LoginAndResupply, kLoginAndResupplyTime)
-
-        -- This Mixin must be inited inside this OnInitialized() function.
-        --if not HasMixin(self, "MapBlip") then
-        --    InitMixin(self, MapBlipMixin)
-        --end
 
         InitMixin(self, StaticTargetMixin)
         InitMixin(self, InfestationTrackerMixin)
