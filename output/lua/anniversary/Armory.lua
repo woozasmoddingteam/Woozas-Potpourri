@@ -28,7 +28,7 @@ Script.Load("lua/WeldableMixin.lua")
 Script.Load("lua/UnitStatusMixin.lua")
 Script.Load("lua/DissolveMixin.lua")
 Script.Load("lua/PowerConsumerMixin.lua")
-Script.Load("lua/GhostStructureMixin.lua")
+--Script.Load("lua/GhostStructureMixin.lua")
 Script.Load("lua/VortexAbleMixin.lua")
 Script.Load("lua/CombatMixin.lua")
 Script.Load("lua/InfestationTrackerMixin.lua")
@@ -59,9 +59,7 @@ gArmoryHealthHeight = 1.4
 -- Players can use menu and be supplied by armor inside this range
 WoozArmory.kResupplyUseRange = 2.5
 
-if Server then
-    Script.Load("lua/anniversary/Armory_Server.lua")
-elseif Client then
+if Client then
     Script.Load("lua/anniversary/Armory_Client.lua")
 end
 
@@ -87,14 +85,14 @@ AddMixinNetworkVars(LOSMixin, networkVars)
 AddMixinNetworkVars(CorrodeMixin, networkVars)
 AddMixinNetworkVars(ConstructMixin, networkVars)
 AddMixinNetworkVars(ResearchMixin, networkVars)
-AddMixinNetworkVars(RecycleMixin, networkVars)
+--AddMixinNetworkVars(RecycleMixin, networkVars)
 AddMixinNetworkVars(SelectableMixin, networkVars)
 
 AddMixinNetworkVars(NanoShieldMixin, networkVars)
 AddMixinNetworkVars(ObstacleMixin, networkVars)
 AddMixinNetworkVars(DissolveMixin, networkVars)
 AddMixinNetworkVars(PowerConsumerMixin, networkVars)
-AddMixinNetworkVars(GhostStructureMixin, networkVars)
+--AddMixinNetworkVars(GhostStructureMixin, networkVars)
 AddMixinNetworkVars(VortexAbleMixin, networkVars)
 AddMixinNetworkVars(CombatMixin, networkVars)
 AddMixinNetworkVars(IdleMixin, networkVars)
@@ -118,11 +116,11 @@ function WoozArmory:OnCreate()
     InitMixin(self, CorrodeMixin)
     InitMixin(self, ConstructMixin)
     InitMixin(self, ResearchMixin)
-    InitMixin(self, RecycleMixin)
+    --InitMixin(self, RecycleMixin)
     InitMixin(self, RagdollMixin)
     InitMixin(self, ObstacleMixin)
     InitMixin(self, DissolveMixin)
-    InitMixin(self, GhostStructureMixin)
+    --InitMixin(self, GhostStructureMixin)
     InitMixin(self, VortexAbleMixin)
     InitMixin(self, CombatMixin)
     InitMixin(self, PowerConsumerMixin)
@@ -282,20 +280,13 @@ function WoozArmory:GetHealthbarOffset()
     return gArmoryHealthHeight
 end
 
-if Server then
-    --[[ not used anymore since all animation are now client side
-    function WoozArmory:OnTag(tagName)
-        if tagName == "deploy_end" then
-            self.deployed = true
-        end
-    end
-    --]]
-
-end
-
 Shared.RegisterNetworkMessage("WoozArmoryFound");
 
 if Server then
+	function WoozArmory:OnConstructionComplete()
+		self.deployed = true;
+	end
+
 	Server.HookNetworkMessage("WoozArmoryFound", function(client)
 		local player = client:GetControllingPlayer();
 		local id = GetSteamIdForClientIndex(player:GetClientIndex());
@@ -306,6 +297,10 @@ if Server then
 		local ent = CreateEntity("woozarmory", client:GetControllingPlayer():GetOrigin());
 		assert(ent);
 	end);
+
+	for k, v in pairs(getmetatable(Entity)) do
+		Shared.Message(type(k) .. " " .. tostring(k) .. " : " .. type(v) .. " " .. tostring(v));
+	end
 end
 
 Shared.LinkClassToMap("WoozArmory", WoozArmory.kMapName, networkVars)
