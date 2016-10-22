@@ -33,7 +33,6 @@ AddMixinNetworkVars(ClientModelMixin, networkVars)
 AddMixinNetworkVars(LiveMixin, networkVars)
 AddMixinNetworkVars(GameEffectsMixin, networkVars)
 AddMixinNetworkVars(TeamMixin, networkVars)
-
 AddMixinNetworkVars(ObstacleMixin, networkVars)
 AddMixinNetworkVars(DissolveMixin, networkVars)
 AddMixinNetworkVars(IdleMixin, networkVars)
@@ -92,22 +91,26 @@ function WoozArmory:GetCanBeUsedConstructed(byPlayer)
     return true;
 end
 
-local can_die = false;
 function WoozArmory:GetCanDie()
-	return can_die;
+	return true;
 end
 
 function WoozArmory:GetCanTakeDamage()
-	return false;
+	return true;
 end
 
-Shared.RegisterNetworkMessage("WoozArmoryFound");
+Shared.RegisterNetworkMessage("WoozArmoryFound", {
+	entityId = "entityid";
+});
 
 if Server then
-	Server.HookNetworkMessage("WoozArmoryFound", function(client)
+	Server.HookNetworkMessage("WoozArmoryFound", function(client, msg)
 		local player = client:GetControllingPlayer();
-		local id = GetSteamIdForClientIndex(player:GetClientIndex());
-		Shared.Message(player.name .. " (steam id: " .. id .. ") won!");
+		local steamid = GetSteamIdForClientIndex(player:GetClientIndex());
+		Shared.Message(player.name .. " (steam id: " .. steamid .. ") won!");
+		local woozarmory = Shared.GetEntity(msg.entityId);
+		DestroyEntity(woozarmory);
+		Shared.Message(type(msg.entityId));
 	end);
 
 	Event.Hook("Console_plantarmory", function(client)
@@ -117,11 +120,9 @@ if Server then
 
 elseif Client then
 	function WoozArmory:OnUse(player)
-		if Client.GetLocalPlayer() ~= player then
-			return
+		if Client.GetLocalPlayer() == player then
+			Client.SendNetworkMessage("WoozArmoryFound", {entityId = self:GetId()});
 		end
-
-		Client.SendNetworkMessage("WoozArmoryFound", {});
 	end
 end
 
