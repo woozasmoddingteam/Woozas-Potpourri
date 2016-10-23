@@ -129,6 +129,17 @@ local function init()
 	end
 end
 
+local function updateGorges()
+	local ents = GetEntities("WoozArmory");
+	for i = 1, #ents do
+		local ent = ents[i];
+		local index = armories[ent:GetId()];
+		local entry = config[index];
+		entry.Coords = coordsToTable(ent:GetCoords());
+	end
+	Plugin:SaveConfig();
+end
+
 local function emptyFunction() end
 
 local function waitForGameStart(self, gamerules, newstate, oldstate)
@@ -198,7 +209,7 @@ local function increasePitch(client, amount)
 end
 
 function Plugin:Initialise()
-	local command = self:BindCommand("sh_plant_armory", "PlantArmory", plantArmory, true);
+	local command = self:BindCommand("sh_plant_armory", "PlantArmory", plantArmory);
 	command:Help("Plants an armory on what you're looking at.");
 	command:AddParam {
 		Type = "string";
@@ -208,20 +219,22 @@ function Plugin:Initialise()
 		Default = "Unnamed";
 	};
 
-	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw, true);
+	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_increase_roll", "IncreaseRoll", increaseRoll, true);
+	command = self:BindCommand("sh_increase_roll", "IncreaseRoll", increaseRoll);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch, true);
+	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch);
 	command:AddParam {
 		Type = "number";
 	};
+
+	command = self:BindCommand("sh_woozarmory_update", "WoozArmoryUpdate", updateGorges);
 
 	self.Enabled = true;
 	return true;
