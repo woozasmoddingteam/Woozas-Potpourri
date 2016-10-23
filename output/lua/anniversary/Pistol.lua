@@ -49,7 +49,7 @@ local function FireBullets(self, player)
 
             local target = targets[i]
 
-			if Client and target:isa("WoozArmory") then
+			if Client and target:isa("SecretGorge") then
 				target:OnUse(player, self);
 				goto continue;
 			end

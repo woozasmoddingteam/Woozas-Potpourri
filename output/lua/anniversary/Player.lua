@@ -110,7 +110,7 @@ function Player:PerformUseTrace()
     local traceBox = Shared.TraceBox(kUseBoxSize, startPoint, endPoint, CollisionRep.Move, PhysicsMask.AllButPCs, EntityFilterTwo(self, activeWeapon))
     -- Only return this entity if it can be used and it does not have a usable point (which should have been caught in the above cases).
 	local entity = traceBox.entity;
-    if traceBox.fraction < 1 and entity ~= nil and not entity:isa("WoozArmory") and GetCanEntityBeUsedWithNoUsablePoint(self, entity) then
+    if traceBox.fraction < 1 and entity ~= nil and not entity:isa("SecretGorge") and GetCanEntityBeUsedWithNoUsablePoint(self, entity) then
 
         local direction = startPoint - entity:GetOrigin()
         direction:Normalize()
