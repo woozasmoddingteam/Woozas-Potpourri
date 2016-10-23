@@ -224,10 +224,9 @@ local function plantGorge(client, name)
 
 	---[[
 	local coords = ent:GetCoords();
-	coords.yAxis = Vector(0, 1, 0);
+	coords.yAxis = trace.normal;
 	local direction = (endPoint - startPoint);
 	direction:Normalize();
-	Shared.Message(tostring(direction));
 	coords.xAxis = -trace.normal:CrossProduct(direction)
 	coords.zAxis = coords.yAxis:CrossProduct(coords.xAxis)
 	ent:SetCoords(coords);
