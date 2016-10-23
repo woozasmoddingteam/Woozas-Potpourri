@@ -76,22 +76,6 @@ local function armoryCallback(player, armory)
 	Plugin:SaveConfig();
 end
 
-local function plantArmory(client, name)
-	local player = client:GetControllingPlayer();
-	local ent = CreateEntity("woozarmory", player:GetOrigin());
-	local angles = player:GetViewAngles();
-	ent:SetAngles(angles);
-	ent:SetCallback(armoryCallback);
-	table.insert(config, {
-		Name = name;
-		Coords = coordsToTable(ent:GetCoords());
-		Used = false;
-		Room = GetLocationForPoint(ent:GetOrigin()):GetName();
-	});
-	armories[ent:GetId()] = #config;
-	Plugin:SaveConfig();
-end
-
 local function cleanUsedEntries(cfg)
 	local newcfg = {};
 	for i = 1, #cfg do
@@ -218,12 +202,33 @@ local function push(client, amount)
 
 	local origin = ent:GetOrigin();
 	local new = origin - startPoint;
-	new -= amount;
+	new += amount;
 	ent:SetOrigin(new + startPoint);
 end
 
+local function plantGorge(client, name)
+	local player = client:GetControllingPlayer();
+
+	local startPoint = player:GetEyePos()
+    local endPoint = startPoint + player:GetViewCoords().zAxis * 100
+    local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
+
+	local ent = CreateEntity("woozarmory", trace.endPoint);
+	local angles = player:GetViewAngles();
+	ent:SetAngles(angles);
+	ent:SetCallback(armoryCallback);
+	table.insert(config, {
+		Name = name;
+		Coords = coordsToTable(ent:GetCoords());
+		Used = false;
+		Room = GetLocationForPoint(ent:GetOrigin()):GetName();
+	});
+	armories[ent:GetId()] = #config;
+	Plugin:SaveConfig();
+end
+
 function Plugin:Initialise()
-	local command = self:BindCommand("sh_plant_armory", "PlantArmory", plantArmory);
+	local command = self:BindCommand("sh_plant_gorge", "PlantGorge", plantGorge, true);
 	command:Help("Plants an armory on what you're looking at.");
 	command:AddParam {
 		Type = "string";
@@ -233,27 +238,27 @@ function Plugin:Initialise()
 		Default = "Unnamed";
 	};
 
-	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw);
+	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw, true);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_increase_roll", "IncreaseRoll", increaseRoll);
+	command = self:BindCommand("sh_increase_roll", "IncreaseRoll", increaseRoll, true);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch);
+	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch, true);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_pushent", "PushEnt", push);
+	command = self:BindCommand("sh_pushent", "PushEnt", push, true);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_woozarmory_update", "WoozArmoryUpdate", updateGorges);
+	command = self:BindCommand("sh_update_gorges", "UpdateGorges", updateGorges, true);
 
 	self.Enabled = true;
 	return true;
