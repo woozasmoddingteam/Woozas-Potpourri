@@ -148,10 +148,53 @@ local function setGameState(self, gamerules, newstate, oldstate)
 	end
 end
 
-function Plugin:SetGameState(Gamerules, NewState, OldState)
-	if NewState ~= OldState then
-		init()
-	end
+function Plugin:SetGameState(...)
+	setGameState(self, ...);
+end
+
+local function increaseYaw(client, amount)
+	local player = client:GetControllingPlayer()
+
+    local startPoint = player:GetEyePos()
+    local endPoint = startPoint + player:GetViewCoords().zAxis * 100
+    local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
+	local ent = trace.entity;
+
+	local angles = ent:GetAngles();
+
+	angles.yaw = (angles.yaw + amount) % math.pi*2;
+
+	ent:SetAngles(angles);
+end
+
+local function increaseRoll(client, amount)
+	local player = client:GetControllingPlayer()
+
+    local startPoint = player:GetEyePos()
+    local endPoint = startPoint + player:GetViewCoords().zAxis * 100
+    local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
+	local ent = trace.entity;
+
+	local angles = ent:GetAngles();
+
+	angles.roll = (angles.roll + amount) % math.pi*2;
+
+	ent:SetAngles(angles);
+end
+
+local function increasePitch(client, amount)
+	local player = client:GetControllingPlayer()
+
+    local startPoint = player:GetEyePos()
+    local endPoint = startPoint + player:GetViewCoords().zAxis * 100
+    local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
+	local ent = trace.entity;
+
+	local angles = ent:GetAngles();
+
+	angles.pitch = (angles.pitch + amount) % math.pi*2;
+
+	ent:SetAngles(angles);
 end
 
 function Plugin:Initialise()
@@ -163,6 +206,21 @@ function Plugin:Initialise()
 		TakeRestOfLine = true;
 		Help = "Name of armory";
 		Default = "Unnamed";
+	};
+
+	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw, true);
+	command:AddParam {
+		Type = "number";
+	};
+
+	command = self:BindCommand("sh_increase_roll", "IncreaseRoll", increaseRoll, true);
+	command:AddParam {
+		Type = "number";
+	};
+
+	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch, true);
+	command:AddParam {
+		Type = "number";
 	};
 
 	self.Enabled = true;
