@@ -217,9 +217,16 @@ local function plantGorge(client, name)
     local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
 
 	local ent = CreateEntity("woozarmory", trace.endPoint);
-	local angles = player:GetViewAngles();
-	ent:SetAngles(angles);
+
+	local coords = ent:GetCoords();
+	coords.yAxis = trace.normal
+	local direction = (endpoint - startpoint):Normalize()
+	coords.zAxis =  trace.normal:CrossProduct(direction)
+	coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
+	ent:SetCoords(coords);
+
 	ent:SetCallback(armoryCallback);
+
 	table.insert(config, {
 		Name = name;
 		Coords = coordsToTable(ent:GetCoords());
@@ -246,7 +253,7 @@ local function killGorgeWithName(client, name)
 end
 
 function Plugin:Initialise()
-	local command = self:BindCommand("sh_plant_gorge", "PlantGorge", plantGorge);
+	local command = self:BindCommand("sh_plant_gorge", "PlantGorge", plantGorge, true);
 	command:Help("Plants an armory on what you're looking at.");
 	command:AddParam {
 		Type = "string";
