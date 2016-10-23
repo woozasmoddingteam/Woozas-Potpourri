@@ -200,8 +200,11 @@ local function push(client, amount)
     local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
 	local ent = trace.entity;
 
+	endPoint = trace.endPoint;
+
 	local origin = ent:GetOrigin();
-	local new = origin - startPoint;
+	local offset = origin - endPoint;
+	local new = endPoint - startPoint;
 	new = new + amount;
 	ent:SetOrigin(new + startPoint);
 end
