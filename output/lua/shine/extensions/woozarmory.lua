@@ -208,6 +208,20 @@ local function increasePitch(client, amount)
 	ent:SetAngles(angles);
 end
 
+local function push(client, amount)
+	local player = client:GetControllingPlayer()
+
+    local startPoint = player:GetEyePos()
+    local endPoint = startPoint + player:GetViewCoords().zAxis * 100
+    local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
+	local ent = trace.entity;
+
+	local origin = ent:GetOrigin();
+	local new = origin - startPoint;
+	new -= amount;
+	ent:SetOrigin(new + startPoint);
+end
+
 function Plugin:Initialise()
 	local command = self:BindCommand("sh_plant_armory", "PlantArmory", plantArmory);
 	command:Help("Plants an armory on what you're looking at.");
@@ -230,6 +244,11 @@ function Plugin:Initialise()
 	};
 
 	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch);
+	command:AddParam {
+		Type = "number";
+	};
+
+	command = self:BindCommand("sh_pushent", "PushEnt", push);
 	command:AddParam {
 		Type = "number";
 	};
