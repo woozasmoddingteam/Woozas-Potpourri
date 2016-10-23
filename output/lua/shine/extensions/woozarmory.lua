@@ -218,11 +218,6 @@ local function plantGorge(client, name)
 
 	local ent = CreateEntity("woozarmory", trace.endPoint);
 
-	--local angles = player:GetAngles();
-	--angles.yaw = (angles.yaw + math.pi) % (math.pi * 2);
-	--ent:SetAngles(angles);
-
-	---[[
 	local coords = ent:GetCoords();
 	coords.yAxis = trace.normal;
 	local direction = (endPoint - startPoint);
@@ -230,7 +225,6 @@ local function plantGorge(client, name)
 	coords.xAxis = -trace.normal:CrossProduct(direction)
 	coords.zAxis = coords.yAxis:CrossProduct(coords.xAxis)
 	ent:SetCoords(coords);
-	--]]
 
 	ent:SetCallback(armoryCallback);
 
