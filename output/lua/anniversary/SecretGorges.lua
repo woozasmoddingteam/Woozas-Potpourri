@@ -2,11 +2,11 @@ Script.Load("lua/Mixins/ClientModelMixin.lua");
 Script.Load("lua/ScriptActor.lua");
 --Script.Load("lua/EntityChangeMixin.lua");
 
-class 'WoozArmory' (ScriptActor)
+class 'SecretGorge' (ScriptActor)
 
-WoozArmory.kMapName = "woozarmory"
+SecretGorge.kMapName = "secretgorge"
 
-WoozArmory.kModelName = PrecacheAsset("models/props/descent/descent_arcade_gorgetoy_01.model")
+SecretGorge.kModelName = PrecacheAsset("models/props/descent/descent_arcade_gorgetoy_01.model")
 
 local networkVars = {};
 
@@ -16,7 +16,7 @@ AddMixinNetworkVars(ClientModelMixin, networkVars)
 
 local emptyFunction = function() assert(false) end
 
-function WoozArmory:OnCreate()
+function SecretGorge:OnCreate()
 
     ScriptActor.OnCreate(self)
 
@@ -34,60 +34,60 @@ function WoozArmory:OnCreate()
 	end
 end
 
-function WoozArmory:OnInitialized()
+function SecretGorge:OnInitialized()
 
     ScriptActor.OnInitialized(self);
 
-    self:SetModel(WoozArmory.kModelName);
+    self:SetModel(SecretGorge.kModelName);
 
 	local mask = bit.bor(kRelevantToTeam1Unit, kRelevantToTeam2Unit);
 	self:SetExcludeRelevancyMask(mask);
 end
 
-function WoozArmory:GetCanBeUsed(player, useSuccessTable) end
+function SecretGorge:GetCanBeUsed(player, useSuccessTable) end
 
-function WoozArmory:GetCanTakeDamage() -- Require for bullet effects somehow...
+function SecretGorge:GetCanTakeDamage() -- Require for bullet effects somehow...
 	return true;
 end
 
-function WoozArmory:GetCanSkipPhysics()
+function SecretGorge:GetCanSkipPhysics()
 	return true;
 end
 
-function WoozArmory:GetClientSideAnimationEnabled()
+function SecretGorge:GetClientSideAnimationEnabled()
 	return false;
 end
 
-function WoozArmory:GetIsMapEntity()
+function SecretGorge:GetIsMapEntity()
 	return true;
 end
 
-Shared.RegisterNetworkMessage("WoozArmoryFound", {
+Shared.RegisterNetworkMessage("SecretGorgeFound", {
 	entityId = "entityid";
 });
 
 if Server then
-	function WoozArmory:SetCallback(newcallback)
+	function SecretGorge:SetCallback(newcallback)
 		self.callback = newcallback;
 	end
 
-	function WoozArmory:GetCallback()
+	function SecretGorge:GetCallback()
 		return self.callback;
 	end
 
-	Server.HookNetworkMessage("WoozArmoryFound", function(client, msg)
+	Server.HookNetworkMessage("SecretGorgeFound", function(client, msg)
 		local player = client:GetControllingPlayer();
-		local woozarmory = Shared.GetEntity(msg.entityId);
-		woozarmory.callback(player, woozarmory);
-		DestroyEntity(woozarmory);
+		local secretgorge = Shared.GetEntity(msg.entityId);
+		secretgorge.callback(player, secretgorge);
+		DestroyEntity(secretgorge);
 	end);
 
 elseif Client then
-	function WoozArmory:OnUse(player)
+	function SecretGorge:OnUse(player)
 		if Client.GetLocalPlayer() == player then
-			Client.SendNetworkMessage("WoozArmoryFound", {entityId = self:GetId()});
+			Client.SendNetworkMessage("SecretGorgeFound", {entityId = self:GetId()});
 		end
 	end
 end
 
-Shared.LinkClassToMap("WoozArmory", WoozArmory.kMapName, networkVars)
+Shared.LinkClassToMap("SecretGorge", SecretGorge.kMapName, networkVars)

@@ -1,11 +1,11 @@
-Script.Load("lua/anniversary/WoozArmory.lua");
+Script.Load("lua/anniversary/SecretGorges.lua");
 
 local Shine = Shine;
 local Plugin = {
 	Version = "1.0";
 	NS2Only = false;
 	HasConfig = true;
-	ConfigName = "WoozArmory.json";
+	ConfigName = "SecretGorge.json";
 	DefaultConfig = {
 		Winners = {};
 		Maps = {}
@@ -52,8 +52,8 @@ local function tableToCoords(table)
 	return coords;
 end
 
-local function armoryCallback(player, armory)
-	local id = armory:GetId();
+local function gorgeCallback(player, gorge)
+	local id = gorge:GetId();
 	local entry = config[armories[id]];
 	entry.Used = true;
 	local map = Shared.GetMapName();
@@ -106,15 +106,15 @@ local function init()
 	for i = 1, #config do
 		Shared.Message("Spawning armories!");
 		local entry = config[i];
-		local ent = Server.CreateEntity("woozarmory", {origin = Vector(0, 0, 0)});
+		local ent = Server.CreateEntity("secretgorge", {origin = Vector(0, 0, 0)});
 		ent:SetCoords(tableToCoords(entry.Coords));
-		ent:SetCallback(armoryCallback);
+		ent:SetCallback(gorgeCallback);
 		armories[ent:GetId()] = i;
 	end
 end
 
 local function updateGorges()
-	local ents = GetEntities("WoozArmory");
+	local ents = GetEntities("SecretGorge");
 	for i = 1, #ents do
 		local ent = ents[i];
 		local index = armories[ent:GetId()];
@@ -128,7 +128,7 @@ local function emptyFunction() end
 
 local function waitForGameStart(self, gamerules, newstate, oldstate)
 	if newstate == kGameState.Started then
-		local ents = GetEntities("WoozArmory");
+		local ents = GetEntities("SecretGorge");
 		for i = 1, #ents do
 			DestroyEntity(ents[i]);
 		end
@@ -216,7 +216,7 @@ local function plantGorge(client, name)
     local endPoint = startPoint + player:GetViewCoords().zAxis * 100
     local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
 
-	local ent = CreateEntity("woozarmory", trace.endPoint);
+	local ent = CreateEntity("secretgorge", trace.endPoint);
 
 	local coords = ent:GetCoords();
 	coords.yAxis = trace.normal;
@@ -226,7 +226,7 @@ local function plantGorge(client, name)
 	coords.zAxis = coords.yAxis:CrossProduct(coords.xAxis)
 	ent:SetCoords(coords);
 
-	ent:SetCallback(armoryCallback);
+	ent:SetCallback(gorgeCallback);
 
 	table.insert(config, {
 		Name = name;
@@ -254,13 +254,13 @@ local function killGorgeWithName(client, name)
 end
 
 function Plugin:Initialise()
-	local command = self:BindCommand("sh_plant_gorge", "PlantGorge", plantGorge, true);
-	command:Help("Plants an armory on what you're looking at.");
+	local command = self:BindCommand("sh_plant_gorge", "PlantGorge", plantGorge);
+	command:Help("Plants a gorge on what you're looking at.");
 	command:AddParam {
 		Type = "string";
 		Optional = true;
 		TakeRestOfLine = true;
-		Help = "Name of armory";
+		Help = "Name of gorge";
 		Default = "Unnamed";
 	};
 
@@ -303,4 +303,4 @@ function Plugin:Initialise()
 	return true;
 end
 
-Shine:RegisterExtension("woozarmory", Plugin);
+Shine:RegisterExtension("thegorgesofapherioxia", Plugin);
