@@ -205,8 +205,8 @@ local function push(client, amount)
 	local origin = ent:GetOrigin();
 	local offset = origin - endPoint;
 	local new = endPoint - startPoint;
-	new = new + amount;
-	ent:SetOrigin(new + startPoint);
+	new = new * amount;
+	ent:SetOrigin(new + startPoint + offset);
 end
 
 local function plantGorge(client, name)
@@ -228,6 +228,21 @@ local function plantGorge(client, name)
 	});
 	armories[ent:GetId()] = #config;
 	Plugin:SaveConfig();
+end
+
+local function killGorge(client, index)
+	config[index].Used = true;
+end
+
+local function killGorgeWithName(client, name)
+	for i = 1, #config do
+		local entry = config[i];
+		if not entry.Used and entry.Name == name then
+			entry.Used = true;
+			return;
+		end
+	end
+	Shine:NotifyColour(client, 255, 20, 20, "No Gorge with that name!");
 end
 
 function Plugin:Initialise()
@@ -256,12 +271,25 @@ function Plugin:Initialise()
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_pushent", "PushEnt", push, true);
+	command = self:BindCommand("sh_push_ent", "PushEnt", push, true);
 	command:AddParam {
 		Type = "number";
+		Help = "Vector is multiplied by this.";
 	};
 
 	command = self:BindCommand("sh_update_gorges", "UpdateGorges", updateGorges, true);
+
+	command = self:BindCommand("sh_kill_gorge", "KillGorge", killGorge, true);
+	command:AddParam {
+		Type = "number";
+		Help = "Offset from last gorge. 0 == last, 1 == before last, 2 == before before last, etc.";
+	};
+
+	command = self:BindCommand("sh_kill_gorge_with_name", "killGorgeWithName", killGorgeWithName, true);
+	command:AddParam {
+		Type = "string";
+		Help = "Name of gorge (Hint: Don't use Unnamed)";
+	};
 
 	self.Enabled = true;
 	return true;
