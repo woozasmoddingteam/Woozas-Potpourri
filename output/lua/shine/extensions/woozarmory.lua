@@ -231,7 +231,7 @@ local function plantGorge(client, name)
 end
 
 local function killGorge(client, index)
-	config[index].Used = true;
+	config[#config-index].Used = true;
 end
 
 local function killGorgeWithName(client, name)
@@ -246,7 +246,7 @@ local function killGorgeWithName(client, name)
 end
 
 function Plugin:Initialise()
-	local command = self:BindCommand("sh_plant_gorge", "PlantGorge", plantGorge, true);
+	local command = self:BindCommand("sh_plant_gorge", "PlantGorge", plantGorge);
 	command:Help("Plants an armory on what you're looking at.");
 	command:AddParam {
 		Type = "string";
@@ -256,36 +256,36 @@ function Plugin:Initialise()
 		Default = "Unnamed";
 	};
 
-	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw, true);
+	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_increase_roll", "IncreaseRoll", increaseRoll, true);
+	command = self:BindCommand("sh_increase_roll", "IncreaseRoll", increaseRoll);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch, true);
+	command = self:BindCommand("sh_increase_pitch", "IncreasePitch", increasePitch);
 	command:AddParam {
 		Type = "number";
 	};
 
-	command = self:BindCommand("sh_push_ent", "PushEnt", push, true);
+	command = self:BindCommand("sh_push_ent", "PushEnt", push);
 	command:AddParam {
 		Type = "number";
 		Help = "Vector is multiplied by this.";
 	};
 
-	command = self:BindCommand("sh_update_gorges", "UpdateGorges", updateGorges, true);
+	command = self:BindCommand("sh_update_gorges", "UpdateGorges", updateGorges);
 
-	command = self:BindCommand("sh_kill_gorge", "KillGorge", killGorge, true);
+	command = self:BindCommand("sh_kill_gorge", "KillGorge", killGorge);
 	command:AddParam {
 		Type = "number";
 		Help = "Offset from last gorge. 0 == last, 1 == before last, 2 == before before last, etc.";
 	};
 
-	command = self:BindCommand("sh_kill_gorge_with_name", "killGorgeWithName", killGorgeWithName, true);
+	command = self:BindCommand("sh_kill_gorge_with_name", "killGorgeWithName", killGorgeWithName);
 	command:AddParam {
 		Type = "string";
 		Help = "Name of gorge (Hint: Don't use Unnamed)";
