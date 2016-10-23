@@ -202,7 +202,7 @@ local function push(client, amount)
 
 	local origin = ent:GetOrigin();
 	local new = origin - startPoint;
-	new += amount;
+	new = new + amount;
 	ent:SetOrigin(new + startPoint);
 end
 
