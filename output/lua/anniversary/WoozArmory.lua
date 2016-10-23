@@ -58,6 +58,10 @@ function WoozArmory:GetClientSideAnimationEnabled()
 	return false;
 end
 
+function WoozArmory:GetIsMapEntity()
+	return true;
+end
+
 Shared.RegisterNetworkMessage("WoozArmoryFound", {
 	entityId = "entityid";
 });
@@ -71,63 +75,11 @@ if Server then
 		return self.callback;
 	end
 
-	--[[
-	-- Special thanks to Katzenfleisch!
-	local function getEntitySpawnTraceEndpoint(player, range)
-		local startPoint = player:GetEyePos();
-		local viewCoords = player:GetViewAngles():GetCoords();
-		local endPoint = startPoint + viewCoords.zAxis * range;
-		local activeWeapon = self:GetActiveWeapon();
-
-		local trace = Shared.TraceRay(startPoint, endPoint, CollisionRep.Default, PhysicsMask.AllButPCs, EntityFilterTwo(self, activeWeapon))
-
-		return trace.endPoint;
-	end
-
-	local function spawnArmory(self, player, position, normal, direction)
-		local ent = CreateEntity("woozarmory", player:GetOrigin());
-
-		local coords = Coords.GetTranslation(position)
-		coords.yAxis = normal
-		coords.zAxis = direction
-
-		coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
-		coords.xAxis:Normalize()
-
-		coords.zAxis = coords.xAxis:CrossProduct(coords.yAxis)
-		coords.zAxis:Normalize()
-
-		ent:SetCoords(coords)
-		ent:SetCallback(logMessage);
-		return true;
-	end
-	--]]
-
 	Server.HookNetworkMessage("WoozArmoryFound", function(client, msg)
 		local player = client:GetControllingPlayer();
 		local woozarmory = Shared.GetEntity(msg.entityId);
 		woozarmory.callback(player, woozarmory);
-		--local steamid = GetSteamIdForClientIndex(player:GetClientIndex());
-		--Shared.Message(player.name .. " (steam id: " .. steamid .. ") won!");
 		DestroyEntity(woozarmory);
-	end);
-
-	local function logMessage(player, woozamory)
-		local steamid = GetSteamIdForClientIndex(player:GetClientIndex());
-		Shared.Message(player.name .. " (steam id: " .. steamid .. ") won!");
-	end
-
-	Event.Hook("Console_plantarmory", function(client)
-		local player = client:GetControllingPlayer();
-		local ent = CreateEntity("woozarmory", player:GetOrigin());
-		local angles = player:GetViewAngles();
-		ent:SetAngles(angles);
-		Shared.Message(tostring(angles.roll) .. "|" .. tostring(angles.yaw) .. "|" .. tostring(angles.pitch));
-		ent:SetCallback(logMessage);
-	end);
-
-	Event.Hook("Console_increase_roll", function(client)
-
 	end);
 
 elseif Client then

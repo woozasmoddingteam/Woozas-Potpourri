@@ -57,7 +57,7 @@ local function armoryCallback(player, armory)
 	local entry = config[armories[id]];
 	entry.Used = true;
 	local map = Shared.GetMapName();
-	local room = GetLocationForPoint(armory:GetOrigin()):GetName();
+	local room = entry.Room;
 	local name = entry.Name;
 	local pname = player.name;
 	local psteamid = GetSteamIdForClientIndex(player:GetClientIndex());
@@ -69,19 +69,11 @@ local function armoryCallback(player, armory)
 		SteamID = psteamid;
 		GorgeName = name;
 		Map = map;
-		Room = room;
-		Coords = entry.Coords;
-		Time = os.date("!");
+		Room = room or "[No Room]";
+		Origin = entry.Coords.origin;
+		Time = os.date();
 	});
-end
-
-local function iterateTable(t)
-	for k, v in pairs(t) do
-		Shared.Message(tostring(k) .. ":" .. type(v));
-		if type(v) == "table" then
-			iterateTable(v);
-		end
-	end
+	Plugin:SaveConfig();
 end
 
 local function plantArmory(client, name)
@@ -94,37 +86,75 @@ local function plantArmory(client, name)
 		Name = name;
 		Coords = coordsToTable(ent:GetCoords());
 		Used = false;
+		Room = GetLocationForPoint(ent:GetOrigin()):GetName();
 	});
-	iterateTable(Plugin.Config);
 	armories[ent:GetId()] = #config;
 	Plugin:SaveConfig();
 end
 
-local function cleanUsedEntries()
-	if #config > 0 then
-		local newconfig = {};
-		for i = 1, #config do
-			local entry = config[i];
-			if not entry.Used then
-				table.insert(newconfig, entry);
-			end
+local function cleanUsedEntries(cfg)
+	local newcfg = {};
+	for i = 1, #cfg do
+		local entry = cfg[i];
+		if not entry.Used then
+			table.insert(newcfg, entry);
 		end
-		config = newconfig;
-		Plugin.Config.Maps[Shared.GetMapName()] = config;
-		Plugin:SaveConfig();
+	end
+	cfg = newcfg;
+	return #cfg ~= 0 and cfg or nil;
+end
+
+local function init()
+	Shared.Message("Initialisation");
+
+	local mapName = Shared.GetMapName();
+	local mapsConfig = Plugin.Config.Maps;
+
+	for k, v in pairs(mapsConfig) do
+		mapsConfig[k] = cleanUsedEntries(v);
+	end
+	Plugin:SaveConfig();
+
+	mapsConfig[mapName] = mapsConfig[mapName] or {}
+	config = mapsConfig[mapName];
+	winners = Plugin.Config.Winners;
+
+	for i = 1, #config do
+		Shared.Message("Spawning armories!");
+		local entry = config[i];
+		local ent = Server.CreateEntity("woozarmory", {origin = Vector(0, 0, 0)});
+		ent:SetCoords(tableToCoords(entry.Coords));
+		ent:SetCallback(armoryCallback);
+		armories[ent:GetId()] = i;
+	end
+end
+
+local function emptyFunction() end
+
+local function waitForGameStart(self, gamerules, newstate, oldstate)
+	if newstate == kGameState.Started then
+		local ents = GetEntities("WoozArmory");
+		for i = 1, #ents do
+			DestroyEntity(ents[i]);
+		end
+	end
+	setGameState = emptyFunction;
+end
+
+local function setGameState(self, gamerules, newstate, oldstate)
+	if newstate ~= oldstate then
+		init();
+		setGameState = waitForGameStart;
+	end
+end
+
+function Plugin:SetGameState(Gamerules, NewState, OldState)
+	if NewState ~= OldState then
+		init()
 	end
 end
 
 function Plugin:Initialise()
-	assert(debug.getregistry().WoozArmory);
-
-	local mapName = Shared.GetMapName();
-	local mapsConfig = Plugin.Config.Maps;
-	mapsConfig[mapName] = mapsConfig[mapName] or {}
-	config = mapsConfig[mapName];
-	cleanUsedEntries(); -- If #config == 0 then config isn't saved.
-	winners = Plugin.Config.Winners;
-
 	local command = self:BindCommand("sh_plant_armory", "PlantArmory", plantArmory, true);
 	command:Help("Plants an armory on what you're looking at.");
 	command:AddParam {
@@ -135,17 +165,8 @@ function Plugin:Initialise()
 		Default = "Unnamed";
 	};
 
-	self:BindCommand("sh_spawn_armories", "SpawnArmories", function()
-			for i = 1, #config do
-				local entry = config[i];
-				local ent = CreateEntity("woozarmory");
-				ent:SetCoords(tableToCoords(entry.Coords));
-				ent:SetCallback(armoryCallback);
-				armories[ent:GetId()] = i;
-			end
-	end, true);
-
 	self.Enabled = true;
 	return true;
 end
+
 Shine:RegisterExtension("woozarmory", Plugin);
