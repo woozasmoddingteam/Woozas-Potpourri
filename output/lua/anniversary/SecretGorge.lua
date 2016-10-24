@@ -1,6 +1,6 @@
 Script.Load("lua/Mixins/ClientModelMixin.lua");
 Script.Load("lua/ScriptActor.lua");
---Script.Load("lua/EntityChangeMixin.lua");
+Script.Load("lua/EntityChangeMixin.lua");
 
 class 'SecretGorge' (ScriptActor)
 
@@ -22,7 +22,7 @@ function SecretGorge:OnCreate()
 
     InitMixin(self, BaseModelMixin);
     InitMixin(self, ClientModelMixin);
-	--InitMixin(self, EntityChangeMixin); -- May be needed
+	InitMixin(self, EntityChangeMixin); -- May be needed
 
     self:SetLagCompensated(false)
     self:SetPhysicsType(PhysicsType.Kinematic)
