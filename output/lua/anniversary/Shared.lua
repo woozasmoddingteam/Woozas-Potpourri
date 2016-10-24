@@ -1,1 +1,1 @@
-Script.Load("lua/anniversary/SecretGorges.lua");
+Script.Load("lua/anniversary/SecretGorge.lua");
