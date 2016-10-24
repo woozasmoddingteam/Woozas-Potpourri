@@ -67,9 +67,9 @@ local function initGroup(group)
 	local msg_n = 1;
 	local func = function()
 		local msg = messages[msg_n];
-		self:SendNetworkMessage(nil, "Advert", {
+		Plugin:SendNetworkMessage(nil, "Advert", {
 			str = msg;
-			group = k;
+			group = group.name;
 		}, true);
 		msg_n = msg_n + 1;
 		if msg_n > len then
