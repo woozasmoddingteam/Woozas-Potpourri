@@ -52,8 +52,14 @@ local function tableToCoords(table)
 	return coords;
 end
 
-local function gorgeCallback(player, gorge)
-	local id = gorge:GetId();
+local function gorgeCallback(client, msg)
+	local id = msg.entityId;
+	local gorge = Shared.GetEntity(id);
+	local player = client:GetControllingPlayer();
+	if not gorge then
+		return;
+	end
+	local entryIndex = gorges[id];
 	local entry = config[gorges[id]];
 	entry.Used = true;
 	local map = Shared.GetMapName();
@@ -62,7 +68,7 @@ local function gorgeCallback(player, gorge)
 	local pname = player.name;
 	local psteamid = GetSteamIdForClientIndex(player:GetClientIndex());
 	Shine:NotifyColour(nil, 128, 218, 148, "[The Gorges of Apherioxia] Player " .. pname .. " has found the secret Apherioxian Gorge '" .. name .. "'!");
-	Shared.Message("[The Gorges of Apherioxia] Gorge '" .. name .. "' found; Player Name: " .. pname .. "; Room: " .. room);
+	Log("[The Gorges of Apherioxia] Gorge %s found; Player Name: %s; Room: %s", name, pname, room);
 	gorges[id] = nil;
 	table.insert(winners, {
 		PlayerName = pname;
@@ -74,6 +80,7 @@ local function gorgeCallback(player, gorge)
 		Time = os.date();
 	});
 	Plugin:SaveConfig();
+	DestroyEntity(gorge);
 end
 
 local function cleanUsedEntries(cfg)
@@ -89,8 +96,6 @@ local function cleanUsedEntries(cfg)
 end
 
 local function init()
-	Shared.Message("Initialisation");
-
 	local mapName = Shared.GetMapName();
 	local mapsConfig = Plugin.Config.Maps;
 
@@ -103,12 +108,13 @@ local function init()
 	config = mapsConfig[mapName];
 	winners = Plugin.Config.Winners;
 
+	Server.HookNetworkMessage("SecretGorgeFound", gorgeCallback);
+
 	for i = 1, #config do
-		Shared.Message("Spawning gorges!");
 		local entry = config[i];
 		local ent = Server.CreateEntity("secretgorge", {origin = Vector(0, 0, 0)});
 		ent:SetCoords(tableToCoords(entry.Coords));
-		ent:SetCallback(gorgeCallback);
+		--ent:SetCallback(gorgeCallback);
 		ent.OnEntityChange = function(self, old, new)
 			if old then
 				if new then
@@ -234,7 +240,7 @@ local function plantGorge(client, name)
 	coords.zAxis = coords.yAxis:CrossProduct(coords.xAxis)
 	ent:SetCoords(coords);
 
-	ent:SetCallback(gorgeCallback);
+	--ent:SetCallback(gorgeCallback);
 
 	table.insert(config, {
 		Name = name;
