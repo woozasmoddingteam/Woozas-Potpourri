@@ -77,7 +77,12 @@ if Server then
 
 	Server.HookNetworkMessage("SecretGorgeFound", function(client, msg)
 		local player = client:GetControllingPlayer();
+		Log("Player %s used a gorge with id %i", player.name, msg.entityId);
 		local secretgorge = Shared.GetEntity(msg.entityId);
+		if not secretgorge then
+			Log("Invalid gorge by player %s!", player.name);
+			return;
+		end
 		secretgorge.callback(player, secretgorge);
 		DestroyEntity(secretgorge);
 	end);
