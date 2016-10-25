@@ -147,7 +147,6 @@ function Plugin:SetGameState(gamerules, newstate, oldstate)
 			DestroyEntity(ents[i]);
 		end
 	end
-	setGameState = emptyFunction;
 end
 
 function Plugin:OnFirstThink()
