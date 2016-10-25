@@ -147,7 +147,7 @@ function Plugin:Initialise()
 			r = v.Color and v.Color[1] or 255;
 			g = v.Color and v.Color[2] or 255;
 			b = v.Color and v.Color[3] or 255;
-			hidable = v.Hidable;
+			hidable = v.Hidable or false;
 			createAt = parseTime(v.CreateAt);
 			destroyAt = parseTime(v.DestroyAt);
 			randomise = v.Randomise or true;
