@@ -7,6 +7,7 @@ local Plugin = Plugin;
 Plugin.DefaultConfig = {
 	RandomiseOrder = true;
 	ServerID = "Your (semi-) unique server ID.";
+	TimeToWait = 1;
 	Adverts = {
 		Warnings = {
 			Randomise = false;
@@ -20,6 +21,7 @@ Plugin.DefaultConfig = {
 			Hidable = true;
 			Interval = 60;
 			DestroyAt = {"Countdown", "Started"};
+			Maps = "ns2_descent";
 			Messages = {
 				"message1",
 				"message2"
@@ -42,6 +44,7 @@ Plugin.DefaultConfig = {
 				"Message of power 2!",
 				"Message of power 3!",
 			};
+			Maps = {"ns2_gorge", "ns2_gorgon"};
 		}
 	}
 }
@@ -51,6 +54,7 @@ local bor = bit.bor;
 local band = bit.band;
 local lshift = bit.lshift;
 local lastPrint = 0;
+local timeToWait;
 
 local function initGroup(group)
 	if not group.messages then
@@ -67,10 +71,26 @@ local function initGroup(group)
 	local len = #messages;
 	local msg_n = 1;
 	local func;
+	local maps = group.maps;
 	func = function()
+		if maps then
+			local map = Shared.GetMapName();
+			if map:len() == 0 then
+				return
+			end
+			for i = 1, #maps do
+				if maps[i] == map then
+					maps = nil;
+					goto continue;
+				end
+			end
+			Plugin:DestroyTimer(group.name);
+			return;
+		end
+		::continue::
 		local now = Shared.GetTime();
-		if lastPrint > now - 1 then
-			Plugin:SimpleTimer(1, func);
+		if lastPrint > now - timeToWait then
+			Plugin:SimpleTimer(timeToWait, func);
 			return;
 		end
 		lastPrint = now;
@@ -114,6 +134,7 @@ function Plugin:Initialise()
 		return false, "No valid ServerID given!";
 	end
 	self.dt.ServerID = serverID;
+	timeToWait = self.Config.TimeToWait or 1;
 
 	for k, v in pairs(self.Config.Adverts) do
 
@@ -132,6 +153,7 @@ function Plugin:Initialise()
 			randomise = v.Randomise or true;
 			interval = assert(v.Interval, "Interval for " .. k .. " is missing!");
 			messages = v.Messages;
+			maps = type(v.Maps) == "string" and {v.Maps} or v.Maps; -- Even if v.Maps is nil it will work as expected.
 		};
 		table.insert(groups, group);
 		if group.createAt == 0 then
