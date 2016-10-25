@@ -60,7 +60,13 @@ local function gorgeCallback(client, msg)
 		return;
 	end
 	local entryIndex = gorges[id];
-	local entry = config[gorges[id]];
+	if not entryIndex then
+		return;
+	end
+	local entry = config[entryIndex];
+	if not entry then
+		return;
+	end
 	entry.Used = true;
 	local map = Shared.GetMapName();
 	local room = entry.Room;
