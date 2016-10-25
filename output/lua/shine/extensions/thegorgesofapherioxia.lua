@@ -140,7 +140,7 @@ end
 
 local function emptyFunction() end
 
-local function waitForGameStart(self, gamerules, newstate, oldstate)
+function Plugin:SetGameState(gamerules, newstate, oldstate)
 	if newstate == kGameState.Started then
 		local ents = GetEntities("SecretGorge");
 		for i = 1, #ents do
@@ -150,15 +150,11 @@ local function waitForGameStart(self, gamerules, newstate, oldstate)
 	setGameState = emptyFunction;
 end
 
-local function setGameState(self, gamerules, newstate, oldstate)
-	if newstate ~= oldstate then
+function Plugin:OnFirstThink()
+	--if newstate ~= oldstate then
 		init();
-		setGameState = waitForGameStart;
-	end
-end
-
-function Plugin:SetGameState(...)
-	setGameState(self, ...);
+		--setGameState = waitForGameStart;
+	--end
 end
 
 local function increaseYaw(client, amount)
