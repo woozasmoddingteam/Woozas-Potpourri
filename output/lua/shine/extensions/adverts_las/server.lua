@@ -50,6 +50,7 @@ local groups = {};
 local bor = bit.bor;
 local band = bit.band;
 local lshift = bit.lshift;
+local lastPrint = 0;
 
 local function initGroup(group)
 	if not group.messages then
@@ -65,7 +66,14 @@ local function initGroup(group)
 	end
 	local len = #messages;
 	local msg_n = 1;
-	local func = function()
+	local func;
+	func = function()
+		local now = Shared.GetTime();
+		if lastPrint > now - 1 then
+			Plugin:SimpleTimer(1, func);
+			return;
+		end
+		lastPrint = now;
 		local msg = messages[msg_n];
 		Plugin:SendNetworkMessage(nil, "Advert", {
 			str = msg;

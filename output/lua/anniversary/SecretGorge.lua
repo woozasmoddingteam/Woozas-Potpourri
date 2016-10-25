@@ -28,10 +28,12 @@ function SecretGorge:OnCreate()
     self:SetPhysicsType(PhysicsType.Kinematic)
     self:SetPhysicsGroup(PhysicsGroup.BigStructuresGroup)
 
+	--[[
 	if Server then
 		assert(not self.callback); -- Assert that we aren't overriding an already existing variable.
 		self.callback = emptyFunction;
 	end
+	--]]
 end
 
 function SecretGorge:OnInitialized()
@@ -66,6 +68,7 @@ Shared.RegisterNetworkMessage("SecretGorgeFound", {
 	entityId = "entityid";
 });
 
+--[[
 if Server then
 	function SecretGorge:SetCallback(newcallback)
 		self.callback = newcallback;
@@ -87,7 +90,7 @@ if Server then
 		DestroyEntity(secretgorge);
 	end);
 
-elseif Client then
+else]]if Client then
 	function SecretGorge:OnUse(player)
 		if Client.GetLocalPlayer() == player then
 			Client.SendNetworkMessage("SecretGorgeFound", {entityId = self:GetId()});
