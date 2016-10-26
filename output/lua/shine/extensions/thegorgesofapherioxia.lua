@@ -163,12 +163,16 @@ function Plugin:OnFirstThink()
 end
 
 local function increaseYaw(client, amount)
-	local player = client:GetControllingPlayer()
+	local player = client:GetControllingPlayer();
 
-    local startPoint = player:GetEyePos()
-    local endPoint = startPoint + player:GetViewCoords().zAxis * 100
+    local startPoint = player:GetEyePos();
+	local viewAngles = player:GetViewAngles();
+	local viewCoords = viewAngles:GetCoords();
+
+    local endPoint = startPoint + viewCoords.zAxis * 100;
     local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
 	local ent = trace.entity;
+	if not ent then return end
 
 	local angles = ent:GetAngles();
 
@@ -184,6 +188,7 @@ local function increaseRoll(client, amount)
     local endPoint = startPoint + player:GetViewCoords().zAxis * 100
     local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
 	local ent = trace.entity;
+	if not ent then return end
 
 	local angles = ent:GetAngles();
 
@@ -199,6 +204,7 @@ local function increasePitch(client, amount)
     local endPoint = startPoint + player:GetViewCoords().zAxis * 100
     local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
 	local ent = trace.entity;
+	if not ent then return end
 
 	local angles = ent:GetAngles();
 
@@ -214,6 +220,7 @@ local function push(client, amount)
     local endPoint = startPoint + player:GetViewCoords().zAxis * 100
     local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()));
 	local ent = trace.entity;
+	if not ent then return end
 
 	endPoint = trace.endPoint;
 
