@@ -68,7 +68,7 @@ Shared.RegisterNetworkMessage("SecretGorgeFound", {
 	entityId = "entityid";
 });
 
-function CommandStructure:GetUseAllowedBeforeGameStart()
+function SecretGorge:GetUseAllowedBeforeGameStart()
 	return true
 end
 
