@@ -68,39 +68,16 @@ Shared.RegisterNetworkMessage("SecretGorgeFound", {
 	entityId = "entityid";
 });
 
---[[
-if Server then
-	function SecretGorge:SetCallback(newcallback)
-		self.callback = newcallback;
-	end
+function CommandStructure:GetUseAllowedBeforeGameStart()
+	return true
+end
 
-	function SecretGorge:GetCallback()
-		return self.callback;
-	end
-
-	Server.HookNetworkMessage("SecretGorgeFound", function(client, msg)
-		local player = client:GetControllingPlayer();
-		Log("Player %s used a gorge with id %i", player.name, msg.entityId);
-		local secretgorge = Shared.GetEntity(msg.entityId);
-		if not secretgorge then
-			Log("Invalid gorge by player %s!", player.name);
-			return;
-		end
-		secretgorge.callback(player, secretgorge);
-		DestroyEntity(secretgorge);
-	end);
-
-else]]
 if Client then
 	function SecretGorge:OnUse(player)
 		if Client.GetLocalPlayer() == player then
 			Client.SendNetworkMessage("SecretGorgeFound", {entityId = self:GetId()});
 		end
 	end
-
-    function CommandStructure:GetUseAllowedBeforeGameStart()
-        return true
-    end
 end
 
 Shared.LinkClassToMap("SecretGorge", SecretGorge.kMapName, networkVars)
