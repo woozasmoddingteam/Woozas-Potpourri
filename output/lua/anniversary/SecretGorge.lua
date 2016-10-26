@@ -90,12 +90,17 @@ if Server then
 		DestroyEntity(secretgorge);
 	end);
 
-else]]if Client then
+else]]
+if Client then
 	function SecretGorge:OnUse(player)
 		if Client.GetLocalPlayer() == player then
 			Client.SendNetworkMessage("SecretGorgeFound", {entityId = self:GetId()});
 		end
 	end
+
+    function CommandStructure:GetUseAllowedBeforeGameStart()
+        return true
+    end
 end
 
 Shared.LinkClassToMap("SecretGorge", SecretGorge.kMapName, networkVars)
