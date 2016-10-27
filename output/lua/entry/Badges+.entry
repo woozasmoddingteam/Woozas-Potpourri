@@ -1,5 +1,0 @@
-modEntry = [[
-Client: lua/Badges+_Client.lua,
-Server: lua/Badges+_Server.lua,
-Priority: 4
-]]
