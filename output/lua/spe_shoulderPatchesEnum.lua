@@ -24,5 +24,6 @@ kShoulderPatchNames = {
     "NS2:Combat Event",
     "Cactuar",
 	"Duck",
-	"Tanstaafl"
+	"Tanstaafl",
+	"Priest"
 }
