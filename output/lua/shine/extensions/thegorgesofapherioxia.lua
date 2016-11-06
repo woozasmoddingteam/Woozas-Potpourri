@@ -176,7 +176,7 @@ local function increaseYaw(client, amount)
 
 	local angles = ent:GetAngles();
 
-	angles.yaw = (angles.yaw + amount) % math.pi*2;
+	angles.yaw = angles.yaw + amount;
 
 	ent:SetAngles(angles);
 end
@@ -192,7 +192,7 @@ local function increaseRoll(client, amount)
 
 	local angles = ent:GetAngles();
 
-	angles.roll = (angles.roll + amount) % math.pi*2;
+	angles.roll = angles.roll + amount;
 
 	ent:SetAngles(angles);
 end
@@ -208,7 +208,7 @@ local function increasePitch(client, amount)
 
 	local angles = ent:GetAngles();
 
-	angles.pitch = (angles.pitch + amount) % math.pi*2;
+	angles.pitch = angles.pitch + amount;
 
 	ent:SetAngles(angles);
 end
