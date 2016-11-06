@@ -27,8 +27,27 @@ local genPoisonMeta = function() return {
 } end
 setmetatable(poison, genPoisonMeta());
 
+local wrapTableMeta = {
+	__newindex = pfunc,
+	__index = function(self, key)
+		local v = rawget(self, "__WRAPPED")[key];
+
+		if type(v) == "function" then
+			if getinfo(v).what ~= "Lua" then
+				return pfunc;
+			else
+				isolateFunction(v);
+			end
+		elseif type(v) == "table" then
+			return wrapTable(v);
+		end
+
+		return v;
+	end
+};
+
 local wrapTable = function(t)
-	return setmetatable({}, {__index = t, __newindex = pfunc});
+	return setmetatable({__WRAPPED = t}, wrapTableMeta);
 end
 
 local function InitMixinOverride(self, mixin, options)
@@ -74,7 +93,7 @@ local function isolateFunction(func)
 	local ups = {};
 	isolated_functions[func] = ups;
 
-	local ups[0] = getfenv(func);
+	ups[0] = getfenv(func);
 
 	for i = 1, getinfo(func).nups do
 		local name, val = getupvalue(func, i);
@@ -83,6 +102,8 @@ local function isolateFunction(func)
 		if type(val) == "function" then
 			if getinfo(val).what ~= "Lua" then
 				setupvalue(func, i, pfunc); -- Don't allow access to external functions
+			else
+				isolateFunction(val);
 			end
 		elseif type(val) == "table" then
 			local wrapper = wrapTable(val);
