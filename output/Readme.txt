@@ -93,4 +93,10 @@ Big Update!? Brings a lot of new stuff to let the Potpourri even look more beaut
 -Added Ready Room Rave from Samus Orphan Black. Special thanks for creating this mod as well as making it compatible with Shine User Config. Time do dance!
 
 v.3.1
-Merged ShoulderPatchesExtra by ZycaR into Potpourri. Setup and Information can be found here: https://github.com/ZycaR/ShoulderPatchesExtra
+-Merged ShoulderPatchesExtra by ZycaR into Potpourri. Setup and Information can be found here: https://github.com/ZycaR/ShoulderPatchesExtra
+
+v3.2
+-Added Gorgetunnel Control by Steelcap. Thanks for creating the mod
+
+v.3.3
+-Added luajit_profiling as Shine Extension. Thank you Las for creating the mod.
