@@ -130,7 +130,9 @@ function InitMixin(inst, mixin, optionalMixinData)
 end
 
 function HasMixin(inst, mixin_type)
-	if not inst then
+	if not inst or not inst.__mixintypes then
+		Log("Received invalid instance!");
+		Shared.Message(debug.traceback());
 		return false;
 	end
 	return inst.__mixintypes[mixin_type] or false
