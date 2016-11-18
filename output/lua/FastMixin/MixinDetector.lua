@@ -28,7 +28,7 @@ local function hookMixinDetector(old, callback)
 	local mixin_state = {}; -- Keeps track of the mixins
 	return function(self)
 		old(self);
-		local mixins = getmetatable(self).mixins;
+		local mixins = self.__mixins;
 		for i = 1, #mixins do
 			local mixin = mixins[i];
 			if mixin_state[mixin] == nil then
@@ -67,6 +67,7 @@ function BeginMixinDetection()
 				cls.OnCreate = original;
 				for mixin, value in pairs(mixin_state) do
 					if value then
+						Log("Inlining %sMixin!", mixin.type);
 						InitMixinForClass(cls, mixin);
 					end
 				end
@@ -78,6 +79,7 @@ function BeginMixinDetection()
 				cls.OnInitialized = original;
 				for mixin, value in pairs(mixin_state) do
 					if value then
+						Log("Inlining %sMixin!", mixin.type);
 						InitMixinForClass(cls, mixin);
 					end
 				end
