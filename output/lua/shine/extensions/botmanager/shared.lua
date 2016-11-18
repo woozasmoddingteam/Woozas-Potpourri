@@ -6,7 +6,7 @@ local Shine = Shine
 local Notify = Shared.Message
 
 local Plugin = {}
-Plugin.Version = "0.1"
+Plugin.Version = "0.2"
 
 function Plugin:SetupDataTable()
 	self:AddDTVar( "boolean", "AllowPlayersToReplaceComBots", true )
