@@ -120,7 +120,6 @@ local function init()
 		local entry = config[i];
 		local ent = Server.CreateEntity("secretgorge", {origin = Vector(0, 0, 0)});
 		ent:SetCoords(tableToCoords(entry.Coords));
-		--ent:SetCallback(gorgeCallback);
 		ent.OnEntityChange = function(self, old, new)
 			if old then
 				if new then

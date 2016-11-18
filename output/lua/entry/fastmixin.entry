@@ -1,3 +1,5 @@
 modEntry = {
 	FileHooks = "lua/FastMixin/FileHooks.lua",
-}
+	Server = "lua/FastMixin/Server.lua",
+	Priority = 0
+};
