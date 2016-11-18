@@ -15,7 +15,7 @@ local metatable = {
 			return self.__class[key];
 		end
 	end
-end
+}
 
 local function GetMixinConstants(self)
 	return self.__mixindata
@@ -42,12 +42,14 @@ class = function(name)
 	meta.__newindex = function(self, key, value)
 		old(self, key, value);
 		if key == "OnCreate" then
+			Log("Overriding OnCreate for %s!", name);
 			local old_OnCreate = cls.OnCreate; -- In case the original __newindex modifies it
 			cls.OnCreate = function(self)
 				old_OnCreate(self);
 				self.__mixins = {};
 				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
 				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+				Log("Better ONCREATE! %s %s %s", name, tostring(self), self.__mixins);
 			end
 			meta.__newindex = old; -- Unhook ourselves when done
 		end
@@ -67,7 +69,14 @@ local function hookMixinDetector(old, callback)
 	local mixin_state = {}; -- Keeps track of the mixins
 	return function(self)
 		old(self);
+		Log("%s %s", tostring(self), self.__mixins);
 		local mixins = self.__mixins;
+		if not mixins then
+			Log("Invalid instance %s!", self);
+			return;
+		else
+			Log("Valid instance %s!", self);
+		end
 		for i = 1, #mixins do
 			local mixin = mixins[i];
 			if mixin_state[mixin] == nil then
@@ -112,7 +121,7 @@ function BeginMixinDetection()
 					end
 				end
 			end
-			cls.OnInitialized = hookMixinDetector(cls.OnCreate, callback);
+			cls.OnCreate = hookMixinDetector(cls.OnCreate, callback);
 		end
 		if cls.OnInitialized then
 			local callback = function(mixin_state, original)
