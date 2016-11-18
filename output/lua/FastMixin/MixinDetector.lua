@@ -30,9 +30,9 @@ class = function(name)
 	local cls = _G[name];
 	local meta = getmetatable(cls);
 	meta.name = name;
-	meta.mixins = {};
 	classes[#classes+1] = cls;
 
+	cls.__class_mixins = {};
 	cls.__class_mixintypes = {};
 	cls.__class_mixindata = {};
 	cls.GetMixinConstants = GetMixinConstants;

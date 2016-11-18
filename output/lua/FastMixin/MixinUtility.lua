@@ -64,17 +64,17 @@ function InitMixinForClass(cls, mixin)
 end
 
 function InitMixin(inst, mixin, optionalMixinData)
-    if not HasMixin(inst, mixin) then
+    PROFILE("InitMixin")
 
-        PROFILE("InitMixin")
+    if inst:isa("Entity") then
+        Shared.AddTagToEntity(inst:GetId(), mixin.type)
+    end
 
-        if inst:isa("Entity") then
-            Shared.AddTagToEntity(inst:GetId(), mixin.type)
-        end
+	if inst.__class_mixins[mixin] then
 
-        for k, v in pairs(mixin) do
+	    for k, v in pairs(mixin) do
 
-            if type(v) == "function" and k ~= "__initmixin" then
+	        if type(v) == "function" and k ~= "__initmixin" then
 
 				if not inst[k] then
 					inst[k] = v;
@@ -96,21 +96,13 @@ function InitMixin(inst, mixin, optionalMixinData)
 					return original(...);
 				end
 
-            end
+	        end
 
 			::continue::
 
-        end
+	    end
 
-		if not inst.__mixins then
-			inst.__mixins = {};
-			inst.__mixintypes = {};
-			inst.__mixindata = mixin.defaultConstants or {};
-			inst.GetMixinConstants = GetMixinConstants;
-			inst.GetMixinConstant = GetMixinConstant;
-		else
-        	assert(not inst.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
-		end
+	    assert(not inst.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
 
 		if mixin.defaultConstants then
 			for k, v in pairs(mixin.defaultConstants) do
@@ -118,18 +110,18 @@ function InitMixin(inst, mixin, optionalMixinData)
 			end
 		end
 
-        table.insert(inst.__mixins, mixin);
+	    table.insert(inst.__mixins, mixin);
 		inst.__mixintypes[mixin.type] = true;
 
-		if optionalMixinData then
+	end
 
-			for k, v in pairs(optionalMixinData) do
-				inst.__mixindata[k] = v
-			end
+	if optionalMixinData then
 
+		for k, v in pairs(optionalMixinData) do
+			inst.__mixindata[k] = v
 		end
 
-    end
+	end
 
     if mixin.__initmixin then
         mixin.__initmixin(inst)
