@@ -7,15 +7,54 @@ if not classes then
 	reg.__CLASSES = classes;
 end
 
+local metatable = {
+	__index = function(self, key)
+		if self[key] ~= nil then
+			return self[key];
+		else
+			return self.__class[key];
+		end
+	end
+end
+
+local function GetMixinConstants(self)
+	return self.__mixindata
+end
+
+local function GetMixinConstant(self, constantName)
+	return self.__mixindata[constantName]
+end
+
 class = function(name)
 	local oldbasesetter = oldclass(name);
 	local cls = _G[name];
-	getmetatable(cls).name = name;
-	getmetatable(cls).mixins = {};
+	local meta = getmetatable(cls);
+	meta.name = name;
+	meta.mixins = {};
 	classes[#classes+1] = cls;
 
+	cls.__class_mixintypes = {};
+	cls.__class_mixindata = {};
+	cls.GetMixinConstants = GetMixinConstants;
+	cls.GetMixinConstant = GetMixinConstant;
+
+	local old = meta.__newindex;
+	meta.__newindex = function(self, key, value)
+		old(self, key, value);
+		if key == "OnCreate" then
+			local old_OnCreate = cls.OnCreate; -- In case the original __newindex modifies it
+			cls.OnCreate = function(self)
+				old_OnCreate(self);
+				self.__mixins = {};
+				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+			end
+			meta.__newindex = old; -- Unhook ourselves when done
+		end
+	end
+
 	return function(base)
-		getmetatable(cls).base = base;
+		meta.base = base;
 		oldbasesetter(base);
 	end
 end
@@ -64,6 +103,7 @@ function BeginMixinDetection()
 		local cls = classes[i];
 		if cls.OnCreate then
 			local callback = function(mixin_state, original)
+				Log("Done inlining for class %s!", getmetatable(cls).name)
 				cls.OnCreate = original;
 				for mixin, value in pairs(mixin_state) do
 					if value then
@@ -76,6 +116,7 @@ function BeginMixinDetection()
 		end
 		if cls.OnInitialized then
 			local callback = function(mixin_state, original)
+				Log("Done inlining for class %s!", getmetatable(cls).name)
 				cls.OnInitialized = original;
 				for mixin, value in pairs(mixin_state) do
 					if value then
