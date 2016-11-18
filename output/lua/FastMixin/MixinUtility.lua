@@ -98,10 +98,12 @@ function InitMixin(inst, mixin, optionalMixinData)
 					goto continue;
 				end
 
-				for i = 1, #mixin.overrideFunctions do
-					if mixin.overrideFunctions[i] == k then
-						inst[k] = v;
-						goto continue;
+				if mixin.overrideFunctions then
+					for i = 1, #mixin.overrideFunctions do
+						if mixin.overrideFunctions[i] == k then
+							inst[k] = v;
+							goto continue;
+						end
 					end
 				end
 
@@ -134,7 +136,7 @@ function InitMixin(inst, mixin, optionalMixinData)
 		end
 
         table.insert(inst.__mixins, mixin);
-		inst.__mixin_types[mixin.type] = true;
+		inst.__mixintypes[mixin.type] = true;
 
 		if optionalMixinData then
 
@@ -153,7 +155,10 @@ function InitMixin(inst, mixin, optionalMixinData)
 end
 
 function HasMixin(inst, mixin_type)
-	return --[[inst.classmeta.__mixintypes[mixin_type] or]] inst.__mixintypes[mixin_type] or false
+	if not inst then
+		return;
+	end
+	return --[[inst.classmeta.__mixintypes[mixin_type] or]] inst.__mixintypes and inst.__mixintypes[mixin_type] or false
 end
 
 function ClassHasMixin(cls, mixin_type)
