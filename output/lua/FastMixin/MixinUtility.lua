@@ -11,11 +11,11 @@ function CreateMixin(mixin)
 	return mixin;
 end
 
-function AddMixinNetworkVars(theMixin, networkVars)
-    if theMixin.networkVars then
-        for varName, varType in pairs(theMixin.networkVars) do
+function AddMixinNetworkVars(mixin, networkVars)
+    if mixin.networkVars then
+        for varName, varType in pairs(mixin.networkVars) do
             if networkVars[varName] ~= nil then
-                error("Variable " .. varName .. " already exists in network vars while adding mixin " .. theMixin.type)
+                error("Variable " .. varName .. " already exists in network vars while adding mixin " .. mixin.type)
             end
             networkVars[varName] = varType
         end
@@ -30,34 +30,83 @@ local function GetMixinConstant(self, constantName)
 	return self.mixindata[constantName]
 end
 
+function InitMixinForClass(cls, mixin)
 
-function InitMixin(classInstance, theMixin, optionalMixinData)
-    if not HasMixin(classInstance, theMixin) then
+	for k, v in pairs(mixin) do
+
+		if type(v) == "function" and k ~= "__initmixin" then
+
+			if not cls[k] then
+				cls[k] = v;
+				goto continue;
+			end
+
+			for i = 1, #mixin.overrideFunctions do
+				if mixin.overrideFunctions[i] == k then
+					cls[k] = v;
+					goto continue;
+				end
+			end
+
+			local original = cls[k];
+			cls[k] = function(...)
+				v(...);
+				return original(...);
+			end
+
+		end
+
+		::continue::
+
+	end
+
+	if cls.mixins then
+		cls.mixins = mixins;
+		cls.mixin_types = {};
+		cls.mixindata = mixin.defaultConstants or {};
+		cls.GetMixinConstants = GetMixinConstants;
+		cls.GetMixinConstant = GetMixinConstant;
+	else
+		assert(not cls.mixin_types[mixin.type], "Tried to load two conflicting mixins with the same type name!");
+	end
+
+	if mixin.defaultConstants then
+		for k, v in pairs(mixin.defaultConstants) do
+			cls.mixindata[k] = v
+		end
+	end
+
+	table.insert(inst.mixins, mixin);
+	init.mixin_types[mixin.type] = true;
+end
+
+function InitMixin(inst, mixin, optionalMixinData)
+    if not HasMixin(inst, mixin) then
 
         PROFILE("InitMixin")
 
-        if classInstance:isa("Entity") then
-            Shared.AddTagToEntity(classInstance:GetId(), theMixin.type)
+        if inst:isa("Entity") then
+            Shared.AddTagToEntity(inst:GetId(), mixin.type)
         end
 
-        for k, v in pairs(theMixin) do
+        for k, v in pairs(mixin) do
 
             if type(v) == "function" and k ~= "__initmixin" then
 
-				if not classInstance[k] then
-					classInstance[k] = v;
+				if not inst[k] then
+					inst[k] = v;
 					goto continue;
 				end
 
-				for i = 1, #theMixin.overrideFunctions do
-					if theMixin.overrideFunctions[i] == k then
-						classInstance[k] = v;
+				for i = 1, #mixin.overrideFunctions do
+					if mixin.overrideFunctions[i] == k then
+						inst[k] = v;
 						goto continue;
 					end
 				end
 
-				local original = classInstance[k];
-				classInstance[k] = function(...)
+				local original = inst[k];
+				inst[k] = function(...)
 					v(...);
 					return original(...);
 				end
@@ -68,41 +117,48 @@ function InitMixin(classInstance, theMixin, optionalMixinData)
 
         end
 
-		local mixinlist = classInstance.instance_mixins;
-		if not mixinlist then
-			mixinlist = {};
-			classInstance.instance_mixins = mixinlist;
-			classInstance.mixindata = theMixin.defaultConstants or {};
-			classInstance.GetMixinConstants = GetMixinConstants;
-			classInstance.GetMixinConstant = GetMixinConstant;
+		local meta = getmetatable(inst);
+
+		if not meta.mixins then
+			meta.mixins = {};
+			meta.mixin_types = {};
+			meta.mixindata = mixin.defaultConstants or {};
+			inst.GetMixinConstants = GetMixinConstants;
+			inst.GetMixinConstant = GetMixinConstant;
 		else
-        	assert(not mixinlist[theMixin.type], "Tried to load two conflicting mixins with the same type name!");
-			if theMixin.defaultConstants then
-	            for k, v in pairs(theMixin.defaultConstants) do
-	                classInstance.mixindata[k] = v
-	            end
-	        end
+        	assert(not meta.mixin_types[mixin.type], "Tried to load two conflicting mixins with the same type name!");
 		end
 
-        mixinlist[theMixin.type] = true
+		if mixin.defaultConstants then
+			for k, v in pairs(mixin.defaultConstants) do
+				meta.mixindata[k] = v
+			end
+		end
 
-        if optionalMixinData then
-
-            for k, v in pairs(optionalMixinData) do
-                classInstance.mixindata[k] = v
-            end
-
-        end
+        table.insert(meta.mixins, mixin);
+		init.mixin_types[mixin.type] = true;
 
     end
 
-    if theMixin.__initmixin then
-        theMixin.__initmixin(classInstance)
+	if optionalMixinData then
+
+		for k, v in pairs(optionalMixinData) do
+			inst.mixindata[k] = v
+		end
+
+	end
+
+    if mixin.__initmixin then
+        mixin.__initmixin(inst)
     end
 
 end
 
-function HasMixin(classInstance, mixinTypeName)
-    local mixinlist = classInstance.instance_mixins
-	return (mixinlist and mixinlist[mixinTypeName]) or false
+function HasMixin(inst, mixin_type)
+	local meta = getmetatable(inst);
+	return meta.classmeta.mixin_types[mixin_type] or meta.mixin_types[mixin_type] or false
+end
+
+function ClassHasMixin(cls, mixin_type)
+	return getmetatable(cls).mixin_types[mixin_type] or false;
 end
