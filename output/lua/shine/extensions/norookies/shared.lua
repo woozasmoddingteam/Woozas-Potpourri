@@ -1,5 +1,5 @@
 --[[
-    Shine No Rookies - Shared
+	Shine No Rookies - Shared
 ]]
 local Shine = Shine
 local Plugin = {}

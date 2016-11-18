@@ -8,14 +8,10 @@ Plugin.DefaultConfig =
 	CommanderBots = false,
 	CommanderBotsStartDelay = 180,
 	LoginCommanderBotAtLogout = false,
-	AllowPlayersToReplaceComBots = true
+	AllowPlayersToReplaceComBots = true,
+	BotTickRate = 10,
 }
 Plugin.CheckConfig = true
-
-do
-	Shine.Hook.SetupClassHook("TeamBrain", "GetNumAssignedToEntity", "ActivePreGetNumAssignedToEntity", "ActivePre")
-	Shine.Hook.SetupClassHook("PlayerRanking", "GetTrackServer", "ActivePreGetTrackServer", "ActivePre")
-end
 
 function Plugin:Initialise()
 	self.Enabled = true
@@ -26,14 +22,12 @@ function Plugin:Initialise()
 	self.dt.AllowPlayersToReplaceComBots = self.CommanderBots and self.Config.AllowPlayersToReplaceComBots
 	self.dt.LoginCommanderBotAtLogout = self.CommanderBots and self.Config.LoginCommanderBotAtLogout
 
+	self.oldkPlayerBrainTickrate = kPlayerBrainTickrate
+	kPlayerBrainTickrate = self.Config.BotTickRate
+
 	self:CreateCommands()
 
 	return true
-end
-
---Fixes for bots
-function Plugin:ActivePreGetNumAssignedToEntity(TeamBrain, entId)
-	if not TeamBrain.entId2memory[entId] then return 0 end
 end
 
 function Plugin:CheckGameStart( Gamerules )
@@ -89,19 +83,6 @@ function Plugin:SetMaxBots(bots, com)
 	Gamerules:SetMaxBots(bots, com)
 end
 
---avoid that ppl loose hive skill for loosing against bots
-function Plugin:ActivePreGetTrackServer()
-	local team1PlayerNum, _, team1BotNum  = gameRules:GetTeam1():GetNumPlayers()
-	local team2PlayerNum, _, team2BotNum = gameRules:GetTeam2():GetNumPlayers()
-
-	team1PlayerNum = team1PlayerNum - team1BotNum
-	team2PlayerNum = team2PlayerNum - team2BotNum
-
-	local diff = math.abs(team1PlayerNum - team2PlayerNum)
-
-	if diff > 2 or team1PlayerNum == 0 or team2PlayerNum == 0 then return false end
-end
-
 function Plugin:CreateCommands()
 	local function MaxBots( _, Number, SaveIntoConfig )
 		self:SetMaxBots( Number, self.Config.CommanderBots )
@@ -138,6 +119,8 @@ end
 
 function Plugin:Cleanup()
 	self:SetMaxBots(0, false)
+
+	kPlayerBrainTickrate = self.oldkPlayerBrainTickrate
 
 	self.BaseClass.Cleanup( self )
 	self.Enabled = false

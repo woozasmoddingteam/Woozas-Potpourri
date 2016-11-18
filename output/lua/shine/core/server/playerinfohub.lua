@@ -113,7 +113,7 @@ function PlayerInfoHub:RemoveRequest( Name, DataType)
 	else
 		for i, name in ipairs(self.Requests[DataType]) do
 			if name == Name then
-				table.remove(type, i)
+				table.remove(self.Requests[DataType], i)
 			end
 		end
 	end
@@ -235,7 +235,7 @@ function PlayerInfoHub:OnConnect( Client )
 		if not self.GeoData[ SteamId ] then
 			self.GeoData[ SteamId ] = -2
 
-			AddToHTTPQueue( StringFormat( "https://freegeoip.net/json/%s", IPAddressToString( Server.GetClientAddress( Client ) ) ), function( Response )
+			AddToHTTPQueue( StringFormat( "http://geoip.nekudo.com/api/%s", IPAddressToString( Server.GetClientAddress( Client ) ) ), function( Response )
 				local data = JsonDecode( Response )
 				PlayerInfoHub.GeoData[ SteamId ] = data or 0
 				Call( "OnReceiveGeoData", Client, PlayerInfoHub.GeoData[ SteamId ] )
@@ -307,15 +307,12 @@ Add("OnSetPlayerLevel", "HiveRequestFinished", function(Player)
 end)
 
 function PlayerInfoHub:GetHiveData( SteamId )
-	if Shine.IsNS2Combat then return end
+	if Shine.IsNS2Combat or not GetHiveDataBySteamId then return end
 
 	local data = GetHiveDataBySteamId(SteamId)
-	--check the steamId to validate the hive data
-	if data and data.steamId == SteamId then
-		
-		--Fix for hive using string instead of number as type for skill
-		data.skill = tonumber(data.skill)
-
+	if data then
+		--Fix for hive2 using a new format
+		data.playTime = data.time_played
 		return data
 	end
 end
