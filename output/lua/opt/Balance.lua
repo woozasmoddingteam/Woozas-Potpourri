@@ -1,0 +1,1 @@
+ kMaxHallucinations = 5;
