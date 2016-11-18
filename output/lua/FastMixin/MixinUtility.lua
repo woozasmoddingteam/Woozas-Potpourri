@@ -22,14 +22,6 @@ function AddMixinNetworkVars(mixin, networkVars)
     end
 end
 
-local function GetMixinConstants(self)
-	return self.__mixindata
-end
-
-local function GetMixinConstant(self, constantName)
-	return self.__mixindata[constantName]
-end
-
 function InitMixinForClass(cls, mixin)
 
 	for k, v in pairs(mixin) do
@@ -60,24 +52,15 @@ function InitMixinForClass(cls, mixin)
 
 	end
 
-	if cls.__mixins then
-		cls.__mixins = mixins;
-		cls.__mixintypes = {};
-		cls.__mixindata = mixin.defaultConstants or {};
-		cls.GetMixinConstants = GetMixinConstants;
-		cls.GetMixinConstant = GetMixinConstant;
-	else
-		assert(not cls.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
-	end
+	assert(not cls.__class_mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
 
 	if mixin.defaultConstants then
 		for k, v in pairs(mixin.defaultConstants) do
-			cls.__mixindata[k] = v
+			cls.__class_mixindata[k] = v
 		end
 	end
 
-	table.insert(inst.__mixins, mixin);
-	init.__mixintypes[mixin.type] = true;
+	cls.__class_mixintypes[mixin.type] = true;
 end
 
 function InitMixin(inst, mixin, optionalMixinData)
@@ -156,11 +139,11 @@ end
 
 function HasMixin(inst, mixin_type)
 	if not inst then
-		return;
+		return false;
 	end
-	return --[[inst.classmeta.__mixintypes[mixin_type] or]] inst.__mixintypes and inst.__mixintypes[mixin_type] or false
+	return inst.__mixintypes[mixin_type] or false
 end
 
 function ClassHasMixin(cls, mixin_type)
-	return getmetatable(cls).__mixintypes[mixin_type] or false;
+	return cls.__class_mixintypes[mixin_type] or false;
 end
