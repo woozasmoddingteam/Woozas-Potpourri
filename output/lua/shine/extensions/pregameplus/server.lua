@@ -250,8 +250,6 @@ function Plugin:Disable()
 	self:DestroyTimer( "Countdown" )
 	self.dt.CountdownText = ""
 
-	if not GetGameInfoEntity():GetWarmUpActive() then return end
-
 	self:DestroyEnts()
 end
 
