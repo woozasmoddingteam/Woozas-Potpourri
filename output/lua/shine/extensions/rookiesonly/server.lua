@@ -56,7 +56,7 @@ function Plugin:Initialise()
 
     --These checks should not be needed but better be on the safe side
     self.Config.MaxPlaytime = math.min( 100 , self.Config.MaxPlaytime)
-    self.Config.MaxLevel = math.min( 10 , self.Config.MaxLevel)
+    self.Config.MaxLevel = math.min(math.max( 25 , self.Config.MaxLevel),50)
 
     self:CheckForSteamTime()
     self:BuildBlockMessage()
