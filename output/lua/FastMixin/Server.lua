@@ -1,6 +1,6 @@
 Log("DISABLING CLASS GENERATION");
-class = nil;
+class = function() assert(false) end;
 
-Script.Load("lua/FastMixin/MixinDetector.lua");
+--Script.Load("lua/FastMixin/MixinDetector.lua");
 
-BeginMixinDetection();
+--BeginMixinDetection();

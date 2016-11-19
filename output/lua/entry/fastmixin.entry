@@ -3,3 +3,69 @@ modEntry = {
 	Server = "lua/FastMixin/Server.lua",
 	Priority = 0
 };
+
+local oldclass = class;
+assert(oldclass);
+
+local reg = debug.getregistry();
+local classes = reg.__CLASSES;
+if not classes then
+	classes = {};
+	reg.__CLASSES = classes;
+end
+
+local metatable = {
+	__index = function(self, key)
+		if self[key] ~= nil then
+			return self[key];
+		else
+			assert(self ~= self.__class);
+			return self.__class[key];
+		end
+	end
+}
+
+local function GetMixinConstants(self)
+	return self.__mixindata
+end
+
+local function GetMixinConstant(self, constantName)
+	return self.__mixindata[constantName]
+end
+
+class = function(name)
+	local oldbasesetter = oldclass(name);
+	local cls = _G[name];
+	local meta = getmetatable(cls);
+	meta.name = name;
+	classes[#classes+1] = cls;
+
+	cls.__class_mixins = {};
+	cls.__class_mixintypes = {};
+	cls.__class_mixindata = {};
+	cls.__class_name = name;
+	cls.GetMixinConstants = GetMixinConstants;
+	cls.GetMixinConstant = GetMixinConstant;
+
+	local old = meta.__newindex;
+	meta.__newindex = function(self, key, value)
+		old(self, key, value);
+		if key == "OnCreate" then
+			local old_OnCreate = cls.OnCreate; -- In case the original __newindex modifies it
+			cls.OnCreate = function(self)
+				old_OnCreate(self);
+				self.__mixins = {};
+				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+				Log("Better ONCREATE! %s %s %s", name, tostring(self), self.__mixins);
+			end
+			Log("Overriding OnCreate for %s with %s!", name, cls.OnCreate);
+			meta.__newindex = old; -- Unhook ourselves when done
+		end
+	end
+
+	return function(base)
+		meta.base = base;
+		oldbasesetter(base);
+	end
+end

@@ -70,7 +70,7 @@ function InitMixin(inst, mixin, optionalMixinData)
         Shared.AddTagToEntity(inst:GetId(), mixin.type)
     end
 
-	if inst.__class_mixins[mixin] then
+	if not inst.__class_mixins[mixin] then
 
 	    for k, v in pairs(mixin) do
 
@@ -102,7 +102,18 @@ function InitMixin(inst, mixin, optionalMixinData)
 
 	    end
 
-	    assert(not inst.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
+		if not inst.__mixintypes then
+			Log("Improperly initialised %s %s of class %s!", inst, tostring(inst), inst.__class_name);
+			inst.__mixintypes = {};
+			inst.__mixindata = {};
+			inst.__mixins = {};
+			inst.__improper = true;
+		else
+			if not inst.__improper then
+				Log("Properly initialised %s %s of class %s!", inst, tostring(inst), inst.__class_name);
+			end
+		    assert(not inst.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
+		end
 
 		if mixin.defaultConstants then
 			for k, v in pairs(mixin.defaultConstants) do
