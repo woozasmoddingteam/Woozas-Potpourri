@@ -85,11 +85,13 @@ function BeginMixinDetection()
 			local old = cls.OnCreate;
 			function cls:OnCreate()
 				self.__initialized = true;
-				self.__mixins = {};
-				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
-				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+				self.__mixins = nil;
+				--self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+				--self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+				--self.__mixindata = nil; -- Uncommenting this line causes a lot of errors
 				old(self);
 			end
+			--]=]
 		end
 
 		--[[
