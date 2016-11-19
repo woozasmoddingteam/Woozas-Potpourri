@@ -61,7 +61,6 @@ function Plugin:SetBadge( Client, Badge, Row, Name )
     local SetBadge = GiveBadge( ClientId, Badge, Row )
     if not SetBadge then return end
     
-    GiveBadge( ClientId, "disabled", Row )
     SetFormalBadgeName( Badge, Name)
     
     return true
