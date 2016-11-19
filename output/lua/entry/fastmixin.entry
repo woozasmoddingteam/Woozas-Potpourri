@@ -16,10 +16,9 @@ end
 
 local metatable = {
 	__index = function(self, key)
-		if self[key] ~= nil then
-			return self[key];
+		if rawget(self, key) ~= nil then
+			return rawget(self, key);
 		else
-			assert(self ~= self.__class);
 			return self.__class[key];
 		end
 	end
