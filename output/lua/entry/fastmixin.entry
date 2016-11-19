@@ -1,6 +1,9 @@
 modEntry = {
 	FileHooks = "lua/FastMixin/FileHooks.lua",
-	Server = "lua/FastMixin/Server.lua",
+	-- We do this because otherwise it wouldn't get loaded after all classes are done being loaded.
+	Server = "lua/FastMixin/Shared.lua",
+	Predict = "lua/FastMixin/Shared.lua",
+	--Client = "lua/FastMixin/Shared.lua",
 	Priority = 0
 };
 
@@ -13,16 +16,6 @@ if not classes then
 	classes = {};
 	reg.__CLASSES = classes;
 end
-
-local metatable = {
-	__index = function(self, key)
-		if rawget(self, key) ~= nil then
-			return rawget(self, key);
-		else
-			return self.__class[key];
-		end
-	end
-}
 
 local function GetMixinConstants(self)
 	return self.__mixindata
@@ -42,26 +35,28 @@ class = function(name)
 	cls.__class_mixins = {};
 	cls.__class_mixintypes = {};
 	cls.__class_mixindata = {};
-	cls.__class_name = name;
 	cls.GetMixinConstants = GetMixinConstants;
 	cls.GetMixinConstant = GetMixinConstant;
 
+	--[[
 	local old = meta.__newindex;
 	meta.__newindex = function(self, key, value)
 		old(self, key, value);
 		if key == "OnCreate" then
 			local old_OnCreate = cls.OnCreate; -- In case the original __newindex modifies it
 			cls.OnCreate = function(self)
-				old_OnCreate(self);
+				self.__initialized = true;
 				self.__mixins = {};
 				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
 				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+				old_OnCreate(self);
 				Log("Better ONCREATE! %s %s %s", name, tostring(self), self.__mixins);
 			end
 			Log("Overriding OnCreate for %s with %s!", name, cls.OnCreate);
 			meta.__newindex = old; -- Unhook ourselves when done
 		end
 	end
+	--]]
 
 	return function(base)
 		meta.base = base;
