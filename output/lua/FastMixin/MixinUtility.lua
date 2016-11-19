@@ -103,14 +103,14 @@ function InitMixin(inst, mixin, optionalMixinData)
 	    end
 
 		if not inst.__mixintypes then
-			Log("Improperly initialised %s %s of class %s!", inst, tostring(inst), inst.__class_name);
+			Log("InitMixin: Improperly initialised %s of class %s!", tostring(inst), inst.classname, inst.__initialized);
 			inst.__mixintypes = {};
 			inst.__mixindata = {};
 			inst.__mixins = {};
 			inst.__improper = true;
 		else
 			if not inst.__improper then
-				Log("Properly initialised %s %s of class %s!", inst, tostring(inst), inst.__class_name);
+				Log("InitMixin: Properly initialised %s of class %s!", tostring(inst), inst.classname);
 			end
 		    assert(not inst.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
 		end
@@ -121,7 +121,9 @@ function InitMixin(inst, mixin, optionalMixinData)
 			end
 		end
 
-	    table.insert(inst.__mixins, mixin);
+		if inst.__mixins then
+	    	table.insert(inst.__mixins, mixin);
+		end
 		inst.__mixintypes[mixin.type] = true;
 
 	end
@@ -141,9 +143,10 @@ function InitMixin(inst, mixin, optionalMixinData)
 end
 
 function HasMixin(inst, mixin_type)
-	if not inst or not inst.__mixintypes then
-		Log("Received invalid instance!");
-		Shared.Message(debug.traceback());
+	if not inst then
+		return false;
+	elseif not inst.__mixintypes then
+		Log("HasMixin: Improperly initialised instance %s of class %s!", inst, inst.classname);
 		return false;
 	end
 	return inst.__mixintypes[mixin_type] or false

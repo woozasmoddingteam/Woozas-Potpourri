@@ -1,4 +1,4 @@
-local classes = debug.getregistry().__CLASSES:
+local classes = debug.getregistry().__CLASSES;
 
 -- The amount of times a mixin has to be instantiated in a row to be deemed inlinable.
 -- A single fail will blacklist it.
@@ -49,13 +49,29 @@ local function hookMixinDetector(old, callback)
 	end
 end
 
+
+local metatable = {
+	__index = function(self, key)
+		if rawget(self, key) ~= nil then
+			return rawget(self, key);
+		else
+			return self.__class[key];
+		end
+	end
+}
+
 function BeginMixinDetection()
 	for i = 1, #classes do
 		local cls = classes[i];
-		if cls.OnCreate then
-			Log("cls.OnCreate for %s: %s", getmetatable(cls).name, cls.OnCreate);
+		local meta = getmetatable(cls);
+
+		if not cls.OnCreate then
+			Log("No OnCreate in class %s!", meta.name);
+		else
+			Log("cls.OnCreate for %s: %s", meta.name, cls.OnCreate);
+			--[[
 			local callback = function(mixin_state, original)
-				Log("Done inlining in OnCreate for class %s!", getmetatable(cls).name)
+				Log("Done inlining in OnCreate for class %s!", meta.name)
 				cls.OnCreate = original;
 				for mixin, value in pairs(mixin_state) do
 					if value then
@@ -65,10 +81,22 @@ function BeginMixinDetection()
 				end
 			end
 			cls.OnCreate = hookMixinDetector(cls.OnCreate, callback);
+			--]]
+			local old = cls.OnCreate;
+			function cls:OnCreate()
+				self.__initialized = true;
+				self.__mixins = {};
+				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+				old(self);
+			end
 		end
+
+		--[[
 		if cls.OnInitialized then
+			Log("cls.OnInitialized for %s: %s", meta.name, cls.OnInitialized);
 			local callback = function(mixin_state, original)
-				Log("Done inlining in OnInitialized for class %s!", getmetatable(cls).name)
+				Log("Done inlining in OnInitialized for class %s!", meta.name)
 				cls.OnInitialized = original;
 				for mixin, value in pairs(mixin_state) do
 					if value then
@@ -79,6 +107,7 @@ function BeginMixinDetection()
 			end
 			cls.OnInitialized = hookMixinDetector(cls.OnInitialized, callback);
 		end
+		--]]
 	end
 end
 --]]
