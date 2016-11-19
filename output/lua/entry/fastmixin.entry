@@ -3,7 +3,7 @@ modEntry = {
 	-- We do this because otherwise it wouldn't get loaded after all classes are done being loaded.
 	Server = "lua/FastMixin/Shared.lua",
 	Predict = "lua/FastMixin/Shared.lua",
-	--Client = "lua/FastMixin/Shared.lua",
+	Client = "lua/FastMixin/Shared.lua",
 	Priority = 0
 };
 
