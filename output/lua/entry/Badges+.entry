@@ -1,0 +1,13 @@
+local Build = Shared.GetBuildNumber()
+if Build < 312 then
+    modEntry = {
+        Client = "lua/Badges+_Client.lua",
+        Server = "lua/Badges+_Server.lua",
+        Priority = 100
+    }
+else
+    modEntry = {
+        FileHooks = "lua/BadgesPlus/Badges+_Shared.lua",
+        Priority = 51
+    }
+end

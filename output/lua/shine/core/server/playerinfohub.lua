@@ -312,7 +312,7 @@ function PlayerInfoHub:GetHiveData( SteamId )
 	local data = GetHiveDataBySteamId(SteamId)
 	if data then
 		--Fix for hive2 using a new format
-		data.playTime = data.time_played
+		data.playTime = data.time_played or -1
 		return data
 	end
 end
