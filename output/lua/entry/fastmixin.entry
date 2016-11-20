@@ -32,31 +32,10 @@ class = function(name)
 	meta.name = name;
 	classes[#classes+1] = cls;
 
-	cls.__class_mixins = {};
 	cls.__class_mixintypes = {};
 	cls.__class_mixindata = {};
 	cls.GetMixinConstants = GetMixinConstants;
 	cls.GetMixinConstant = GetMixinConstant;
-
-	--[[
-	local old = meta.__newindex;
-	meta.__newindex = function(self, key, value)
-		old(self, key, value);
-		if key == "OnCreate" then
-			local old_OnCreate = cls.OnCreate; -- In case the original __newindex modifies it
-			cls.OnCreate = function(self)
-				self.__initialized = true;
-				self.__mixins = {};
-				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
-				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
-				old_OnCreate(self);
-				Log("Better ONCREATE! %s %s %s", name, tostring(self), self.__mixins);
-			end
-			Log("Overriding OnCreate for %s with %s!", name, cls.OnCreate);
-			meta.__newindex = old; -- Unhook ourselves when done
-		end
-	end
-	--]]
 
 	return function(base)
 		meta.base = base;
