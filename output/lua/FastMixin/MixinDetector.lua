@@ -52,6 +52,16 @@ local metatable = {
 	end
 }
 
+local onCreate_env = setmetatable(
+	{InitMixin = InitMixinMixinDetector},
+	{__index = _G, __newindex = _G}
+);
+
+local OnInitialized_env = setmetatable(
+	{InitMixin = InitMixinMixinDetector, HasMixin = HasMixinOnInitialized},
+	{__index = _G, __newindex = _G}
+);
+
 function BeginMixinDetection()
 	for i = 1, #classes do
 		local cls = classes[i];
@@ -62,6 +72,8 @@ function BeginMixinDetection()
 		else
 			Log("cls.OnCreate for %s: %s", meta.name, cls.OnCreate);
 			local old = cls.OnCreate;
+			local oldenv = getfenv(old);
+			setfenv(old, onCreate_env);
 			local onCreate_mixin_state = {};
 			local hcount = 0; -- highest, look in detectMixins
 			function cls:OnCreate()
@@ -73,6 +85,7 @@ function BeginMixinDetection()
 					old(self);
 					hcount = detectMixins(self.__mixins, cls, onCreate_mixin_state, hcount);
 					if not hcount then -- returns false if done
+						setfenv(old, oldenv);
 						function cls:OnCreate()
 							if not self.__class then
 								self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
@@ -94,10 +107,7 @@ function BeginMixinDetection()
 			Log("cls.OnInitialized for %s: %s", meta.name, cls.OnCreate);
 			local old = cls.OnInitialized;
 			local oldenv = getfenv(old);
-			setfenv(old, setmetatable(
-				{HasMixin = HasMixinOnInitialized},
-				{__index = _G, __newindex = _G}
-			));
+			setfenv(old, OnInitialized_env);
 			local onInitialized_mixin_state = {};
 			local hcount = 0; -- highest, look in detectMixins
 			function cls:OnInitialized()
