@@ -105,21 +105,6 @@ local function internalInitMixin(inst, mixin, optionalMixinData)
 
 	end
 
-	if not inst.__mixintypes then
-		Log("InitMixin: Improperly initialised %s of class %s!", tostring(inst), inst.classname);
-		inst.__mixintypes = {};
-		inst.__mixindata = {};
-		inst.__mixins = {};
-		inst.__improper = true;
-	else
-		if inst.__mixintypes[mixin.type] then
-			Log(
-				"Tried to load two conflicting mixins with the same type name! " ..
-				"Class: %s, Mixin: %s, Conflict with class mixin: %s",
-				inst.classname, mixin.type, inst.__class_mixintypes[mixin] or false);
-		end
-	end
-
 	if mixin.defaultConstants then
 		for k, v in pairs(mixin.defaultConstants) do
 			inst.__mixindata[k] = v
@@ -131,9 +116,9 @@ end
 
 -- To allow optimisations for MapBlipMixin
 function InitMixinConditional(inst, mixin, optionalMixinData)
-    PROFILE("InitMixin");
+    PROFILE("InitMixinConditional");
 
-	if not inst.__mixintypes or not inst.__mixintypes[mixin.type] then
+	if not inst.__mixintypes[mixin.type] then
 
 		internalInitMixin(inst, mixin, optionalMixinData);
 
@@ -151,22 +136,18 @@ function InitMixinConditional(inst, mixin, optionalMixinData)
 
 	end
 
-	if inst.__mixins then
-		table.insert(inst.__mixins, mixin);
-	end
+	table.insert(inst.__mixins, mixin);
 end
 
 
-function InitMixin(inst, mixin, optionalMixinData)
-    PROFILE("InitMixin");
+function InitMixinMixinDetector(inst, mixin, optionalMixinData)
+    PROFILE("InitMixinMixinDetector");
 
-	if not inst.__mixintypes or not inst.__mixintypes[mixin.type] then
+	if not inst.__mixintypes[mixin.type] then
 
 		internalInitMixin(inst, mixin, optionalMixinData);
 
-		if inst.__mixins then
-	    	table.insert(inst.__mixins, mixin);
-		end
+	    table.insert(inst.__mixins, mixin);
 
 	end
 
@@ -183,6 +164,30 @@ function InitMixin(inst, mixin, optionalMixinData)
     end
 
 end
+
+function InitMixin(inst, mixin, optionalMixinData)
+    PROFILE("InitMixin");
+
+	if not inst.__mixintypes or not inst.__mixintypes[mixin.type] then
+
+		internalInitMixin(inst, mixin, optionalMixinData);
+
+	end
+
+	if optionalMixinData then
+
+		for k, v in pairs(optionalMixinData) do
+			inst.__mixindata[k] = v
+		end
+
+	end
+
+    if mixin.__initmixin then
+        mixin.__initmixin(inst)
+    end
+
+end
+
 
 -- For OnInitialized
 function HasMixinOnInitialized(inst, mixin_type)
