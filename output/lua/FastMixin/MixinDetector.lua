@@ -2,19 +2,13 @@ local classes = debug.getregistry().__CLASSES;
 
 -- The amount of times a mixin has to be instantiated in a row to be deemed inlinable.
 -- A single fail will blacklist it.
+-- Increase it if the wrong mixins are optimised
+-- NB: You **will** decrease the performance on OnCreate by a lot for the initial [kMixinInliningLimit] calls
 local kMixinInliningLimit = 3;
 
-local nomixins = {};
-
 local function detectMixins(mixins, cls, mixin_state, hcount)
-	--[[
-	if not mixins then
-		Log("Invalid instance %s of class %s!", tostring(self), self.classname);
-		return nomixins;
-	end
-	--]]
 	if #mixins == 0 then -- If no mixins are used, we shouldn't wait.
-		return false; -- To avoid allocation.
+		return false;
 	end
 	for i = 1, #mixins do
 		local mixin = mixins[i];
@@ -62,7 +56,7 @@ function BeginMixinDetection()
 		local meta = getmetatable(cls);
 
 		if not cls.OnCreate then
-			Log("No OnCreate in class %s!", meta.name);
+			Log("INFO: No OnCreate in class %s!", meta.name);
 		else
 			Log("cls.OnCreate for %s: %s", meta.name, cls.OnCreate);
 			local old = cls.OnCreate;
@@ -77,7 +71,7 @@ function BeginMixinDetection()
 					old(self);
 					hcount = detectMixins(self.__mixins, cls, onCreate_mixin_state, hcount);
 					if not hcount then -- returns false if done
-						getmetatable(cls).fastmixin = true;
+						meta.fastmixin = true;
 						function cls:OnCreate()
 							if not self.__class then
 								self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
