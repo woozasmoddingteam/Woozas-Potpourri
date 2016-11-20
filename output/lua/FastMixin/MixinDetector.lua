@@ -1,47 +1,6 @@
 Script.Load("lua/MixinUtility.lua");
 local classes = debug.getregistry().__CLASSES;
 
--- The amount of times a mixin has to be instantiated in a row to be deemed inlinable.
--- A single fail will blacklist it.
--- Increase it if the wrong mixins are optimised
--- NB: You **will** decrease the performance on OnCreate by a lot for the initial [kMixinInliningLimit] calls
-local kMixinInliningLimit = 3;
-
-local function detectMixins(mixins, cls, mixin_state, hcount)
-	if #mixins == 0 then -- If no mixins are used, we shouldn't wait.
-		return false;
-	end
-	for i = 1, #mixins do
-		local mixin = mixins[i];
-		local count;
-		if mixin_state[mixin] == nil then
-			mixin_state[mixin] = 1;
-			count = 1;
-		else
-			count = mixin_state[mixin] + 1;
-			mixin_state[mixin] = count;
-		end
-
-		if count > hcount then -- All the previous ones are invalid
-			hcount = count;
-		end
-	end
-
-	if hcount >= kMixinInliningLimit then
-		Log("----------\n\n\nINLINING MIXINS FOR %s!", getmetatable(cls).name);
-		for i = 1, #mixins do
-			local mixin = mixins[i];
-			if mixin_state[mixin] >= kMixinInliningLimit then
-				InitMixinForClass(cls, mixin);
-			end
-		end
-		Log("\n\n\n----------");
-		return false;
-	end
-
-	return hcount;
-end
-
 local metatable = {
 	__index = function(self, key)
 		if rawget(self, key) ~= nil then
@@ -52,13 +11,8 @@ local metatable = {
 	end
 }
 
-local onCreate_env = setmetatable(
+local env = setmetatable(
 	{InitMixin = InitMixinMixinDetector},
-	{__index = _G, __newindex = _G}
-);
-
-local OnInitialized_env = setmetatable(
-	{InitMixin = InitMixinMixinDetector, HasMixin = HasMixinOnInitialized},
 	{__index = _G, __newindex = _G}
 );
 
@@ -73,9 +27,7 @@ function BeginMixinDetection()
 			Log("cls.OnCreate for %s: %s", meta.name, cls.OnCreate);
 			local old = cls.OnCreate;
 			local oldenv = getfenv(old);
-			setfenv(old, onCreate_env);
-			local onCreate_mixin_state = {};
-			local hcount = 0; -- highest, look in detectMixins
+			setfenv(old, env);
 			function cls:OnCreate()
 				if not self.__class then
 					self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
@@ -83,17 +35,18 @@ function BeginMixinDetection()
 					self.__mixins = {};
 					self.__class = cls;
 					old(self);
-					hcount = detectMixins(self.__mixins, cls, onCreate_mixin_state, hcount);
-					if not hcount then -- returns false if done
-						setfenv(old, oldenv);
-						function cls:OnCreate()
-							if not self.__class then
-								self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
-								self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
-								self.__class = cls;
-							end
-							old(self);
+					for i = 1, #self.__mixins do
+						local mixin = self.__mixins[i];
+						InitMixinForClass(cls, mixin);
+					end
+					setfenv(old, oldenv);
+					function cls:OnCreate()
+						if not self.__class then
+							self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+							self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+							self.__class = cls;
 						end
+						old(self);
 					end
 				else
 					old(self);
@@ -107,18 +60,17 @@ function BeginMixinDetection()
 			Log("cls.OnInitialized for %s: %s", meta.name, cls.OnCreate);
 			local old = cls.OnInitialized;
 			local oldenv = getfenv(old);
-			setfenv(old, OnInitialized_env);
-			local onInitialized_mixin_state = {};
-			local hcount = 0; -- highest, look in detectMixins
+			setfenv(old, env);
 			function cls:OnInitialized()
-				if assert(self.__class) == cls then
+				if self.__class == cls then
 					self.__mixins = {};
 					old(self);
-					hcount = detectMixins(self.__mixins, cls, onInitialized_mixin_state, hcount);
-					if not hcount then -- returns false if done
-						setfenv(old, oldenv);
-						cls.OnInitialized = old;
+					for i = 1, #self.__mixins do
+						local mixin = self.__mixins[i];
+						InitMixinForClass(cls, mixin);
 					end
+					setfenv(old, oldenv);
+					function cls.OnInitialized = old;
 				else
 					old(self);
 				end
