@@ -1,3 +1,4 @@
+Script.Load("lua/MixinUtility.lua");
 local classes = debug.getregistry().__CLASSES;
 
 -- The amount of times a mixin has to be instantiated in a row to be deemed inlinable.
@@ -27,9 +28,10 @@ local function detectMixins(mixins, cls, mixin_state, hcount)
 	end
 
 	if hcount >= kMixinInliningLimit then
-		Log("----------\n\n\nINLINING MIXINS FOR %s!", getmetatable(cls).classname);
+		Log("----------\n\n\nINLINING MIXINS FOR %s!", getmetatable(cls).name);
 		for i = 1, #mixins do
-			if mixin_state[mixins[i]] >= kMixinInliningLimit then
+			local mixin = mixins[i];
+			if mixin_state[mixin] >= kMixinInliningLimit then
 				InitMixinForClass(cls, mixin);
 			end
 		end
@@ -71,7 +73,6 @@ function BeginMixinDetection()
 					old(self);
 					hcount = detectMixins(self.__mixins, cls, onCreate_mixin_state, hcount);
 					if not hcount then -- returns false if done
-						meta.fastmixin = true;
 						function cls:OnCreate()
 							if not self.__class then
 								self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
@@ -80,6 +81,33 @@ function BeginMixinDetection()
 							end
 							old(self);
 						end
+					end
+				else
+					old(self);
+				end
+			end
+		end
+
+		if not cls.OnInitialized then
+			Log("INFO: No OnInitialized in class %s!", meta.name);
+		else
+			Log("cls.OnInitialized for %s: %s", meta.name, cls.OnCreate);
+			local old = cls.OnInitialized;
+			local oldenv = getfenv(old);
+			setfenv(old, setmetatable(
+				{HasMixin = HasMixinOnInitialized},
+				{__index = _G, __newindex = _G}
+			));
+			local onInitialized_mixin_state = {};
+			local hcount = 0; -- highest, look in detectMixins
+			function cls:OnInitialized()
+				if assert(self.__class) == cls then
+					self.__mixins = {};
+					old(self);
+					hcount = detectMixins(self.__mixins, cls, onInitialized_mixin_state, hcount);
+					if not hcount then -- returns false if done
+						setfenv(old, oldenv);
+						cls.OnInitialized = old;
 					end
 				else
 					old(self);

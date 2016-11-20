@@ -35,10 +35,12 @@ function InitMixinForClass(cls, mixin)
 				goto continue;
 			end
 
-			for i = 1, #mixin.overrideFunctions do
-				if mixin.overrideFunctions[i] == k then
-					cls[k] = v;
-					goto continue;
+			if mixin.overrideFunctions then
+				for i = 1, #mixin.overrideFunctions do
+					if mixin.overrideFunctions[i] == k then
+						cls[k] = v;
+						goto continue;
+					end
 				end
 			end
 
@@ -65,68 +67,106 @@ function InitMixinForClass(cls, mixin)
 	cls.__class_mixintypes[mixin.type] = true;
 end
 
+local function internalInitMixin(inst, mixin, optionalMixinData)
+	if inst.__isent then
+		Shared.AddTagToEntity(inst:GetId(), mixin.type);
+	elseif inst:isa("Entity") then
+		inst.__isent = true;
+		Shared.AddTagToEntity(inst:GetId(), mixin.type);
+	end
+
+	for k, v in pairs(mixin) do
+
+		if type(v) == "function" and k ~= "__initmixin" then
+
+			if not inst[k] then
+				inst[k] = v;
+				goto continue;
+			end
+
+			if mixin.overrideFunctions then
+				for i = 1, #mixin.overrideFunctions do
+					if mixin.overrideFunctions[i] == k then
+						inst[k] = v;
+						goto continue;
+					end
+				end
+			end
+
+			local original = inst[k];
+			inst[k] = function(...)
+				v(...);
+				return original(...);
+			end
+
+		end
+
+		::continue::
+
+	end
+
+	if not inst.__mixintypes then
+		Log("InitMixin: Improperly initialised %s of class %s!", tostring(inst), inst.classname);
+		inst.__mixintypes = {};
+		inst.__mixindata = {};
+		inst.__mixins = {};
+		inst.__improper = true;
+	else
+		if inst.__mixintypes[mixin.type] then
+			Log(
+				"Tried to load two conflicting mixins with the same type name! " ..
+				"Class: %s, Mixin: %s, Conflict with class mixin: %s",
+				inst.classname, mixin.type, inst.__class_mixintypes[mixin] or false);
+		end
+	end
+
+	if mixin.defaultConstants then
+		for k, v in pairs(mixin.defaultConstants) do
+			inst.__mixindata[k] = v
+		end
+	end
+
+	inst.__mixintypes[mixin.type] = true;
+end
+
+-- To allow optimisations for MapBlipMixin
+function InitMixinConditional(inst, mixin, optionalMixinData)
+    PROFILE("InitMixin");
+
+	if not inst.__mixintypes or not inst.__mixintypes[mixin.type] then
+
+		internalInitMixin(inst, mixin, optionalMixinData);
+
+		if optionalMixinData then
+
+			for k, v in pairs(optionalMixinData) do
+				inst.__mixindata[k] = v
+			end
+
+		end
+
+	    if mixin.__initmixin then
+	        mixin.__initmixin(inst)
+	    end
+
+	end
+
+	if inst.__mixins then
+		table.insert(inst.__mixins, mixin);
+	end
+end
+
+
 function InitMixin(inst, mixin, optionalMixinData)
     PROFILE("InitMixin");
 
-	if inst.__isent then
-		Shared.AddTagToEntity(inst:GetId(), mixin.type);
-    elseif inst:isa("Entity") then
-		inst.__isent = true;
-        Shared.AddTagToEntity(inst:GetId(), mixin.type);
-    end
+	if not inst.__mixintypes or not inst.__mixintypes[mixin.type] then
 
-	if not inst.__class_mixins[mixin] then
-
-	    for k, v in pairs(mixin) do
-
-	        if type(v) == "function" and k ~= "__initmixin" then
-
-				if not inst[k] then
-					inst[k] = v;
-					goto continue;
-				end
-
-				if mixin.overrideFunctions then
-					for i = 1, #mixin.overrideFunctions do
-						if mixin.overrideFunctions[i] == k then
-							inst[k] = v;
-							goto continue;
-						end
-					end
-				end
-
-				local original = inst[k];
-				inst[k] = function(...)
-					v(...);
-					return original(...);
-				end
-
-	        end
-
-			::continue::
-
-	    end
-
-		if not inst.__mixintypes then
-			Log("InitMixin: Improperly initialised %s of class %s!", tostring(inst), inst.classname);
-			inst.__mixintypes = {};
-			inst.__mixindata = {};
-			inst.__mixins = {};
-			inst.__improper = true;
-		else
-		    assert(not inst.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
-		end
-
-		if mixin.defaultConstants then
-			for k, v in pairs(mixin.defaultConstants) do
-				inst.__mixindata[k] = v
-			end
-		end
+		internalInitMixin(inst, mixin, optionalMixinData);
 
 		if inst.__mixins then
 	    	table.insert(inst.__mixins, mixin);
 		end
-		inst.__mixintypes[mixin.type] = true;
 
 	end
 
@@ -144,14 +184,17 @@ function InitMixin(inst, mixin, optionalMixinData)
 
 end
 
-function HasMixin(inst, mixin_type)
-	if not inst then
-		return false;
-	elseif not inst.__mixintypes then
-		Log("HasMixin: Improperly initialised instance %s of class %s!", inst, inst.classname);
-		return false;
+-- For OnInitialized
+function HasMixinOnInitialized(inst, mixin_type)
+	if mixin_type == "MapBlip" then -- This piece of code makes very heavy assumptions!
+		InitMixinConditional(inst, MapBlipMixin);
+	else
+		return inst and inst.__mixintypes and inst.__mixintypes[mixin_type] or false
 	end
-	return inst.__mixintypes[mixin_type] or false
+end
+
+function HasMixin(inst, mixin_type)
+	return inst and inst.__mixintypes and inst.__mixintypes[mixin_type] or false;
 end
 
 function ClassHasMixin(cls, mixin_type)
