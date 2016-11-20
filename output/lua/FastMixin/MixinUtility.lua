@@ -24,6 +24,8 @@ end
 
 function InitMixinForClass(cls, mixin)
 
+	Log("INLINING %sMixin FOR CLASS %s!", mixin.type, getmetatable(cls).name);
+
 	for k, v in pairs(mixin) do
 
 		if type(v) == "function" and k ~= "__initmixin" then
@@ -64,10 +66,13 @@ function InitMixinForClass(cls, mixin)
 end
 
 function InitMixin(inst, mixin, optionalMixinData)
-    PROFILE("InitMixin")
+    PROFILE("InitMixin");
 
-    if inst:isa("Entity") then
-        Shared.AddTagToEntity(inst:GetId(), mixin.type)
+	if inst.__isent then
+		Shared.AddTagToEntity(inst:GetId(), mixin.type);
+    elseif inst:isa("Entity") then
+		inst.__isent = true;
+        Shared.AddTagToEntity(inst:GetId(), mixin.type);
     end
 
 	if not inst.__class_mixins[mixin] then
@@ -103,15 +108,12 @@ function InitMixin(inst, mixin, optionalMixinData)
 	    end
 
 		if not inst.__mixintypes then
-			Log("InitMixin: Improperly initialised %s of class %s!", tostring(inst), inst.classname, inst.__initialized);
+			Log("InitMixin: Improperly initialised %s of class %s!", tostring(inst), inst.classname);
 			inst.__mixintypes = {};
 			inst.__mixindata = {};
 			inst.__mixins = {};
 			inst.__improper = true;
 		else
-			if not inst.__improper then
-				Log("InitMixin: Properly initialised %s of class %s!", tostring(inst), inst.classname);
-			end
 		    assert(not inst.__mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
 		end
 

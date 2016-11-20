@@ -4,51 +4,47 @@ local classes = debug.getregistry().__CLASSES;
 -- A single fail will blacklist it.
 local kMixinInliningLimit = 3;
 
-local function hookMixinDetector(old, callback)
-	local mixin_state = {}; -- Keeps track of the mixins
-	return function(self)
-		old(self);
-		Log("%s %s", tostring(self), self.__mixins);
-		local mixins = self.__mixins;
-		if not mixins then
-			Log("Invalid instance %s!", self);
-			return;
-		else
-			Log("Valid instance %s!", self);
-		end
-		if #mixins == 0 then -- If no mixins are used, we shouldn't wait.
-			callback(mixin_state, old);
-		end
-		for i = 1, #mixins do
-			local mixin = mixins[i];
-			if mixin_state[mixin] == nil then
-				mixin_state[mixin] = 0;
-			elseif mixin_state[mixin] ~= false then
-				mixin_state[mixin] = mixin_state[mixin] + 1;
-			end
-		end
-		local previous = nil;
-		local prev_mixin = nil;
-		for mixin, count in pairs(mixin_state) do
-			if not previous then
-				previous = count;
-				prev_mixin = mixin;
-			else
-				if count > previous then
-					mixin_state[prev_mixin] = false;
-				elseif count < previous then
-					mixin_state[mixin] = false;
-				end
+local nomixins = {};
 
-				if count >= kMixinInliningLimit then
-					callback(mixin_state, old);
-					break;
-				end
-			end
+local function detectMixins(mixins, cls, mixin_state, hcount)
+	--[[
+	if not mixins then
+		Log("Invalid instance %s of class %s!", tostring(self), self.classname);
+		return nomixins;
+	end
+	--]]
+	if #mixins == 0 then -- If no mixins are used, we shouldn't wait.
+		return false; -- To avoid allocation.
+	end
+	for i = 1, #mixins do
+		local mixin = mixins[i];
+		local count;
+		if mixin_state[mixin] == nil then
+			mixin_state[mixin] = 1;
+			count = 1;
+		else
+			count = mixin_state[mixin] + 1;
+			mixin_state[mixin] = count;
+		end
+
+		if count > hcount then -- All the previous ones are invalid
+			hcount = count;
 		end
 	end
-end
 
+	if hcount >= kMixinInliningLimit then
+		Log("----------\n\n\nINLINING MIXINS FOR %s!", getmetatable(cls).classname);
+		for i = 1, #mixins do
+			if mixin_state[mixins[i]] >= kMixinInliningLimit then
+				InitMixinForClass(cls, mixin);
+			end
+		end
+		Log("\n\n\n----------");
+		return false;
+	end
+
+	return hcount;
+end
 
 local metatable = {
 	__index = function(self, key)
@@ -69,47 +65,33 @@ function BeginMixinDetection()
 			Log("No OnCreate in class %s!", meta.name);
 		else
 			Log("cls.OnCreate for %s: %s", meta.name, cls.OnCreate);
-			--[[
-			local callback = function(mixin_state, original)
-				Log("Done inlining in OnCreate for class %s!", meta.name)
-				cls.OnCreate = original;
-				for mixin, value in pairs(mixin_state) do
-					if value then
-						Log("Inlining %sMixin!", mixin.type);
-						InitMixinForClass(cls, mixin);
-					end
-				end
-			end
-			cls.OnCreate = hookMixinDetector(cls.OnCreate, callback);
-			--]]
 			local old = cls.OnCreate;
+			local onCreate_mixin_state = {};
+			local hcount = 0; -- highest, look in detectMixins
 			function cls:OnCreate()
-				self.__initialized = true;
-				self.__mixins = nil;
-				--self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
-				--self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
-				--self.__mixindata = nil; -- Uncommenting this line causes a lot of errors
-				old(self);
-			end
-			--]=]
-		end
-
-		--[[
-		if cls.OnInitialized then
-			Log("cls.OnInitialized for %s: %s", meta.name, cls.OnInitialized);
-			local callback = function(mixin_state, original)
-				Log("Done inlining in OnInitialized for class %s!", meta.name)
-				cls.OnInitialized = original;
-				for mixin, value in pairs(mixin_state) do
-					if value then
-						Log("Inlining %sMixin!", mixin.type);
-						InitMixinForClass(cls, mixin);
+				if not self.__class then
+					self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+					self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+					self.__mixins = {};
+					self.__class = cls;
+					old(self);
+					hcount = detectMixins(self.__mixins, cls, onCreate_mixin_state, hcount);
+					if not hcount then -- returns false if done
+						getmetatable(cls).fastmixin = true;
+						function cls:OnCreate()
+							if not self.__class then
+								self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+								self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+								self.__class = cls;
+							end
+							old(self);
+						end
 					end
+				else
+					old(self);
 				end
 			end
-			cls.OnInitialized = hookMixinDetector(cls.OnInitialized, callback);
 		end
-		--]]
 	end
 end
 --]]
