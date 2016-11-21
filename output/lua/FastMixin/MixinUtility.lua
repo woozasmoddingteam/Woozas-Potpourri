@@ -170,7 +170,7 @@ function HasMixinMixinDetector(inst, mixin_type)
 		if inst.__mixins then
 			table.insert(inst.__mixins, MapBlipMixin);
 		else
-			Log("%s of class %s tried to add %sMixin but did not have __mixins!", tostring(inst), inst.classname, mixin_type);
+			Log("%s of class %s tried to add MapBlipMixin but did not have __mixins!", tostring(inst), inst.classname);
 		end
 	end
 	return inst and inst.__mixintypes and inst.__mixintypes[mixin_type] or false
