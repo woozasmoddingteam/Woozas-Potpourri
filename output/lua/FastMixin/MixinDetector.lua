@@ -12,7 +12,7 @@ local metatable = {
 }
 
 local env = setmetatable(
-	{InitMixin = InitMixinMixinDetector},
+	{InitMixin = InitMixinMixinDetector, HasMixin = HasMixinMixinDetector},
 	{__index = _G, __newindex = _G}
 );
 
@@ -35,9 +35,13 @@ function BeginMixinDetection()
 					self.__mixins = {};
 					self.__class = cls;
 					old(self);
-					for i = 1, #self.__mixins do
-						local mixin = self.__mixins[i];
-						InitMixinForClass(cls, mixin);
+					local tags = {};
+					if self:isa("Entity") then
+						for i = 1, #self.__mixins do
+							local mixin = self.__mixins[i];
+							InitMixinForClass(cls, mixin);
+							tags[#tags+1] = mixin.type;
+						end
 					end
 					setfenv(old, oldenv);
 					function cls:OnCreate()
@@ -47,6 +51,9 @@ function BeginMixinDetection()
 							self.__class = cls;
 						end
 						old(self);
+						for i = 1, #tags do
+							Shared.AddTagToEntity(self:GetId(), mixin.type);
+						end
 					end
 				else
 					old(self);
@@ -65,12 +72,21 @@ function BeginMixinDetection()
 				if self.__class == cls then
 					self.__mixins = {};
 					old(self);
-					for i = 1, #self.__mixins do
-						local mixin = self.__mixins[i];
-						InitMixinForClass(cls, mixin);
+					local tags = {};
+					if self:isa("Entity") then
+						for i = 1, #self.__mixins do
+							local mixin = self.__mixins[i];
+							InitMixinForClass(cls, mixin);
+							tags[#tags+1] = mixin.type;
+						end
 					end
 					setfenv(old, oldenv);
-					function cls.OnInitialized = old;
+					function cls:OnInitialized()
+						old(self);
+						for i = 1, #tags do
+							Shared.AddTagToEntity(self:GetId(), mixin.type);
+						end
+					end
 				else
 					old(self);
 				end
