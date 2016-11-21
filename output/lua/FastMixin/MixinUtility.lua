@@ -24,47 +24,51 @@ end
 
 function InitMixinForClass(cls, mixin)
 
-	Log("INLINING %sMixin FOR CLASS %s!", mixin.type, getmetatable(cls).name);
+	if not cls.__class_mixintypes[mixin.type] then
 
-	for k, v in pairs(mixin) do
+		Log("INLINING %sMixin FOR CLASS %s!", mixin.type, getmetatable(cls).name);
 
-		if type(v) == "function" and k ~= "__initmixin" then
+		for k, v in pairs(mixin) do
 
-			if not cls[k] then
-				cls[k] = v;
-				goto continue;
-			end
+			if type(v) == "function" and k ~= "__initmixin" then
 
-			if mixin.overrideFunctions then
-				for i = 1, #mixin.overrideFunctions do
-					if mixin.overrideFunctions[i] == k then
-						cls[k] = v;
-						goto continue;
+				if not cls[k] then
+					cls[k] = v;
+					goto continue;
+				end
+
+				if mixin.overrideFunctions then
+					for i = 1, #mixin.overrideFunctions do
+						if mixin.overrideFunctions[i] == k then
+							cls[k] = v;
+							goto continue;
+						end
 					end
 				end
+
+				local original = cls[k];
+				cls[k] = function(...)
+					v(...);
+					return original(...);
+				end
+
 			end
 
-			local original = cls[k];
-			cls[k] = function(...)
-				v(...);
-				return original(...);
-			end
+			::continue::
 
 		end
 
-		::continue::
-
-	end
-
-	assert(not cls.__class_mixintypes[mixin.type], "Tried to load two conflicting mixins with the same type name!");
-
-	if mixin.defaultConstants then
-		for k, v in pairs(mixin.defaultConstants) do
-			cls.__class_mixindata[k] = v
+		if mixin.defaultConstants then
+			for k, v in pairs(mixin.defaultConstants) do
+				cls.__class_mixindata[k] = v
+			end
 		end
-	end
 
-	cls.__class_mixintypes[mixin.type] = true;
+		cls.__class_mixintypes[mixin.type] = true;
+
+	else
+		Log("TRIED TO INLINE ALREADY INLINED %s FOR CLASS %s", mixin.type, getmetatable(cls).name);
+	end
 end
 
 local function internalInitMixin(inst, mixin, optionalMixinData)
@@ -103,6 +107,12 @@ local function internalInitMixin(inst, mixin, optionalMixinData)
 
 		::continue::
 
+	end
+
+	if not inst.__mixintypes then
+		Log("InitMixin: Improperly initialized %s of class %s with at mixin %sMixin!", tostring(inst), inst.classname, mixin.type);
+		inst.__mixintypes = {};
+		inst.__mixindata = {};
 	end
 
 	if mixin.defaultConstants then

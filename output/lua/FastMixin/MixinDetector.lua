@@ -52,7 +52,7 @@ function BeginMixinDetection()
 						end
 						old(self);
 						for i = 1, #tags do
-							Shared.AddTagToEntity(self:GetId(), mixin.type);
+							Shared.AddTagToEntity(self:GetId(), tags[i]);
 						end
 					end
 				else
@@ -84,7 +84,7 @@ function BeginMixinDetection()
 					function cls:OnInitialized()
 						old(self);
 						for i = 1, #tags do
-							Shared.AddTagToEntity(self:GetId(), mixin.type);
+							Shared.AddTagToEntity(self:GetId(), tags[i]);
 						end
 					end
 				else
