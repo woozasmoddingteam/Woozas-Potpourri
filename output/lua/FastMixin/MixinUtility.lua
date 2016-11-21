@@ -114,31 +114,6 @@ local function internalInitMixin(inst, mixin, optionalMixinData)
 	inst.__mixintypes[mixin.type] = true;
 end
 
--- To allow optimisations for MapBlipMixin
-function InitMixinConditional(inst, mixin, optionalMixinData)
-    PROFILE("InitMixinConditional");
-
-	if not inst.__mixintypes[mixin.type] then
-
-		internalInitMixin(inst, mixin, optionalMixinData);
-
-		if optionalMixinData then
-
-			for k, v in pairs(optionalMixinData) do
-				inst.__mixindata[k] = v
-			end
-
-		end
-
-	    if mixin.__initmixin then
-	        mixin.__initmixin(inst)
-	    end
-
-	end
-
-	table.insert(inst.__mixins, mixin);
-end
-
 
 function InitMixinMixinDetector(inst, mixin, optionalMixinData)
     PROFILE("InitMixinMixinDetector");
@@ -190,18 +165,21 @@ end
 
 
 -- For OnInitialized
-function HasMixinOnInitialized(inst, mixin_type)
+function HasMixinMixinDetector(inst, mixin_type)
 	if mixin_type == "MapBlip" then -- This piece of code makes very heavy assumptions!
-		InitMixinConditional(inst, MapBlipMixin);
-	else
-		return inst and inst.__mixintypes and inst.__mixintypes[mixin_type] or false
+		if inst.__mixins then
+			table.insert(inst.__mixins, MapBlipMixin);
+		else
+			Log("%s of class %s tried to add %sMixin but did not have __mixins!", tostring(inst), inst.classname, mixin_type);
+		end
 	end
+	return inst and inst.__mixintypes and inst.__mixintypes[mixin_type] or false
 end
 
 function HasMixin(inst, mixin_type)
 	return inst and inst.__mixintypes and inst.__mixintypes[mixin_type] or false;
 end
 
-function ClassHasMixin(cls, mixin_type)
+function ClassHasMixin(cls, mixin_type) -- Also works with instances of the classes actually
 	return cls.__class_mixintypes[mixin_type] or false;
 end
