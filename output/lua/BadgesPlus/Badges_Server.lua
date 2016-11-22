@@ -41,10 +41,12 @@ function Badges_FetchBadges(clientId, response)
 
         userId2OwnedBadges[userId][badgeid] = badgedata.columns
 
-        local queuedRows = gBadgeClientRequestQueue[clientId] and gBadgeClientRequestQueue[clientId][badgeid]
-        if queuedRows then
-            for _, queuedRow in ipairs(queuedRows) do
-                Badges_SetBadge(clientId, badgeid, queuedRow)
+        local queuedColumns = gBadgeClientRequestQueue[clientId] and gBadgeClientRequestQueue[clientId][badgeid]
+        if queuedColumns then
+            for i, queuedColumn in ipairs(queuedColumns) do
+                if Badges_SetBadge(clientId, badgeid, queuedColumn) then
+                    table.remove(gBadgeClientRequestQueue[clientId][badgeid], i)
+                end
             end
         end
         Server.SendNetworkMessage(client, "BadgeRows", BuildBadgeRowsMessage(badgeid, badgedata.columns), true)
@@ -99,9 +101,13 @@ function GiveBadge(userId, badgeName, column)
     local client = clientId and Server.GetClientById(clientId)
 
     if client then
-        local queuedRow = gBadgeClientRequestQueue[clientId] and gBadgeClientRequestQueue[clientId][badgeid]
-        if queuedRow then
-            Badges_SetBadge(clientId, badgeid, queuedRow)
+        local queuedColumns = gBadgeClientRequestQueue[clientId] and gBadgeClientRequestQueue[clientId][badgeid]
+        if queuedColumns then
+            for i, queuedColumn in ipairs(queuedColumns) do
+                if Badges_SetBadge(clientId, badgeid, queuedColumn) then
+                    table.remove(gBadgeClientRequestQueue[clientId][badgeid], i)
+                end
+            end
         end
 
         Server.SendNetworkMessage(client, "BadgeRows", BuildBadgeRowsMessage(badgeid, columns), true)
