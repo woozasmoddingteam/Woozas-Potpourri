@@ -77,12 +77,14 @@ function GUIBadgesSelection:LoadBadges()
         self.avaibleBadges[i]= nil
     end
 
-    local i = 1
+    local i = 0
     local ownedBadges = Badges_GetOwnedBadges()
     for _, badge in ipairs(gBadges) do
         local badgeid = gBadges[badge]
 
         if badgeid ~= gBadges.none and ownedBadges[badgeid] and not selectedbadges[badgeid] then
+            i = i + 1
+
             self.avaibleBadges[i] = CreateMenuElement(self.avaibleRow, "Image")
             self.avaibleBadges[i]:SetCSSClass("badge")
             local badgeData = Badges_GetBadgeData(badgeid)
@@ -139,8 +141,6 @@ function GUIBadgesSelection:LoadBadges()
                     self.background:SetPosition(newPos)
                 end
             end
-
-            i = i + 1
         end
     end
 
