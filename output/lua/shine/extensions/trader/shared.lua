@@ -1,5 +1,5 @@
 --[[
-	NS2 Trader plugin.
+	Discord plugin.
 ]]
 local Plugin = {}
 Plugin.Version = "1.0"
@@ -14,4 +14,4 @@ function Plugin:NetworkUpdate( _, OldValue, NewValue )
 	end
 end
 
-Shine:RegisterExtension( "trader_bot", Plugin )
+Shine:RegisterExtension( "trader", Plugin )
