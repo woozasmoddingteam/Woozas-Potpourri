@@ -110,7 +110,7 @@ local function internalInitMixin(inst, mixin, optionalMixinData)
 	end
 
 	if not inst.__mixintypes then
-		Log("InitMixin: Improperly initialized %s of class %s with at mixin %sMixin!", tostring(inst), inst.classname, mixin.type);
+		--Log("InitMixin: Improperly initialized %s of class %s with at mixin %sMixin!", tostring(inst), inst.classname, mixin.type);
 		inst.__mixintypes = {};
 		inst.__mixindata = {};
 	end
@@ -132,7 +132,11 @@ function InitMixinMixinDetector(inst, mixin, optionalMixinData)
 
 		internalInitMixin(inst, mixin, optionalMixinData);
 
-	    table.insert(inst.__mixins, mixin);
+		if inst.__mixins then
+	    	table.insert(inst.__mixins, mixin);
+		else
+			Log("WARNING: USED InitMixinMixinDetector WITH MIXIN %s ON %s OF CLASS %s WITHOUT .__mixins", mixin.type, tostring(inst), inst.classname);
+		end
 
 	end
 
@@ -181,6 +185,7 @@ function HasMixinMixinDetector(inst, mixin_type)
 			table.insert(inst.__mixins, MapBlipMixin);
 		else
 			Log("%s of class %s tried to add MapBlipMixin but did not have __mixins!", tostring(inst), inst.classname);
+			Log(debug.traceback());
 		end
 	end
 	return inst and inst.__mixintypes and inst.__mixintypes[mixin_type] or false
