@@ -13,11 +13,12 @@ end
 
 function AddMixinNetworkVars(mixin, networkVars)
     if mixin.networkVars then
-        for varName, varType in pairs(mixin.networkVars) do
-            if networkVars[varName] ~= nil then
-                error("Variable " .. varName .. " already exists in network vars while adding mixin " .. mixin.type)
-            end
-            networkVars[varName] = varType
+        for k, v in pairs(mixin.networkVars) do
+            if networkVars[k] ~= nil then
+                error("Variable " .. k .. " already exists in network vars while adding mixin " .. mixin.type)
+            else
+            	networkVars[k] = v;
+			end
         end
     end
 end

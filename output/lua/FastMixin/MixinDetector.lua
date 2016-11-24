@@ -23,65 +23,65 @@ function DetectMixins(cls)
 	detected_classes[cls] = true;
 	local meta = getmetatable(cls);
 
+	meta.mixins = {};
 	if not cls.OnCreate then
 		Log("INFO: No OnCreate in class %s!", meta.name);
 		return;
-	end
-
-	do
-		local running = false;
+	else
 		Log("cls.OnCreate for %s: %s", meta.name, cls.OnCreate);
 		local old = cls.OnCreate;
 		local oldenv = getfenv(old);
-		setfenv(old, env);
 		function cls:OnCreate(...)
-			assert(not running, "Not reentrant!");
 			if not self.__class then
 				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
 				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
-				self.__mixinstack = {};
 				self.__class = cls;
 			end
 
-			-- Create a new table on the stack
-			local mixins = {};
+			local oldmixins = self.__mixins;
+			local mixins = meta.mixins;
 			self.__mixins = mixins;
-			local index = #self.__mixinstack+1;
-			self.__mixinstack[index] = mixins;
 
+			setfenv(old, env);
 			old(self, ...);
 
-			for i = index+1, #self.__mixinstack do
-				for j = 1, #self.__mixinstack[i] do
-					local mixin = self.__mixinstack[i][j];
-					if not ClassHasMixin(cls, mixin.type) then
-						InitMixinForClass(cls, mixin);
-					end
-				end
-			end
-
 			local tags = {};
-			if self:isa("Entity") then
-				for i = 1, #mixins do
-					local mixin = mixins[i];
-					if not ClassHasMixin(cls, mixin.type) then
-						InitMixinForClass(cls, mixin);
+			local isent = self:isa("Entity");
+			for i = 1, #mixins do
+				local mixin = mixins[i];
+				if not ClassHasMixin(cls, mixin.type) then
+					InitMixinForClass(cls, mixin);
+					if isent then
 						tags[#tags+1] = mixin.type;
 					end
 				end
 			end
 
+			local bmixins = getmetatable(meta.base) and getmetatable(meta.base).mixins;
+			if bmixins then
+				for i = 1, #bmixins do
+					local mixin = bmixins[i];
+					if not ClassHasMixin(cls, mixin.type) then
+						InitMixinForClass(cls, mixin)
+						table.insert(mixins, mixin);
+					end
+				end
+			end
+
 			setfenv(old, oldenv);
+			self.__mixins = oldmixins;
+
 			function cls:OnCreate(...)
 				if not self.__class then
 					self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
 					self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
-					self.__mixins = {};
 					self.__class = cls;
 				end
 				old(self, ...);
-				for i = 1, #tags do
-					Shared.AddTagToEntity(self:GetId(), tags[i]);
+				if isent then
+					for i = 1, #tags do
+						Shared.AddTagToEntity(self:GetId(), tags[i]);
+					end
 				end
 			end
 		end
