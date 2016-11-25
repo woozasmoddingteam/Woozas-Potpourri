@@ -12,7 +12,11 @@ end
 
 Script.Load("lua/FastMixin/MixinDetector.lua");
 
-BeginMixinDetection();
+--BeginMixinDetection();
+
+--DetectMixins(ScriptActor);
+--DetectMixins(Player);
+--DetectMixins(Marine);
 
 --DetectMixins(AdvancedArmory);
 --DetectMixins(Armory);
