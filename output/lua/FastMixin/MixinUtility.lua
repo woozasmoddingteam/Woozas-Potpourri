@@ -23,54 +23,100 @@ function AddMixinNetworkVars(mixin, networkVars)
     end
 end
 
-function InitMixin(inst, mixin, optionalMixinData)
+function InitMixin(self, mixin, optionalMixinData)
     PROFILE("InitMixin");
 
-	if type(inst.__mixintypes) ~= "table" then
-		Log("InitMixin: Improperly initialized %s of class %s with at mixin %sMixin!", tostring(inst), inst.classname, mixin.type);
-		Log(debug.traceback());
-		inst.__mixintypes = {};
-		inst.__mixindata = {};
-		goto mixin;
+	local add_tag = self.__isent;
+	if add_tag == nil then
+		add_tag = self:isa("Entity");
+		self.__isent = add_tag;
 	end
 
-	if inst.__mixintypes[mixin.type] then
-		goto init;
-	end
+	-- The most likely
+	if self.__constructing then
 
-	::mixin::
-	do
+		local cls = self.__class;
 
-		if inst.__isent then
-			Shared.AddTagToEntity(inst:GetId(), mixin.type);
-		elseif inst:isa("Entity") then
-			inst.__isent = true;
-			Shared.AddTagToEntity(inst:GetId(), mixin.type);
+		if not self.__class_mixintypes[mixin.type] then
+			for k, v in pairs(mixin) do
+
+				if type(v) == "function" and k ~= "__initmixin" then
+
+					if not self[k] then
+						self[k] = v;
+						cls[k] = v;
+						goto continue;
+					end
+
+					if mixin.overrideFunctions then
+						for i = 1, #mixin.overrideFunctions do
+							if mixin.overrideFunctions[i] == k then
+								self[k] = v;
+								cls[k] = v;
+								goto continue;
+							end
+						end
+					end
+
+					local original = self[k];
+					local func = function(...)
+						v(...);
+						return original(...);
+					end
+
+					self[k] = func;
+					cls[k] = func;
+
+				end
+
+				::continue::
+
+			end
+
+			if mixin.defaultConstants then
+				for k, v in pairs(mixin.defaultConstants) do
+					self.__class_mixindata[k] = v
+				end
+			end
+
+			self.__class_mixintypes[mixin.type] = true;
+
+		end
+	else
+		if not self.__mixintypes then
+			Log("InitMixin(%s, %sMixin, %s): Improperly initialized instance!", self, mixin.type, optionalMixinData);
+			self.__mixintypes = {};
+			self.__mixindata = {};
+			self.__constructing = false;
+		elseif self.__mixintypes[mixin.type] then
+			goto init;
 		end
 
 		for k, v in pairs(mixin) do
 
 			if type(v) == "function" and k ~= "__initmixin" then
 
-				if not inst[k] then
-					inst[k] = v;
+				if not self[k] then
+					self[k] = v;
 					goto continue;
 				end
 
 				if mixin.overrideFunctions then
 					for i = 1, #mixin.overrideFunctions do
 						if mixin.overrideFunctions[i] == k then
-							inst[k] = v;
+							self[k] = v;
 							goto continue;
 						end
 					end
 				end
 
-				local original = inst[k];
-				inst[k] = function(...)
+				local original = self[k];
+				local func = function(...)
 					v(...);
 					return original(...);
 				end
+
+				self[k] = func;
 
 			end
 
@@ -80,12 +126,11 @@ function InitMixin(inst, mixin, optionalMixinData)
 
 		if mixin.defaultConstants then
 			for k, v in pairs(mixin.defaultConstants) do
-				inst.__mixindata[k] = v
+				self.__mixindata[k] = v
 			end
 		end
 
-		inst.__mixintypes[mixin.type] = true;
-
+		self.__mixintypes[mixin.type] = true;
 	end
 
 	::init::
