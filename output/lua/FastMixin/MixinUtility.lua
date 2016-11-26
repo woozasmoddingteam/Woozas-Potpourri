@@ -27,10 +27,6 @@ function InitMixin(self, mixin, optionalMixinData)
     PROFILE("InitMixin");
 
 	local add_tag = self.__isent;
-	if add_tag == nil then
-		add_tag = self:isa("Entity");
-		self.__isent = add_tag;
-	end
 
 	-- The most likely
 	if self.__constructing then
@@ -82,9 +78,17 @@ function InitMixin(self, mixin, optionalMixinData)
 			self.__class_mixintypes[mixin.type] = true;
 
 		end
+		if add_tag == nil then
+			add_tag = self:isa("Entity");
+			self.__isent = add_tag;
+		end
+
+		if add_tag then
+			Shared.AddTagToEntity(self:GetId(), mixin.type);
+		end
 	else
 		if not self.__mixintypes then
-			Log("InitMixin(%s, %sMixin, %s): Improperly initialized instance!", self, mixin.type, optionalMixinData);
+			Log("InitMixin(%s (%s), %sMixin, %s): Improperly initialized instance!", self, self.classname, mixin.type, optionalMixinData);
 			self.__mixintypes = {};
 			self.__mixindata = {};
 			self.__constructing = false;
@@ -131,6 +135,15 @@ function InitMixin(self, mixin, optionalMixinData)
 		end
 
 		self.__mixintypes[mixin.type] = true;
+
+		if add_tag == nil then
+			add_tag = self:isa("Entity");
+			self.__isent = add_tag;
+		end
+
+		if add_tag then
+			Shared.AddTagToEntity(self:GetId(), mixin.type);
+		end
 	end
 
 	::init::
@@ -138,13 +151,13 @@ function InitMixin(self, mixin, optionalMixinData)
 	if optionalMixinData then
 
 		for k, v in pairs(optionalMixinData) do
-			inst.__mixindata[k] = v
+			self.__mixindata[k] = v
 		end
 
 	end
 
     if mixin.__initmixin then
-        mixin.__initmixin(inst)
+        mixin.__initmixin(self)
     end
 
 end

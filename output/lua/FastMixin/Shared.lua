@@ -12,7 +12,7 @@ end
 
 Script.Load("lua/FastMixin/MixinDetector.lua");
 
---BeginMixinDetection();
+BeginMixinDetection();
 
 --DetectMixins(ScriptActor);
 --DetectMixins(Player);
