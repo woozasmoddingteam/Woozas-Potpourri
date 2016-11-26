@@ -24,10 +24,10 @@ function DetectMixins(cls)
 	local meta = getmetatable(cls);
 
 	if not cls.OnCreate then
-		Log("INFO: No OnCreate in class %s!", meta.name);
+		Log("INFO: No %s.OnCreate!", meta.name);
 		return;
 	else
-		Log("cls.OnCreate for %s: %s", meta.name, cls.OnCreate);
+		Log("INFO: Enabling optimisations for %s.OnCreate", meta.name, cls.OnCreate);
 		local old = cls.OnCreate;
 		function cls:OnCreate(...)
 			if not self.__class then
@@ -36,23 +36,23 @@ function DetectMixins(cls)
 				self.__class = cls;
 				self.__constructing = true;
 				old(self, ...);
-				self.__constructing = nil;
+				self.__constructing = false;
+			else
+				old(self, ...);
 			end
 		end
 	end
 
 	if not cls.OnInitialized then
-		Log("INFO: No OnInitialized in class %s!", meta.name);
-		return;
+		Log("INFO: No %s.OnInitialized!", meta.name);
 	else
-		Log("cls.OnInitialized for %s: %s", meta.name, cls.OnCreate);
+		Log("INFO: Enabling optimisations for %s.OnInitialized", meta.name, cls.OnCreate);
 		local old = cls.OnInitialized;
 		function cls:OnInitialized(...)
-			if self.__class == cls then
-				old(self, ...);
-			else
-				old(self, ...);
-			end
+			local preconstruction = self.__constructing;
+			self.__constructing = true;
+			old(self, ...);
+			self.__constructing = preconstruction;
 		end
 	end
 end
