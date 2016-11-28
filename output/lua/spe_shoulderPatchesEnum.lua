@@ -24,6 +24,8 @@ kShoulderPatchNames = {
     "NS2:Combat Event",
     "Cactuar",
 	"Duck",
+	"fbshoulder",
 	"Tanstaafl",
-	"Priest"
+	"Priest",
+	"parche"
 }
