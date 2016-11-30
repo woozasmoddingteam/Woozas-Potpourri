@@ -11,11 +11,6 @@ local metatable = {
 	end
 }
 
-local env = setmetatable(
-	{InitMixin = InitMixinMixinDetector, HasMixin = HasMixinMixinDetector},
-	{__index = _G, __newindex = _G}
-);
-
 local detected_classes = {};
 
 function DetectMixins(cls)
@@ -31,7 +26,7 @@ function DetectMixins(cls)
 		local old = cls.OnCreate;
 		function cls:OnCreate(...)
 			if not self.__class then
-				self.__mixintypes = setmetatable({__class = cls.__class_mixintypes}, metatable);
+				self.__mixintypes = {};
 				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
 				self.__class = cls;
 				self.__constructing = true;

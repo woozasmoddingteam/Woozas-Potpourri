@@ -26,19 +26,17 @@ end
 function InitMixin(self, mixin, optionalMixinData)
     PROFILE("InitMixin");
 
-	local add_tag = self.__isent;
-
 	-- The most likely
 	if self.__constructing then
 
-		local cls = self.__class;
-
 		if not self.__class_mixintypes[mixin.type] then
+			local cls = self.__class;
+
 			for k, v in pairs(mixin) do
 
 				if type(v) == "function" and k ~= "__initmixin" then
 
-					if not self[k] then
+					if not cls[k] then
 						self[k] = v;
 						cls[k] = v;
 						goto continue;
@@ -54,7 +52,7 @@ function InitMixin(self, mixin, optionalMixinData)
 						end
 					end
 
-					local original = self[k];
+					local original = cls[k];
 					local func = function(...)
 						v(...);
 						return original(...);
@@ -77,14 +75,6 @@ function InitMixin(self, mixin, optionalMixinData)
 
 			self.__class_mixintypes[mixin.type] = true;
 
-		end
-		if add_tag == nil then
-			add_tag = self:isa("Entity");
-			self.__isent = add_tag;
-		end
-
-		if add_tag then
-			Shared.AddTagToEntity(self:GetId(), mixin.type);
 		end
 	else
 		if not self.__mixintypes then
@@ -133,8 +123,10 @@ function InitMixin(self, mixin, optionalMixinData)
 				self.__mixindata[k] = v
 			end
 		end
+	end
 
-		self.__mixintypes[mixin.type] = true;
+	do
+		local add_tag = self.__isent;
 
 		if add_tag == nil then
 			add_tag = self:isa("Entity");
@@ -144,7 +136,9 @@ function InitMixin(self, mixin, optionalMixinData)
 		if add_tag then
 			Shared.AddTagToEntity(self:GetId(), mixin.type);
 		end
-	end
+
+		self.__mixintypes[mixin.type] = true;
+	end -- Otherwise lua complains about jumping into the scope of a local
 
 	::init::
 
