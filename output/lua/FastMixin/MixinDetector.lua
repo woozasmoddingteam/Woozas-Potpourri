@@ -22,7 +22,7 @@ function DetectMixins(cls)
 		Log("INFO: No %s.OnCreate!", meta.name);
 		return;
 	else
-		Log("INFO: Enabling optimisations for %s.OnCreate", meta.name, cls.OnCreate);
+		--Log("INFO: Enabling optimisations for %s.OnCreate", meta.name, cls.OnCreate);
 		local old = cls.OnCreate;
 		function cls:OnCreate(...)
 			if not self.__class then
@@ -41,7 +41,7 @@ function DetectMixins(cls)
 	if not cls.OnInitialized then
 		Log("INFO: No %s.OnInitialized!", meta.name);
 	else
-		Log("INFO: Enabling optimisations for %s.OnInitialized", meta.name, cls.OnCreate);
+		--Log("INFO: Enabling optimisations for %s.OnInitialized", meta.name, cls.OnCreate);
 		local old = cls.OnInitialized;
 		function cls:OnInitialized(...)
 			local preconstruction = self.__constructing;
