@@ -24,7 +24,7 @@ function AddMixinNetworkVars(mixin, networkVars)
 end
 
 function InitMixin(self, mixin, optionalMixinData)
-    PROFILE("InitMixin");
+    --PROFILE("InitMixin");
 
 	-- The most likely
 	if self.__constructing then
@@ -78,7 +78,7 @@ function InitMixin(self, mixin, optionalMixinData)
 		end
 	else
 		if not self.__mixintypes then
-			Log("InitMixin(%s (%s), %sMixin, %s): Improperly initialized instance!", self, self.classname, mixin.type, optionalMixinData);
+			--Log("InitMixin(%s (%s), %sMixin, %s): Improperly initialized instance!", self, self.classname, mixin.type, optionalMixinData);
 			self.__mixintypes = {};
 			self.__mixindata = {};
 			self.__constructing = false;
