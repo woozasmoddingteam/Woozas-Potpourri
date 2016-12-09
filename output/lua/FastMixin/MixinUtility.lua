@@ -23,8 +23,8 @@ function AddMixinNetworkVars(mixin, networkVars)
     end
 end
 
+
 function InitMixin(self, mixin, optionalMixinData)
-    --PROFILE("InitMixin");
 
 	-- The most likely
 	if self.__constructing then
@@ -54,8 +54,9 @@ function InitMixin(self, mixin, optionalMixinData)
 
 					local original = cls[k];
 					local func = function(...)
+						local ret = original(...); -- NB: You can only return **1** from your functions! This was UWE's decision and not mine.
 						v(...);
-						return original(...);
+						return ret;
 					end
 
 					self[k] = func;
@@ -154,6 +155,57 @@ function InitMixin(self, mixin, optionalMixinData)
         mixin.__initmixin(self)
     end
 
+end
+
+function StaticInitMixin(cls, mixin, mixindata)
+	error("Don't.");
+	assert(not cls.__class_mixintypes[mixin.type]);
+
+	for k, v in pairs(mixin) do
+
+		if type(v) == "function" and k ~= "__initmixin" then
+
+			if not cls[k] then
+				cls[k] = v;
+				goto continue;
+			end
+
+			if mixin.overrideFunctions then
+				for i = 1, #mixin.overrideFunctions do
+					if mixin.overrideFunctions[i] == k then
+						cls[k] = v;
+						goto continue;
+					end
+				end
+			end
+
+			local original = cls[k];
+			local func = function(...)
+				v(...);
+				return original(...);
+			end
+
+			cls[k] = func;
+
+		end
+
+		::continue::
+
+	end
+
+	if mixin.defaultConstants then
+		for k, v in pairs(mixin.defaultConstants) do
+			cls.__class_mixindata[k] = v
+		end
+	end
+
+	if mixindata then
+		for k, v in pairs(mixindata) do
+			cls.__class_mixindata[k] = v;
+		end
+	end
+
+	cls.__class_mixintypes[mixin.type] = true;
 end
 
 function HasMixin(inst, mixin_type)
