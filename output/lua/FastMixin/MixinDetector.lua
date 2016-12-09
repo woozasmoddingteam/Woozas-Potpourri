@@ -19,7 +19,7 @@ function DetectMixins(cls)
 	local meta = getmetatable(cls);
 
 	if not cls.OnCreate then
-		Log("INFO: No %s.OnCreate!", meta.name);
+		--Log("INFO: No %s.OnCreate!", meta.name);
 		return;
 	else
 		--Log("INFO: Enabling optimisations for %s.OnCreate", meta.name, cls.OnCreate);
@@ -39,7 +39,7 @@ function DetectMixins(cls)
 	end
 
 	if not cls.OnInitialized then
-		Log("INFO: No %s.OnInitialized!", meta.name);
+		--Log("INFO: No %s.OnInitialized!", meta.name);
 	else
 		--Log("INFO: Enabling optimisations for %s.OnInitialized", meta.name, cls.OnCreate);
 		local old = cls.OnInitialized;

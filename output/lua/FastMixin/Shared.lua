@@ -14,9 +14,28 @@ Script.Load("lua/FastMixin/MixinDetector.lua");
 
 BeginMixinDetection();
 
---DetectMixins(ScriptActor);
---DetectMixins(Player);
---DetectMixins(Marine);
+--[[
+local function printSlows(...)
+	local args = {...};
+	for i = 1, #args do
+		local n = args[i];
+		local t = _G[n];
+		if not t then Log("%s does not exist!", n); goto continue end
+		if type(t) ~= "table" then Log("%s is not a table but instead a %s!", n, type(t)); goto continue end
+		for k, v in pairs(t) do
+			if type(v) == "function" and debug.getinfo(v).what ~= "Lua" then
+				Log(n .. ".%s", k);
+			end
+		end
+		::continue::
+	end
+end
 
---DetectMixins(AdvancedArmory);
---DetectMixins(Armory);
+Log("SLOW FUNCTIONS:");
+if Server then
+	printSlows("Server", "Shared", "_G", "Angles", "AnimationGraph", "Cinematic", "CollisionObject", "Color", "Coords", "Entity", "Event", "HeightMap", "Model", "Move", "Pathing", "RandomUniform", "Render");
+elseif Client then
+	printSlows("Client", "ClientLoaded");
+end
+Log("END OF SLOW FUNCTIONS.");
+--]]

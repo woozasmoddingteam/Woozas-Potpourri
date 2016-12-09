@@ -7,8 +7,6 @@ modEntry = {
 	Priority = 0
 };
 
-ASSERT = assert;
-
 local oldclass = class;
 assert(oldclass);
 
