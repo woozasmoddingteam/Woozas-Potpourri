@@ -34,11 +34,15 @@ class = function(name)
 
 	cls.__class_mixintypes = {};
 	cls.__class_mixindata = {};
+	cls.__is_ent = false;
 	cls.GetMixinConstants = GetMixinConstants;
 	cls.GetMixinConstant = GetMixinConstant;
 
 	return function(base)
 		meta.base = base;
+		if base.__is_ent or base == Entity then
+			cls.__is_ent = true;
+		end
 		oldbasesetter(base);
 	end
 end
