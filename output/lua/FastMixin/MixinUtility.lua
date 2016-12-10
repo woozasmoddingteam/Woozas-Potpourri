@@ -126,20 +126,11 @@ function InitMixin(self, mixin, optionalMixinData)
 		end
 	end
 
-	do
-		local add_tag = self.__isent;
+	if self.__is_ent then
+		Shared.AddTagToEntity(self:GetId(), mixin.type);
+	end
 
-		if add_tag == nil then
-			add_tag = self:isa("Entity");
-			self.__isent = add_tag;
-		end
-
-		if add_tag then
-			Shared.AddTagToEntity(self:GetId(), mixin.type);
-		end
-
-		self.__mixintypes[mixin.type] = true;
-	end -- Otherwise lua complains about jumping into the scope of a local
+	self.__mixintypes[mixin.type] = true;
 
 	::init::
 
