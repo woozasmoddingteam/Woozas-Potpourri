@@ -57,7 +57,7 @@ local toString = function(v)
 end
 
 debug.callstack = function(level)
-	level = level + 1 or 2;
+	level = level and level + 1 or 2;
 	local str = "Call stack:";
 	local i = level;
 	local func = debug.getinfo(i);
