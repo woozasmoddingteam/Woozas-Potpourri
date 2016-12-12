@@ -62,7 +62,7 @@ debug.callstack = function(level)
 	local i = level;
 	local func = debug.getinfo(i);
 	while func do
-		str = str .. ("\n\t#%d: %s:%i@%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined);
+		str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined);
 		local j = 1;
 		local name, value = debug.getlocal(i, j);
 		while name do
