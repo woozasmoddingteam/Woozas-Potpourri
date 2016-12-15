@@ -23,8 +23,11 @@ function AddMixinNetworkVars(mixin, networkVars)
     end
 end
 
+local void = function() end
 
 function InitMixin(self, mixin, optionalMixinData)
+
+	local log = (self:isa("JetpackMarine") and mixin == WeaponOwnerMixin and Log) or void;
 
 	-- The most likely
 	if self.__constructing then
@@ -32,11 +35,16 @@ function InitMixin(self, mixin, optionalMixinData)
 		if not self.__class_mixintypes[mixin.type] then
 			local cls = self.__class;
 
+			log("\n\n\nMixin WeaponOwnerMixin in permanently inside %s\n\n\n", self);
+
 			for k, v in pairs(mixin) do
 
 				if type(v) == "function" and k ~= "__initmixin" then
 
+					log("Mixing %s in", k);
+
 					if not cls[k] then
+						log("Original was not defined!");
 						self[k] = v;
 						cls[k] = v;
 						goto continue;
@@ -45,6 +53,7 @@ function InitMixin(self, mixin, optionalMixinData)
 					if mixin.overrideFunctions then
 						for i = 1, #mixin.overrideFunctions do
 							if mixin.overrideFunctions[i] == k then
+								log("Original was defined, but we don't give a fuck.");
 								self[k] = v;
 								cls[k] = v;
 								goto continue;
@@ -53,6 +62,7 @@ function InitMixin(self, mixin, optionalMixinData)
 					end
 
 					local original = cls[k];
+					log("Original was defined, and it's needy... Merging with %s", debug.getinfo(original));
 					local func = function(...)
 						local ret = original(...); -- NB: You can only return **1** from your functions! This was UWE's decision and not mine.
 						v(...);
@@ -87,11 +97,16 @@ function InitMixin(self, mixin, optionalMixinData)
 			goto init;
 		end
 
+		log("\n\n\nMixin WeaponOwnerMixin in for %s\n\n\n", self);
+
 		for k, v in pairs(mixin) do
 
 			if type(v) == "function" and k ~= "__initmixin" then
 
+				log("Mixing %s in!", k);
+
 				if not self[k] then
+					log("Original was not defined!");
 					self[k] = v;
 					goto continue;
 				end
@@ -99,6 +114,7 @@ function InitMixin(self, mixin, optionalMixinData)
 				if mixin.overrideFunctions then
 					for i = 1, #mixin.overrideFunctions do
 						if mixin.overrideFunctions[i] == k then
+							log("Original was defined, but we don't give a fuck.");
 							self[k] = v;
 							goto continue;
 						end
@@ -106,9 +122,11 @@ function InitMixin(self, mixin, optionalMixinData)
 				end
 
 				local original = self[k];
+				log("Original was defined, and it's needy... Merging with %s", debug.getinfo(original));
 				local func = function(...)
+					local ret = original(...); -- NB: You can only return **1** from your functions! This was UWE's decision and not mine.
 					v(...);
-					return original(...);
+					return ret;
 				end
 
 				self[k] = func;
