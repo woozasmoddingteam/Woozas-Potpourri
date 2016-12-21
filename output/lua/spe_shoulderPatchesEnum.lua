@@ -27,5 +27,6 @@ kShoulderPatchNames = {
 	"fbshoulder",
 	"Tanstaafl",
 	"Priest",
-	"parche"
+	"parche",
+	"che"
 }
