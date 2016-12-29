@@ -100,3 +100,9 @@ v3.2
 
 v.3.3
 -Added luajit_profiling as Shine Extension. Thank you Las for creating the mod.
+
+v.3.4
+-Removed: Gorge Tunnel Control (Mod now included in Wooza's Hodgepodge Mod)
+Added
+-Beacon Opti by Katzenfleisch. Mod link: http://steamcommunity.com/sharedfiles/filedetails/?id=798295173&searchtext=beacon
+-Beacon on X by ydy. Mod link: http://steamcommunity.com/sharedfiles/filedetails/?id=658759990&searchtext=beacon
