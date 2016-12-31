@@ -1,0 +1,77 @@
+modEntry = {
+	FileHooks = "lua/FastMixin/FileHooks.lua",
+	-- We do this because otherwise it wouldn't get loaded after all classes are done being loaded.
+	Server = "lua/FastMixin/Shared.lua",
+	Predict = "lua/FastMixin/Shared.lua",
+	Client = "lua/FastMixin/Shared.lua",
+	Priority = 0
+};
+
+local oldclass = class;
+assert(oldclass);
+
+local reg = debug.getregistry();
+local classes = reg.__CLASSES;
+if not classes then
+	classes = {};
+	reg.__CLASSES = classes;
+end
+
+local function GetMixinConstants(self)
+	return self.__mixindata
+end
+
+local function GetMixinConstant(self, constantName)
+	return self.__mixindata[constantName]
+end
+
+class = function(name)
+	local oldbasesetter = oldclass(name);
+	local cls = _G[name];
+	local meta = getmetatable(cls);
+	meta.name = name;
+	classes[#classes+1] = cls;
+
+	cls.__class_mixintypes = {};
+	cls.__class_mixindata = {};
+	cls.__is_ent = false;
+	cls.GetMixinConstants = GetMixinConstants;
+	cls.GetMixinConstant = GetMixinConstant;
+
+	return function(base)
+		meta.base = base;
+		if base.__is_ent or base == Entity then
+			cls.__is_ent = true;
+		end
+		oldbasesetter(base);
+	end
+end
+
+local toString = function(v)
+	local str = ToString(v);
+	if type(v) == "table" then
+		return tostring(v) .. " " .. str;
+	else
+		return str;
+	end
+end
+
+debug.callstack = function(level)
+	level = level and level + 1 or 2;
+	local str = "Call stack:";
+	local i = level;
+	local func = debug.getinfo(i);
+	while func do
+		str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined);
+		local j = 1;
+		local name, value = debug.getlocal(i, j);
+		while name do
+			str = str .. ("\n\t\t%s = %s"):format(name, toString(value));
+			j = j + 1;
+			name, value = debug.getlocal(i, j);
+		end
+		i = i + 1;
+		func = debug.getinfo(i);
+	end
+	return str;
+end
