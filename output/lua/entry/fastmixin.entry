@@ -25,15 +25,21 @@ local function GetMixinConstant(self, constantName)
 	return self.__mixindata[constantName]
 end
 
+Entity.__is_ent = true;
+
 class = function(name)
 	local oldbasesetter = oldclass(name);
 	local cls = _G[name];
 	local meta = getmetatable(cls);
 	meta.name = name;
+	meta.mixintypes = {};
+	meta.mixindata = {};
+	--meta.mixinarguments = {};
+	-- Used to restore the original functions and unapplying the mixins. Integer keys's values are keys that should be cleared.
+	meta.mixinbackup = {};
+	meta.mixins = {};
 	classes[#classes+1] = cls;
 
-	cls.__class_mixintypes = {};
-	cls.__class_mixindata = {};
 	cls.__is_ent = false;
 	cls.GetMixinConstants = GetMixinConstants;
 	cls.GetMixinConstant = GetMixinConstant;
@@ -44,13 +50,31 @@ class = function(name)
 			cls.__is_ent = true;
 		end
 		oldbasesetter(base);
+		---[=[
+		local backup = getmetatable(base) and getmetatable(base).mixinbackup;
+		if backup then
+			for k, v in pairs(backup) do
+				if type(k) ~= "number" then
+					cls[k] = v;
+				end
+			end
+			for i = 1, #backup do
+				cls[backup[i]] = nil;
+			end
+			for i = 1, #meta.mixins do
+				InitMixinForClass(cls, meta.mixins[i]); -- Reinitialise all mixins
+			end
+		end
+		--]=]
 	end
 end
 
 local toString = function(v)
-	local str = ToString(v);
+	local err, str = pcall(ToString, v);
 	if type(v) == "table" then
 		return tostring(v) .. " " .. str;
+	elseif type(v) == "string" then
+		return "\"" .. str .. "\"";
 	else
 		return str;
 	end
