@@ -1,7 +1,0 @@
-modEntry = {
-         Client = "lua/BO_Client.lua",
-         Server = "lua/BO_Server.lua",
-         Shared = "lua/BO_Shared.lua",
-         FileHooks = "lua/BO_FileHooks.lua",
-         Priority = 6
-}
