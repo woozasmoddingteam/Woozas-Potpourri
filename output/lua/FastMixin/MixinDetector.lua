@@ -27,7 +27,7 @@ function DetectMixins(cls)
 		function cls:OnCreate(...)
 			if not self.__class then
 				self.__mixintypes = {};
-				self.__mixindata = setmetatable({__class = cls.__class_mixindata}, metatable);
+				self.__mixindata = setmetatable({__class = meta.mixindata}, metatable);
 				self.__class = cls;
 				self.__constructing = true;
 				old(self, ...);
