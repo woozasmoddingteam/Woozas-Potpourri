@@ -52,6 +52,19 @@ if Server then
         return nil -- apparently this team is empty???  Should never happen but... meh.
     end
 
+	local function AllowedToHallucinate(entity)
+
+	    local allowed = true
+	    if entity.timeLastHallucinated and entity.timeLastHallucinated + kHallucinationCloudCooldown > Shared.GetTime() then
+	        allowed = false
+	    else
+	        entity.timeLastHallucinated = Shared.GetTime()
+	    end
+
+	    return allowed
+
+	end
+
 
     function HallucinationCloud:Perform()
 
