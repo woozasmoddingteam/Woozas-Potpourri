@@ -61,9 +61,11 @@ class = function(name)
 			for i = 1, #backup do
 				cls[backup[i]] = nil;
 			end
+			--[[
 			for i = 1, #meta.mixins do
 				InitMixinForClass(cls, meta.mixins[i]); -- Reinitialise all mixins
 			end
+			--]]
 		end
 		--]=]
 	end
