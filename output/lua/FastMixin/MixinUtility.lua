@@ -1,5 +1,8 @@
 Script.Load("lua/Table.lua")
 
+local void = function() end
+local log = Server and Log or void;
+
 function CreateMixin(mixin)
     if mixin then
         for k in pairs(mixin) do
@@ -59,20 +62,27 @@ end
 
 -- NB: You can only return __1__ value! I could implement multi-variable return though. Will do if someone wants it.
 local function mergeFunctions(a, b)
+	local ia = debug.getinfo(a);
+	local ib = debug.getinfo(b);
+
 	local args = "";
-	local arg_count = math.max(debug.getinfo(a).nparams, debug.getinfo(b).nparams);
-	if arg_count > 0 then
-		for i = 1, arg_count-1 do
-			args = args .. "arg" .. i .. ",";
+	if ia.isvararg or ib.isvararg then
+		args = "..."
+	else
+		local arg_count = math.max(ia.nparams, ib.nparams);
+		if arg_count > 0 then
+			for i = 1, arg_count-1 do
+				args = args .. "arg" .. i .. ",";
+			end
+			args = args .. "arg" .. arg_count;
 		end
-		args = args .. "arg" .. arg_count;
 	end
 
 	local str = ([[
 		local a, b = ...;
 
 		assert(type(a) == "function" and type(b) == "function");
-		
+
 		return function(%s)
 			local ret = a(%s);
 			b(%s);
@@ -80,10 +90,17 @@ local function mergeFunctions(a, b)
 		end
 	]]):format(args, args, args);
 
+	--[[
+	local func = debug.getinfo(a);
+	Log("a: %s", func.name or "nil");
+	local func = debug.getinfo(b);
+	Log("b: %s", func.name or "nil");
+	Log(str);
+	--]]
+
 	return assert(loadstring(str))(a, b);
 end
 
-local void = function() end
 local sink = setmetatable({}, {__newindex = void});
 
  -- self is an instance of the class that was made prior to this.
@@ -97,12 +114,10 @@ function InitMixinForClass(cls, mixin, self)
 	self = self or sink;
 
 	-- Have to initialise it for subclasses first
-	-- if meta.name or self.classname then
-		local subclasses = Script.GetDerivedClasses(meta.name or self.classname);
-		for i = 1, #subclasses do
-			InitMixinForClass(_G[subclasses[i]], mixin);
-		end
-	-- end
+	local subclasses = Script.GetDerivedClasses(meta.name or self.classname);
+	for i = 1, #subclasses do
+		InitMixinForClass(_G[subclasses[i]], mixin);
+	end
 
 	for k, v in pairs(mixin) do
 
@@ -169,8 +184,10 @@ function InitMixinForClass(cls, mixin, self)
 end
 
 function InitMixinForInstance(self, mixin)
+	log("WARNING: InitMixinForInstance(%s (%s), %sMixin)", self, self.classname or self.GetClassName and self:GetClassName() or "[unknown class]", mixin.type);
+
 	if not self.__mixintypes then
-		--Log("InitMixin(%s (%s), %sMixin, %s): Improperly initialized instance!", self, self.classname, mixin.type, optionalMixinData);
+		log("WARNING: Improperly initialized!");
 		self.__mixintypes = {};
 		self.__mixindata = {};
 		self.__constructing = false;
@@ -202,6 +219,26 @@ function InitMixinForInstance(self, mixin)
 
 		::continue::
 
+	end
+
+	if not mixin.__arguments then
+		local args = {};
+		mixin.__arguments = args;
+		if mixin.defaultConstants then
+			for k in pairs(mixin.defaultConstants) do
+				table.insert(args, k);
+			end
+		end
+		if mixin.expectedConstants then
+			for k in pairs(mixin.expectedConstants) do
+				table.insert(args, k);
+			end
+		end
+		if mixin.optionalConstants then
+			for k in pairs(mixin.optionalConstants) do
+				table.insert(args, k);
+			end
+		end
 	end
 
 	if mixin.defaultConstants then
