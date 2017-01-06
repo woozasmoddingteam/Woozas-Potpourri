@@ -23,9 +23,14 @@ function DetectMixins(cls)
 	if not cls.OnCreate then
 		return;
 	else
+		local info = debug.getinfo(cls.OnCreate);
 		local args = "";
-		for i = 1, debug.getinfo(cls.OnCreate).nparams do
-			args = args .. ", arg" .. i;
+		if info.isvararg then
+			args = "...";
+		else
+			for i = 1, info.nparams-1 do
+				args = args .. ", arg" .. i;
+			end
 		end
 
 		local str = [[
@@ -34,7 +39,7 @@ function DetectMixins(cls)
 			local old = cls.OnCreate;
 
 			return function(self%s)
-				if not self.__class then
+				if not self.__constructing then
 					self.__mixintypes = {};
 					self.__mixindata = setmetatable({}, {__index = meta.mixindata});
 					self.__constructing = true;
@@ -50,16 +55,19 @@ function DetectMixins(cls)
 		cls.OnCreate = assert(loadstring(str))(cls);
 	end
 
-	if not cls.OnInitialized then
-	else
+	if cls.OnInitialized then
+		local info = debug.getinfo(cls.OnInitialized);
 		local args = "";
-		for i = 1, debug.getinfo(cls.OnInitialized).nparams-1 do
-			args = args .. ", arg" .. i;
+		if info.isvararg then
+			args = "...";
+		else
+			for i = 1, info.nparams-1 do
+				args = args .. ", arg" .. i;
+			end
 		end
 
 		local str = [[
 			local cls = ...;
-			local meta = getmetatable(cls);
 			local old = cls.OnInitialized;
 
 			return function(self%s)
