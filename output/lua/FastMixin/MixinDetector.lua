@@ -18,37 +18,63 @@ function DetectMixins(cls)
 	detected_classes[cls] = true;
 	local meta = getmetatable(cls);
 
+	cls.__class = cls;
+
 	if not cls.OnCreate then
-		--Log("INFO: No %s.OnCreate!", meta.name);
 		return;
 	else
-		--Log("INFO: Enabling optimisations for %s.OnCreate", meta.name, cls.OnCreate);
-		local old = cls.OnCreate;
-		function cls:OnCreate(...)
-			if not self.__class then
-				self.__mixintypes = {};
-				self.__mixindata = setmetatable({__class = meta.mixindata}, metatable);
-				self.__class = cls;
-				self.__constructing = true;
-				old(self, ...);
-				self.__constructing = false;
-			else
-				old(self, ...);
-			end
+		local args = "";
+		for i = 1, debug.getinfo(cls.OnCreate).nparams do
+			args = args .. ", arg" .. i;
 		end
+
+		local str = [[
+			local cls = ...;
+			local meta = getmetatable(cls);
+			local old = cls.OnCreate;
+
+			return function(self%s)
+				if not self.__class then
+					self.__mixintypes = {};
+					self.__mixindata = setmetatable({}, {__index = meta.mixindata});
+					self.__constructing = true;
+					old(self%s);
+					self.__constructing = false;
+				else
+					old(self%s);
+				end
+			end
+		]];
+
+		str = str:format(args, args, args);
+		cls.OnCreate = assert(loadstring(str))(cls);
 	end
 
 	if not cls.OnInitialized then
-		--Log("INFO: No %s.OnInitialized!", meta.name);
 	else
-		--Log("INFO: Enabling optimisations for %s.OnInitialized", meta.name, cls.OnCreate);
-		local old = cls.OnInitialized;
-		function cls:OnInitialized(...)
-			local preconstruction = self.__constructing;
-			self.__constructing = true;
-			old(self, ...);
-			self.__constructing = preconstruction;
+		local args = "";
+		for i = 1, debug.getinfo(cls.OnInitialized).nparams-1 do
+			args = args .. ", arg" .. i;
 		end
+
+		local str = [[
+			local cls = ...;
+			local meta = getmetatable(cls);
+			local old = cls.OnInitialized;
+
+			return function(self%s)
+				if not self.__constructing then
+					self.__constructing = true;
+					old(self%s);
+					self.__constructing = false;
+				else
+					old(self%s);
+				end
+			end
+		]];
+
+		str = str:format(args, args, args);
+		cls.OnInitialized = assert(loadstring(str))(cls);
 	end
 end
 
@@ -57,4 +83,3 @@ function BeginMixinDetection()
 		DetectMixins(classes[i]);
 	end
 end
---]]

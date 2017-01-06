@@ -25,19 +25,14 @@ end
 
 function InitMixin(self, mixin, optionalMixinData)
 
-	-- The most likely
-	---[[
 	if self.__constructing then
 		local meta = getmetatable(self.__class);
 		if not meta.mixintypes[mixin.type] then
-			--Log("InitMixinForClass(%s, %sMixin, %s)", meta.name or self.classname or "No classname!", mixin.type, self);
 			InitMixinForClass(self.__class, mixin, self);
 		end
 	else
 		InitMixinForInstance(self, mixin);
 	end
-	--]]
-	--InitMixinForInstance(self, mixin);
 	if self.__is_ent then
 		Shared.AddTagToEntity(self:GetId(), mixin.type);
 	end
@@ -46,7 +41,6 @@ function InitMixin(self, mixin, optionalMixinData)
 
 	if optionalMixinData then
 
-		---[[
 		for i = 1, #mixin.__arguments do
 			local k = mixin.__arguments[i];
 			local v = optionalMixinData[k];
@@ -54,26 +48,39 @@ function InitMixin(self, mixin, optionalMixinData)
 				self.__mixindata[k] = v;
 			end
 		end
-		--]]
 
-		--[[
-		for k, v in pairs(optionalMixinData) do
-			if self.__mixindata[k] == nil then
-				Log("InitMixin(%s, %sMixin, %s): mixindata[%s] wasn't properly set!", self, mixin.type, optionalMixinData, k);
-				Log("mixin.__arguments: %s", mixin.__arguments);
-				Log("mixin.optionalConstants: %s", mixin.optionalConstants or "nil");
-				Log("mixin.defaultConstants: %s", mixin.defaultConstants or "nil");
-				Log("mixin.expectedConstants: %s", mixin.expectedConstants or "nil");
-			end
-			self.__mixindata[k] = v;
-		end
-		--]]
 	end
 
     if mixin.__initmixin then
         mixin.__initmixin(self)
     end
 
+end
+
+-- NB: You can only return __1__ value! I could implement multi-variable return though. Will do if someone wants it.
+local function mergeFunctions(a, b)
+	local args = "";
+	local arg_count = math.max(debug.getinfo(a).nparams, debug.getinfo(b).nparams);
+	if arg_count > 0 then
+		for i = 1, arg_count-1 do
+			args = args .. "arg" .. i .. ",";
+		end
+		args = args .. "arg" .. arg_count;
+	end
+
+	local str = ([[
+		local a, b = ...;
+
+		assert(type(a) == "function" and type(b) == "function");
+		
+		return function(%s)
+			local ret = a(%s);
+			b(%s);
+			return ret;
+		end
+	]]):format(args, args, args);
+
+	return assert(loadstring(str))(a, b);
 end
 
 local void = function() end
@@ -121,11 +128,7 @@ function InitMixinForClass(cls, mixin, self)
 			end
 
 			local original = cls[k];
-			local func = function(...)
-				local ret = original(...); -- NB: You can only return **1** argument from your functions! This was UWE's decision and not mine.
-				v(...);
-				return ret;
-			end
+			local func = mergeFunctions(original, v);
 
 			self[k] = func;
 			cls[k] = func;
@@ -193,14 +196,7 @@ function InitMixinForInstance(self, mixin)
 				end
 			end
 
-			local original = self[k];
-			local func = function(...)
-				local ret = original(...); -- NB: You can only return **1** from your functions! This was UWE's decision and not mine.
-				v(...);
-				return ret;
-			end
-
-			self[k] = func;
+			self[k] = mergeFunctions(self[k], v);
 
 		end
 
