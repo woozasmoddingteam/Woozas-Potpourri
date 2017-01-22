@@ -29,5 +29,6 @@ kShoulderPatchNames = {
 	"Priest",
 	"parche",
 	"che",
-	"Tank"
+	"Tank",
+	"MajorK"
 }

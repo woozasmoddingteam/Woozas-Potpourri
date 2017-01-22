@@ -1,0 +1,4 @@
+modEntry = {
+	FileHooks = "lua/ResourceTickrateScale/FileHooks.lua",
+	Priority = 9
+}
