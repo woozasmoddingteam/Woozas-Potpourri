@@ -1,0 +1,1 @@
+ModLoader.SetupFileHook( "lua/Whip_Server.lua", "lua/WF/WFWhip_Server.lua", "post")

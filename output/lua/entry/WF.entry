@@ -1,0 +1,5 @@
+modEntry =
+{    
+	FileHooks = "lua/WF/WFFileHooks.lua",
+    Priority = 9 -- This needs to be higher than the piority of any incompatible mod
+}

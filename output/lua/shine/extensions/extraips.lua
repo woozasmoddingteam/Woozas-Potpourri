@@ -46,6 +46,7 @@ local function SpawnInfantryPortal(self, techPoint, force)
 			if (predefinedSpawnPoint - techPointOrigin):GetLength() <= kInfantryPortalAttachRange then
 				spawnPoint = predefinedSpawnPoint
 				takenInfantryPortalPoints[p] = true
+				break
 			end
 		end
         
@@ -71,6 +72,8 @@ local function SpawnInfantryPortal(self, techPoint, force)
 end
 
 function Plugin:OnFirstThink()
+	Shine.Hook.ReplaceLocalFunction( MarineTeam.SpawnInitialStructures, "SpawnInfantryPortal", SpawnInfantryPortal )
+
 	Shine.Hook.SetupClassHook( "MarineTeam", "SpawnInitialStructures", "OnSpawnInitialStructures", "PassivePost")
 	Shine.Hook.SetupClassHook( "MarineTeam", "ResetTeam", "PreMarineTeamReset", "PassivePre")
 end
@@ -81,13 +84,6 @@ function Plugin:PreMarineTeamReset()
 end
 
 function Plugin:OnSpawnInitialStructures( Team, TechPoint )
-
-	-- Replace the Vanilla SpawnInfantryPortal local function to get rid of the 2nd ip routine of Vanilla
-	if not self.HookSetup then
-		Shine.Hook.ReplaceLocalFunction( MarineTeam.SpawnInitialStructures, "SpawnInfantryPortal", SpawnInfantryPortal )
-		self.HookSetup = true
-	end
-
 	local MinPlayers = self.Config.MinPlayers
 	local _, PlayerCount = Shine.GetAllPlayers()
 	

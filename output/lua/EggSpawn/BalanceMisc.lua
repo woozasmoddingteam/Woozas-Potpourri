@@ -1,0 +1,1 @@
+kAlienSpawnTime = 8

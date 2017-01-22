@@ -30,30 +30,35 @@ function Plugin:Initialise()
 	return true
 end
 
+--Fix shine kicking bots
+function Plugin:VerifyCommanderTable()
+	for i = #gCommanderBots, 1, -1 do
+		local bot = gCommanderBots[i]
+		local status = pcall(function() return bot:GetIsPlayerCommanding() end)
+		if status == false then
+			bot:Disconnect()
+		end
+	end
+
+	return #gCommanderBots
+end
+
 function Plugin:CheckGameStart( Gamerules )
 	local State = Gamerules:GetGameState()
 
-	if State > kGameState.PreGame then return end
+	if State > kGameState.WarmUp then return end
 
-	local NumCommanderBots = #gCommanderBots
+	local NumCommanderBots = self:VerifyCommanderTable()
 	local StartDelay = self.Config.CommanderBotsStartDelay or 0
 	if StartDelay > 0 and NumCommanderBots > 0 and not self.StartTime then
 		self.StartTime = Shared.GetTime() + StartDelay
 	end
 
-	if self.StartTime then
-		if Shared.GetTime() < self.StartTime then
-
-			if NumCommanderBots == 0 then
-				self.StartTime = nil
-				return
-			end
-
-			return false
-		else
-			self.StartTime = nil
-		end
+	if self.StartTime and (NumCommanderBots == 0 or Shared.GetTime() >= self.StartTime) then
+		self.StartTime = nil
 	end
+
+	return self.StartTime
 end
 
 --Filter bots for voterandom
