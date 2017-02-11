@@ -1,0 +1,4 @@
+modEntry = {
+	FileHooks = "lua/UsableMixin.GetCanBeUsedInaccurately/FileHooks.lua";
+	Priority = 9;
+}

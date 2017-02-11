@@ -1,42 +1,25 @@
-local kUseBoxSize = Vector(0.5, 0.5, 0.5)
-local kDownwardUseRange = 2.2
-
-
-local function GetIsValidUseOfPoint(self, entity, usablePoint, useRange)
-
-    if GetPlayerCanUseEntity(self, entity) then
-
-        local viewCoords = self:GetViewAngles():GetCoords()
-        local toUsePoint = usablePoint - self:GetEyePos()
-
-        return toUsePoint:GetLength() < useRange and viewCoords.zAxis:DotProduct(GetNormalizedVector(toUsePoint)) > 0.8
-
-    end
-
-    return false
-
+local function getLocal(f, n)
+	local index = 1;
+	while assert(debug.getupvalue(f, index)) ~= n do
+		index = index + 1;
+	end
+	local n, v = debug.getupvalue(f, index); -- This n is the same as the previous n
+	return v;
 end
 
---[[
-    Will return true if the passed in entity can be used by self and
-    the entity has no attach points to use.
-]]
-local function GetCanEntityBeUsedWithNoUsablePoint(self, entity)
+local kUseBoxSize = getLocal(Player.PerformUseTrace, "kUseBoxSize");
+local kDownwardUseRange = getLocal(Player.PerformUseTrace, "kDownwardUseRange");
+local GetIsValidUseOfPoint = getLocal(Player.PerformUseTrace, "GetIsValidUseOfPoint");
+local GetCanEntityBeUsedWithNoUsablePoint = getLocal(Player.PerformUseTrace, "GetCanEntityBeUsedWithNoUsablePoint");
 
-    if HasMixin(entity, "Usable") then
-
-        -- Ignore usable points if a Structure has not been built.
-        local usablePointOverride = HasMixin(entity, "Construct") and not entity:GetIsBuilt()
-
-        local usablePoints = entity:GetUsablePoints()
-        if usablePointOverride or (not usablePoints or #usablePoints == 0) and GetPlayerCanUseEntity(self, entity) then
-            return true, nil
-        end
-
-    end
-
-    return false, nil
-
+local function GetCanBeUsedInaccurately(self, ent)
+	if HasMixin(ent, "Usable") and ent.GetCanBeUsedInaccurately then
+		local t = {b = true};
+		ent:GetCanBeUsedInaccurately(self, t);
+		return t.b;
+	else
+		return false;
+	end
 end
 
 function Player:PerformUseTrace()
@@ -73,7 +56,6 @@ function Player:PerformUseTrace()
                     local usablePoint = usablePoints[p]
                     local success = GetIsValidUseOfPoint(self, entity, usablePoint, useRange)
                     if success then
-						--Shared.Message("Success with usable points! Entity: " .. debug.typename(entity));
                         return entity, usablePoint
                     end
 
@@ -90,14 +72,13 @@ function Player:PerformUseTrace()
     local endPoint = startPoint + viewCoords.zAxis * useRange
     local activeWeapon = self:GetActiveWeapon()
 
-    local trace = Shared.TraceRay(startPoint, endPoint, CollisionRep.Default, PhysicsMask.AllButPCs, EntityFilterTwo(self, activeWeapon))
+    local trace = Shared.TraceRay(startPoint, endPoint, CollisionRep.Default, PhysicsMask.AllButPCsAndRagdollsAndBabblers, EntityFilterTwo(self, activeWeapon))
 
     if trace.fraction < 1 and trace.entity ~= nil then
 
         -- Only return this entity if it can be used and it does not have a usable point (which should have been
         -- caught in the above cases).
         if GetCanEntityBeUsedWithNoUsablePoint(self, trace.entity) then
-			--Shared.Message("Success with no usable points! Entity: " .. debug.typename(trace.entity));
             return trace.entity, trace.endPoint
         end
 
@@ -107,18 +88,16 @@ function Player:PerformUseTrace()
     -- Modify the endPoint to account for the size of the box.
     local maxUseLength = (kUseBoxSize - -kUseBoxSize):GetLength()
     endPoint = startPoint + viewCoords.zAxis * (useRange - maxUseLength / 2)
-    local traceBox = Shared.TraceBox(kUseBoxSize, startPoint, endPoint, CollisionRep.Move, PhysicsMask.AllButPCs, EntityFilterTwo(self, activeWeapon))
+    local traceBox = Shared.TraceBox(kUseBoxSize, startPoint, endPoint, CollisionRep.Move, PhysicsMask.AllButPCsAndRagdollsAndBabblers, EntityFilterTwo(self, activeWeapon))
     -- Only return this entity if it can be used and it does not have a usable point (which should have been caught in the above cases).
-	local entity = traceBox.entity;
-    if traceBox.fraction < 1 and entity ~= nil and not entity:isa("SecretGorge") and GetCanEntityBeUsedWithNoUsablePoint(self, entity) then
+    if traceBox.fraction < 1 and traceBox.entity ~= nil and GetCanBeUsedInaccurately(self, traceBox.entity) and GetCanEntityBeUsedWithNoUsablePoint(self, traceBox.entity) then
 
-        local direction = startPoint - entity:GetOrigin()
+        local direction = startPoint - traceBox.entity:GetOrigin()
         direction:Normalize()
 
         -- Must be generally facing the entity.
         if viewCoords.zAxis:DotProduct(direction) < -0.5 then
-			--Shared.Message("Success with no usable points and extended tolerance! Entity: " .. debug.typename(entity));
-            return entity, traceBox.endPoint
+            return traceBox.entity, traceBox.endPoint
         end
 
     end

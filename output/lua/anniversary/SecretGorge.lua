@@ -48,6 +48,10 @@ end
 
 function SecretGorge:GetCanBeUsed(player, useSuccessTable) end
 
+function SecretGorge:GetCanBeUsedInaccurately(player, t)
+	t.b = false;
+end
+
 function SecretGorge:GetCanTakeDamage() -- Require for bullet effects somehow...
 	return true;
 end
