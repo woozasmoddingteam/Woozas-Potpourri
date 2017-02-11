@@ -155,10 +155,9 @@ function Plugin:SetGameState(gamerules, newstate, oldstate)
 end
 
 function Plugin:OnFirstThink()
-	--if newstate ~= oldstate then
+	if not GetGamerules():GetGameStarted() then
 		init();
-		--setGameState = waitForGameStart;
-	--end
+	end
 end
 
 local function increaseYaw(client, amount)
