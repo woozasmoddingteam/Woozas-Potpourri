@@ -1,3 +1,0 @@
-modEntry = {
-	FileHooks = "lua/opt/FileHooks.lua",
-}
