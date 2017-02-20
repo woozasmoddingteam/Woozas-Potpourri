@@ -30,5 +30,7 @@ kShoulderPatchNames = {
 	"parche",
 	"che",
 	"Tank",
-	"MajorK"
+	"MajorK",
+	"Wooza Approved Patch",
+	"Otter_Patch"
 }

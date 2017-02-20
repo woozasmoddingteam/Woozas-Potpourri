@@ -106,3 +106,7 @@ v.3.4
 Added
 -Beacon Opti by Katzenfleisch. Mod link: http://steamcommunity.com/sharedfiles/filedetails/?id=798295173&searchtext=beacon
 -Beacon on X by ydy. Mod link: http://steamcommunity.com/sharedfiles/filedetails/?id=658759990&searchtext=beacon
+
+v.3.5
+-Removed Opti Beacon and Beacon on X
+-Added: Crazy Mines, Mods Map Prefix, Third Person Aliens and Egg Spawning Rebalance
