@@ -1,3 +1,3 @@
 modEntry = {
-	FileHooks = "lua/PregamePeace/FileHooks.lua",
+	FileHooks = "lua/PregamePeace/FileHooks.lua"
 }
