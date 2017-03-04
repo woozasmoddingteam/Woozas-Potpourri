@@ -46,7 +46,7 @@ function Player:PerformUseTrace()
 
         local entity = ents[e]
         -- Filter away anything on the enemy team. Allow using entities not on any team.
-        if not HasMixin(entity, "Team") or self:GetTeamNumber() == entity:GetTeamNumber() then
+        if (not HasMixin(entity, "Team") or self:GetTeamNumber() == entity:GetTeamNumber()) and GetCanBeUsedInaccurately(self, entity) then
 
             local usablePoints = entity:GetUsablePoints()
             if usablePoints then
