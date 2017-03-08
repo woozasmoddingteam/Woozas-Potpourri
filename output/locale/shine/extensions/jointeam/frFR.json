@@ -1,0 +1,12 @@
+{
+	"NOTIFY_PREFIX":"[JoinTeam]",
+	"OK_LESS_PLAYER": "Vous pouvez toujours rejoindre l'équipe en sous-nombre",
+	"OK_CHOICE":"Bienvenue dans l'équipe de votre choix!",
+	"OK_MARINES":"Bienvenue dans l'équipe des Marines!",
+	"OK_ALIENS":"Bienvenue dans l'équipe des Aliens!",
+	"ERROR_1": "Désolé, vous ne pouvez pas rejoindre cette équipe pour des raisons d'équilibrage",
+	"ERROR_2": "Vous pouvez attendre que l'équilibrage change, ou rejoindre l'autre équipe",
+	"TEXT_CURRENT":"Equilibrage actuel des équipes:",
+	"TEXT_JOIN_M":"Si vous rejoignez les marines:",
+	"TEXT_JOIN_A":"Si vous rejoignez les aliens:"
+}
