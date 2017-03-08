@@ -1,0 +1,3 @@
+modEntry = {
+	FileHooks = "lua/MMMPanel/FileHooks.lua"
+};

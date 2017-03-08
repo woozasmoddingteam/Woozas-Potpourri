@@ -110,3 +110,9 @@ Added
 v.3.5
 -Removed Opti Beacon and Beacon on X
 -Added: Crazy Mines, Mods Map Prefix, Third Person Aliens and Egg Spawning Rebalance
+
+v.3.6
+-Added: Mod Panels by Nin
+
+v.3.7
+-Added: Shine JoinTeam by Bof
