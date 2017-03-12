@@ -2,9 +2,9 @@
  	ShoulderPatchesExtra
 	ZycaR (c) 2016
 ]]
-Script.Load("lua/spe_ShoulderPatchesConfig.lua")
-Script.Load("lua/spe_ShoulderPatchesMessage.lua")
-    
+Script.Load("lua/spe/ShoulderPatchesConfig.lua")
+Script.Load("lua/spe/ShoulderPatchesMessage.lua")
+
 local speMenuOptions = {
     name  = "ShoulderPatch",
     label = "Custom Patches",
@@ -30,35 +30,36 @@ function GUIMainMenu:CreateCustomizeWindow()
     local patchNames = ShoulderPatchesConfig:GetClientShoulderPatchNames(player)
     local patchName, index = ShoulderPatchesConfig:GetClientShoulderPatch(player)
 
-    LoadCSSFile("lua/spe.css")
+    LoadCSSFile("lua/spe/css.css")
+
 
     // create container
     self.spe = CreateMenuElement(self.mainWindow, "ContentBox", true)
     self.spe:SetCSSClass("shoulder_patches_wrapper")
-    
-    self.customizeFrame:AddEventCallbacks({
-        OnHide = function(self)
-            self.scriptHandle.spe:SetIsVisible(false)
-        end
-    })
-    
-    // create from
-    local form = CreateMenuElement(self.spe, "Form", true)    
+
+    //self.customizeFrame:AddEventCallbacks({
+    //    OnHide = function(self)
+    //        self.scriptHandle.spe:SetIsVisible(false)
+    //    end
+    //})
+
+    // create form
+    local form = CreateMenuElement(self.spe, "Form", true)
     form:SetCSSClass("options")
 
     // label on top of input
-    local label = CreateMenuElement(form, "Font", false)
-    label:SetCSSClass("shoulder_patches_label")
-    label:SetText(speMenuOptions.label)
-    label:SetTopOffset(0)
-    label:SetIgnoreEvents(false)
+    //local label = CreateMenuElement(form, "Font", false)
+    //label:SetCSSClass("shoulder_patches_label")
+    //label:SetText(speMenuOptions.label)
+    //label:SetTopOffset(0)
+    //label:SetIgnoreEvents(false)
 
     // input for patches
     local input = form:CreateFormElement(Form.kElementType.DropDown, speMenuOptions.name, patchName)
     input:SetOptions(patchNames)
     input:SetCSSClass(speMenuOptions.css)
     input:AddSetValueCallback(OnShoulderPatchChanged)
-    input:SetTopOffset(35)
+    input:SetTopOffset(235)
 
     local function OnMouseInFn(self)
         local showModelType = "decal"
@@ -76,9 +77,10 @@ function GUIMainMenu:CreateCustomizeWindow()
             menuRefresed = false
         end
     end
+
     for index, child in ipairs(input:GetChildren()) do
         child:AddEventCallbacks({ OnMouseIn = OnMouseInFn })
     end
-        
+
     self.customizeElements[speMenuOptions.name] = input
 end

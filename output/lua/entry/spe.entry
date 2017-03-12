@@ -1,4 +1,4 @@
 modEntry = {
-	FileHooks = "lua/spe_Filehook.lua",
+	FileHooks = "lua/spe/Filehooks.lua",
 	Priority = 4
 }
