@@ -2,8 +2,8 @@
  	ShoulderPatchesExtra
 	ZycaR (c) 2016
 ]]
-Script.Load("lua/spe_ShoulderPatchesConfig.lua")
-Script.Load("lua/spe_ShoulderPatchesMessage.lua")
+Script.Load("lua/spe/ShoulderPatchesConfig.lua")
+Script.Load("lua/spe/ShoulderPatchesMessage.lua")
 
 ShoulderPatchesMixin = CreateMixin( ShoulderPatchesMixin )
 ShoulderPatchesMixin.type = "ShoulderPatches"

@@ -1,6 +1,3 @@
-modEntry = [[
-	 Client: lua/PingClient.lua,
-	 Server: lua/PingServer.lua,
-	 Predict: lua/PingPredict.lua,
-	 Priority: 4
-]]
+modEntry = {
+	 Server = "lua/ping_file.lua"
+}

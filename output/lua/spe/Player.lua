@@ -3,7 +3,7 @@
 	ZycaR (c) 2016
 ]]
 
-Script.Load("lua/spe_ShoulderPatchesMixin.lua")
+Script.Load("lua/spe/ShoulderPatchesMixin.lua")
 
 local ns2_OnInitialized = Player.OnInitialized
 function Player:OnInitialized()
@@ -26,4 +26,4 @@ if Server then
 end
 
 -- Modder's version of AddMixinNetworkVars()
-Shared.LinkClassToMap("Player", Player.kMapName, ShoulderPatchesMixin.networkVars)
+Shared.LinkClassToMap("Player", nil, ShoulderPatchesMixin.networkVars)

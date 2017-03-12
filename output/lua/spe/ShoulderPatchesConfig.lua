@@ -4,7 +4,7 @@
 ]]
 
 Script.Load("lua/ConfigFileUtility.lua")
-Script.Load("lua/spe_shoulderPatchesEnum.lua")
+Script.Load("lua/spe/shoulderPatchesEnum.lua")
 
 kDefaultGroupName = "DefaultGroup"
 
