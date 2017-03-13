@@ -30,31 +30,31 @@ function GUIMainMenu:CreateCustomizeWindow()
     local patchNames = ShoulderPatchesConfig:GetClientShoulderPatchNames(player)
     local patchName, index = ShoulderPatchesConfig:GetClientShoulderPatch(player)
 
-    LoadCSSFile("lua/spe/css.css")
+    LoadCSSFile("lua/spe/spe.css")
 
 
-    // create container
+    -- create container
     self.spe = CreateMenuElement(self.mainWindow, "ContentBox", true)
     self.spe:SetCSSClass("shoulder_patches_wrapper")
 
-    //self.customizeFrame:AddEventCallbacks({
-    //    OnHide = function(self)
-    //        self.scriptHandle.spe:SetIsVisible(false)
-    //    end
-    //})
+    self.customizeFrame:AddEventCallbacks({
+        OnHide = function(self)
+            self.scriptHandle.spe:SetIsVisible(false)
+        end
+    })
 
-    // create form
+    -- create form
     local form = CreateMenuElement(self.spe, "Form", true)
     form:SetCSSClass("options")
 
-    // label on top of input
-    //local label = CreateMenuElement(form, "Font", false)
-    //label:SetCSSClass("shoulder_patches_label")
-    //label:SetText(speMenuOptions.label)
-    //label:SetTopOffset(0)
-    //label:SetIgnoreEvents(false)
+    -- label on top of input
+    local label = CreateMenuElement(form, "Font", false)
+    label:SetCSSClass("shoulder_patches_label")
+    label:SetText(speMenuOptions.label)
+    label:SetTopOffset(0)
+    label:SetIgnoreEvents(false)
 
-    // input for patches
+    -- input for patches
     local input = form:CreateFormElement(Form.kElementType.DropDown, speMenuOptions.name, patchName)
     input:SetOptions(patchNames)
     input:SetCSSClass(speMenuOptions.css)
