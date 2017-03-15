@@ -5,22 +5,24 @@
 local Shine = Shine
 local Plugin = Plugin
 
-Plugin.Version = "1.0"
-Plugin.HasConfig = false --Does this plugin have a config file?
+Plugin.Version = "1.2"
+Plugin.HasConfig = true --Does this plugin have a config file?
 Plugin.ConfigName = "readyroomrave.json" --What's the name of the file?
 Plugin.DefaultState = true --Should the plugin be enabled when it is first added to the config?
 Plugin.NS2Only = false --Set to true to disable the plugin in NS2: Combat if you want to use the same code for both games in a mod.
-Plugin.DefaultConfig = {}
-Plugin.CheckConfig = false --Should we check for missing/unused entries when loading?
-Plugin.CheckConfigTypes = false --Should we check the types of values in the config to make sure they match our default's types?
+Plugin.DefaultConfig = {
+    tauntVolume = 1,
+    musicVolume = 0.4,
+    raveVolume = 0.6,
+    maxSprayDistance = 4,
+}
+Plugin.CheckConfig = true --Should we check for missing/unused entries when loading?
+Plugin.CheckConfigTypes = true --Should we check the types of values in the config to make sure they match our default's types?
 
 
 function Plugin:Initialise()
 
     self.commandTime = -999
-    self.tauntVolume = 1
-    self.musicVolume = 0.4
-    self.raveVolume = 0.6
 
     self:PrecacheAssets()
 
@@ -61,12 +63,12 @@ function Plugin:OnConsoleSound(client, name)
         -- only during pregame or in readyroom
         if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
 
-        StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.musicVolume)
+        StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.Config.musicVolume or 0.4)
         self.commandTime = Shared.GetTime()
     else
         for _,v in pairs(soundList) do
             if name == v then
-                StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.tauntVolume)
+                StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.Config.tauntVolume or 1)
                 self.commandTime = Shared.GetTime()
                 return
             end
@@ -89,7 +91,7 @@ function Plugin:OnConsoleRave(client)
     -- only during pregame or in readyroom
     if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
 
-    StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/nancy", origin, self.raveVolume)
+    StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/nancy", origin, self.Config.raveVolume or 0.6)
     -- local nearbyPlayers = GetEntitiesWithinRange("Player", origin, 20)
     -- for p = 1, #nearbyPlayers do
     --    self:SendNetworkMessage( nearbyPlayers[p], "RaveCinematic", { origin = origin, stop = false }, true )
@@ -106,11 +108,35 @@ function Plugin:SetGameState( Gamerules, GameState )
 end
 
 
+function Plugin:GetDecalPath(client)
+    if client == nil then return end
+    local player = client:GetControllingPlayer()
+
+    -- user needs to have a decal set in the shine user config
+    local userData = Shine:GetUserData( Server.GetOwner(player):GetUserId() )
+    if not userData then return end
+
+    -- check user config first
+    if userData.Decal and userData.Decal[1] then
+        return userData.Decal[1]
+    end
+
+    -- now check user's group config
+    local groupData = Shine:GetGroupData( userData.Group )
+    if groupData and groupData.Decal and groupData.Decal[1] then
+        return groupData.Decal[1]
+    end
+
+    -- no decal configured, return nil
+    return
+end
+
+
 function Plugin:OnConsoleCreateSpray(client)
     if client == nil then return end
     local player = client:GetControllingPlayer()
     local origin = player:GetOrigin()
-    local playerIndex = nil
+    local maxSprayDistance = self.Config.maxSprayDistance or 4
 
     -- only during pregame or in readyroom
     if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
@@ -118,32 +144,39 @@ function Plugin:OnConsoleCreateSpray(client)
     -- spam protection
     if (Shared.GetTime() - self.commandTime < 3.5) then return end
 
-    -- user needs to have a decal set in the shine user config
-    local decalPath = nil
-    local userData = Shine:GetUserData( Server.GetOwner(player):GetUserId() )
-    if not userData then return end
-
-    if userData.Decal and userData.Decal[1] then
-        decalPath = userData.Decal[1]
-    else
-        local groupData = Shine:GetGroupData( userData.Group )
-        if groupData and groupData.Decal and groupData.Decal[1] then
-            decalPath = groupData.Decal[1]
-        else
-            return
-        end
-    end
+    local decalPath = self:GetDecalPath(client)
+    if decalPath == nil then return end
 
     local startPoint = player:GetEyePos()
     local endPoint = startPoint + player:GetViewCoords().zAxis * 100
-    local trace = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterAll())
+    local trace = Shared.TraceRay(startPoint, endPoint, CollisionRep.Default, PhysicsMask.Bullets, EntityFilterAll())
 
     if trace.fraction ~= 1 then
-        local coords = Coords.GetTranslation(trace.endPoint)
-        coords.origin = player:GetEyePos()
-        coords.yAxis = trace.normal
-        coords.zAxis = coords.yAxis:GetPerpendicular()
-        coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
+        local direction = startPoint - trace.endPoint
+        local distance = direction:GetLength()
+        direction:Normalize()
+        if distance > maxSprayDistance then return end
+
+        local coords = Coords.GetIdentity()
+        if trace.normal:CrossProduct(Vector(0,1,0)):GetLength() < 0.35 then
+            -- we are looking at the floor, a slope or the ceiling, so rotate decal to face us
+            local isFacingUp = trace.normal:DotProduct(Vector(0,1,0)) > 0
+            coords.origin = trace.endPoint - 0.5 * trace.normal
+            coords.yAxis = trace.normal
+            if isFacingUp then
+                coords.xAxis = direction
+            else
+                coords.xAxis = -direction
+            end
+            coords.zAxis = coords.xAxis:CrossProduct(coords.yAxis)
+            coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
+        else
+            -- we are looking at a wall, decal is always upright
+            coords.origin = trace.endPoint - 0.5 * direction
+            coords.yAxis = trace.normal
+            coords.zAxis = coords.yAxis:GetPerpendicular()
+            coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
+        end
 
         local angles = Angles()
         angles:BuildFromCoords(coords)
@@ -162,7 +195,7 @@ function Plugin:CreateCommands()
     local function OnConsoleSound( Client, Name )
         self:OnConsoleSound( Client, Name )
     end
-    self:BindCommand( "sh_sound", "sound", OnConsoleSound, false, false )
+    self:BindCommand( "sh_sound", "sound", OnConsoleSound, true, false )
     :AddParam{ Type = "string", Optional = true, TakeRestOfLine = true, Default = "dance", MaxLength = 100, Help = "[mess|better|dead|dance|dosomething] or [nancy|ayumi](pregame only)" }
     :Help( "<soundname> Plays the specified sound if it exists." )
 

@@ -14,7 +14,7 @@ function Plugin:SetupDataTable()
         yaw = "float",
         roll = "float",
         pitch = "float",
-        path = "string (20)"
+        path = "string (60)"
     }, "Client" )
 end
 
