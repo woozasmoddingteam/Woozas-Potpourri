@@ -13,7 +13,7 @@ Plugin.ConfigName = "AutoPerfProfile.json"
 Plugin.DefaultConfig =
 {
 	LogPerf = true,
-	LogTraces = true
+	LogTraces = false
 }
 Plugin.CheckConfig = true
 
@@ -34,8 +34,6 @@ function Plugin:SetGameState( Gamerules, NewState, OldState )
 
 	if NewState == kGameState.Started then
 		Shared.ConsoleCommand("p_logall")
-	elseif NewState > kGameState.Started then
-		Shared.ConsoleCommand("p_endlog")
 	end
 end
 

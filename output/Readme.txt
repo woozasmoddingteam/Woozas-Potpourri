@@ -112,7 +112,8 @@ v.3.5
 -Added: Crazy Mines, Mods Map Prefix, Third Person Aliens and Egg Spawning Rebalance
 
 v.3.6
--Added: Mod Panels by Nin
+-Added: Mod Panels by Nin, Removed Third Person Aliens
 
-v.3.7
--Added: Shine JoinTeam by Bof
+v.4.0
+-Added: Shine Permamute, LocalAllTalk Extended, PregamePeace
+-Removed: Commodore Command Station, Cuter Gorge Eyes (Mod File sizes are too big).

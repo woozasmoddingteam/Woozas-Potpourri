@@ -121,9 +121,10 @@ function Plugin:OnReceiveENSLData( Client, Data )
 	if type(Data) ~= "table" then return end
 
 	local Teamname = Data.team and Data.team.name
+	local TeamID = Data.team and string.format("ENSL#%s", Data.team.id)
 
 	if Teamname then
-		self:SetBadge( Client, Teamname, self.Config.ENSLTeamsRow, string.format("ENSL Team - %s", Teamname))
+		self:SetBadge( Client, TeamID, self.Config.ENSLTeamsRow, string.format("ENSL Team - %s", Teamname))
 	end
 end
 
