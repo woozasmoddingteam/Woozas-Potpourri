@@ -59,7 +59,7 @@ function GUIMainMenu:CreateCustomizeWindow()
     input:SetOptions(patchNames)
     input:SetCSSClass(speMenuOptions.css)
     input:AddSetValueCallback(OnShoulderPatchChanged)
-    input:SetTopOffset(235)
+    input:SetTopOffset(35)
 
     local function OnMouseInFn(self)
         local showModelType = "decal"
