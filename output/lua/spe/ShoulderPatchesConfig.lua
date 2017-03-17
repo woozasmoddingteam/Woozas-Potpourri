@@ -4,7 +4,7 @@
 ]]
 
 Script.Load("lua/ConfigFileUtility.lua")
-Script.Load("lua/spe/shoulderPatchesEnum.lua")
+Script.Load("lua/spe/ShoulderPatchesEnum.lua")
 
 kDefaultGroupName = "DefaultGroup"
 
@@ -58,24 +58,24 @@ if Server then
             return data and data.Group
         end
     end
-    
+
     local function GetShineGroupPatches(name)
         if Shine and Shine.GetGroupData then
             local data = Shine:GetGroupData(name) or {}
             return data and (data.Patches or { data.Patch })
         end
     end
-    
+
     local function GetShineDefaultGroupPatches(name)
         if Shine and Shine.GetDefaultGroup then
             local data = Shine:GetDefaultGroup() or {}
             return data and (data.Patches or { data.Patch })
         end
-    end    
-    
+    end
+
     local function GetShinePatches(client)
         if not Shine then return nil end
-        
+
         local patches = {}
         local group = GetShineGroupName(client)
         table.addtable( GetShineUserPatches(client), patches )
@@ -88,7 +88,7 @@ if Server then
 
     local function GetShoulderPatches(config, steamId)
         local patches = {}
-        
+
         if not config then
             Shared.Message("Missing or invalid ShoulderPatchesConfig.json file.")
             return {}
@@ -148,7 +148,7 @@ if Client then
 
     function ShoulderPatchesConfig:GetClientShoulderPatch(player)
         local index = Client.GetOptionInteger("spe", kEmptyPatchIndex)
-        
+
         if not self.PatchNames[ index ] then
             Client.SetOptionInteger("spe", kEmptyPatchIndex)
             index = kEmptyPatchIndex
