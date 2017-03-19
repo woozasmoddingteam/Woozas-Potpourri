@@ -22,7 +22,6 @@ end
 
 function AddModPanel(values, maybe_url)
 	assert(#kModPanels < 255, "Can not add more mod panels! Max: 255")
-	Shared.Message ("found " .. tostring(values))
 	if type(values) == "string" then
 		values = {
 			material = values,
@@ -35,4 +34,10 @@ function AddModPanel(values, maybe_url)
 	end
 	PrecacheAsset(values.material)
 	table.insert(kModPanels, values)
+end
+
+local quickload = {}
+Shared.GetMatchingFileNames("lua/quickload/*.lua", true, quickload)
+for _, file in ipairs(quickload) do
+	ModLoader.SetupFileHook("lua/Class.lua", file, "post")
 end

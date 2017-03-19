@@ -1,6 +1,4 @@
-if AddModPanel then
-	AddModPanel {
-		material = "materials/custom_badges_mod_panel.material",
-		url      = "http://apheriox.com/custom-badges-tutorial/"
-	}
-end
+modEntry = {
+FileHooks = "lua/custom_badges_mod_panel/FileHooks.lua",
+Priority = 80
+}
