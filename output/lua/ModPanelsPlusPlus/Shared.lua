@@ -5,7 +5,7 @@ if Server then
 
 	local function hasDistance(origin, min, max, points)
 		for i = 1, #points do
-			local dist = points[i]:GetOrigin():GetDistanceTo(origin)
+			local dist = points[i]:GetDistanceTo(origin)
 			if dist < min or dist > max then
 				return false
 			end
@@ -20,6 +20,14 @@ if Server then
 		Log "Initializing mod panels..."
 
 		local spawnPoints = Server.readyRoomSpawnList
+		local badPoints = {}
+		for i = 1, #spawnPoints do
+			badPoints[i] = spawnPoints[i]:GetOrigin()
+		end
+		local teamjoins = GetEntities("TeamJoin")
+		for i = 1, #teamjoins do
+			badPoints[#spawnPoints+i] = teamjoins[i]:GetOrigin()
+		end
 
 		local config = LoadConfigFile("ModPanels.json", {})
 		local configChanged = false
@@ -65,7 +73,7 @@ if Server then
 						Log "WARNING: Over 50 tries for mod panel placement!"
 						break
 					end
-				until not trace.entity and hasDistance(trace.endPoint, 0.5, 10, spawnPoints)
+				until not trace.entity and hasDistance(trace.endPoint, 0.5, 10, badPoints)
 
 				modPanel:SetOrigin(trace.endPoint - modPanel.offset)
 
