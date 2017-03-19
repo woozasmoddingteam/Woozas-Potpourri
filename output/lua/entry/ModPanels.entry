@@ -1,4 +1,0 @@
-modEntry = {
-FileHooks = "lua/ModPanels/FileHooks.lua",
-Priority = 110
-}

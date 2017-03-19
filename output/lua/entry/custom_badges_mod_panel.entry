@@ -1,0 +1,6 @@
+if AddModPanel then
+	AddModPanel {
+		material = "materials/custom_badges_mod_panel.material",
+		url      = "http://apheriox.com/custom-badges-tutorial/"
+	}
+end

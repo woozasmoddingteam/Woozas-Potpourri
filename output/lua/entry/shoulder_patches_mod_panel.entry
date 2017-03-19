@@ -1,0 +1,6 @@
+if AddModPanel then
+	AddModPanel {
+		material = "materials/shoulder_patches_mod_panel.material",
+		url      = "http://apheriox.com/shoulder-patches-tutorial/"
+	}
+end
