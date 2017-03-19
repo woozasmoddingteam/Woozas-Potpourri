@@ -1,0 +1,10 @@
+shader = "shaders/Model_emissive_alpha.surface_shader"
+albedoMap =     "materials/custom_badges_mod_panel.dds"
+specularMap =   "materials/custom_badges_mod_panel.dds"
+opacityMap =    "materials/dev/dev_white.dds"
+emissiveMap =   "materials/custom_badges_mod_panel.dds"
+normalMap =     "materials/dev/dev_normal.dds"
+specularMap =   "materials/dev/black.dds"
+
+surface = "thin_metal"
+
