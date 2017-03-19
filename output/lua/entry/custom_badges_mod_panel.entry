@@ -1,4 +1,0 @@
-modEntry = {
-FileHooks = "lua/custom_badges_mod_panel/FileHooks.lua",
-Priority = 80
-}
