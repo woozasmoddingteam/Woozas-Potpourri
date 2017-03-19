@@ -1,0 +1,4 @@
+modEntry = {
+FileHooks = "lua/discord_mod_panel/FileHooks.lua",
+Priority = 80
+}

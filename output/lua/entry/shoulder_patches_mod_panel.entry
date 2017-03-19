@@ -1,0 +1,4 @@
+modEntry = {
+FileHooks = "lua/shoulder_patches_mod_panel/FileHooks.lua",
+Priority = 80
+}
