@@ -33,7 +33,6 @@ function ModPanel:OnCreate()
 	}
 
 	self.modPanelId = 0
-	self:SetRelevancyDistance(20)
 end
 
 function ModPanel:OnInitialized()
