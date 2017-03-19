@@ -2,7 +2,7 @@
 if AddModPanel then
 	AddModPanel {
 		material = "materials/discord_mod_panel/discord_mod_panel.material",
-		url      = "https://discord.gg/0v5uwb6jDlQ7tKWsl",
+		url      = "https://discord.gg/0v5uwb6jDlQ7tKWs",
 		size     = {0.5, 0.5}
 	}
 	AddModPanel {
