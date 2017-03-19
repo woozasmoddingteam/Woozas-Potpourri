@@ -80,21 +80,6 @@ if Client then
 			vertices = self.vertices
 		end
 
-		local colors
-
-		if self.color then
-			colors = {}
-			for i = 1, #self.colors, 4 do
-				colors[i]   = self.colors[i]   * self.color[1]
-				colors[i+1] = self.colors[i+1] * self.color[2]
-				colors[i+2] = self.colors[i+2] * self.color[3]
-				colors[i+3] = self.colors[i+3] * self.color[4]
-			end
-			Log("Colors: %s", colors)
-		else
-			colors = self.colors
-		end
-
 		local coords = Coords()
 		coords.origin = self:GetOrigin() + self.offset
 		self.panel:SetIndices(self.indices, #self.indices)
@@ -106,10 +91,16 @@ if Client then
 		if self.OnPostReInitialize then
 			self:OnPostReInitialize()
 		end
+
+		self.lastUpdate = Shared.GetTime()
 	end
 
 	local up = Vector(0, 1, 0)
+	local kRecreationInterval = 5
 	function ModPanel:OnUpdateRender()
+		if Shared.GetTime() - self.lastUpdate > kRecreationInterval then
+			self:ReInitialize()
+		end
 		local player = Client.GetLocalPlayer()
 		local coords = Coords.GetLookAt(self:GetOrigin() + self.offset, player:GetEyePos(), up)
 		self.panel:SetCoords(coords)
