@@ -63,13 +63,14 @@ if Server then
 
 				local radius = modPanel.size and math.max(modPanel.size[1], modPanel.size[2]) or 1
 				local coords = Coords()
-				coords.origin = spawnPoint
+				coords.origin = spawnPoint + modPanel.offset
 				local body = Shared.CreatePhysicsSphereBody(false, radius, 1, coords)
 				initBody(body)
 				local offset = randomXZvector()
-				spawnPoint = body:Trace(offset, CollisionRep.Default, CollisionRep.Default, PhysicsMask.All).endPoint
+				body:Move(offset, CollisionRep.Default, CollisionRep.Default, PhysicsMask.All)
+				body:Move(Vector(0, -100, 0), CollisionRep.Default, CollisionRep.Default, PhysicsMask.All)
 
-				modPanel:SetOrigin(spawnPoint)
+				modPanel:SetOrigin(body:GetPosition() - Vector(0, radius, 0))
 
 				Shared.DestroyCollisionObject(body)
 
