@@ -3,36 +3,47 @@ Script.Load("lua/ModPanelsPlusPlus/ModPanel.lua")
 
 if Server then
 
-	local function hasDistance(origin, min, max, points)
+	local function hasDistance(origin, min, max, points, count)
+		local nearbies = 0
 		for i = 1, #points do
-			local dist = points[i]:GetDistanceTo(origin)
-			if dist < min or dist > max then
-				return false
+			local dist = points[i]:GetOrigin():GetDistanceTo(origin)
+			if dist > min and dist < max then
+				nearbies = nearbies + 1
+				if nearbies >= count then
+					return true
+				end
 			end
 		end
-		return true
+		return false
+	end
+
+	local function makeBody(dynamicity, extents, coords, bodies)
+		local body = Shared.CreatePhysicsBoxBody(dynamicity, extents, 1, coords)
+		table.insert(bodies, body)
+		body:SetGravityEnabled(false)
+		body:SetLinearDamping(0)
+		body:SetTriggerEnabled(false)
+		body:SetCollisionEnabled(true)
+		return body
 	end
 
 	local mod_panels_spawned = false
 	function InitializeModPanels()
-		assert(not mod_panels_spawned, "Mod Panels have alraedy been spawned!")
+		assert(not mod_panels_spawned, "Mod Panels have already been spawned!")
 
 		Log "Initializing mod panels..."
 
 		local spawnPoints = Server.readyRoomSpawnList
-		local badPoints = {}
-		for i = 1, #spawnPoints do
-			badPoints[i] = spawnPoints[i]:GetOrigin()
-		end
+
+		local bodies = {}
+
 		local teamjoins = GetEntities("TeamJoin")
 		for i = 1, #teamjoins do
-			badPoints[#spawnPoints+i] = teamjoins[i]:GetOrigin()
+			local body = makeBody(false, Vector(3, 2, 0.5), teamjoins[i]:GetCoords(), bodies)
 		end
 
 		local config = LoadConfigFile("ModPanels.json", {})
 		local configChanged = false
-
-		local bodies = {}
 
 		for index, values in ipairs(kModPanels) do
 
@@ -56,12 +67,7 @@ if Server then
 				local extents = modPanel.size and Vector(modPanel.size[1], modPanel.size[2], modPanel.size[1]) or Vector(0.5, 0.6, 0.5)
 				local coords = modPanel:GetCoords()
 				coords.origin = coords.origin + modPanel.offset
-				local body = Shared.CreatePhysicsBoxBody(true, extents, 1, coords)
-				table.insert(bodies, body)
-				body:SetGravityEnabled(false)
-				body:SetLinearDamping(0)
-				body:SetTriggerEnabled(false)
-				body:SetCollisionEnabled(true)
+				local body = makeBody(true, extents, coords, bodies)
 
 				-- Move it around until it has moved succesfully or tried too many times
 				local count = 0
@@ -73,7 +79,7 @@ if Server then
 						Log "WARNING: Over 50 tries for mod panel placement!"
 						break
 					end
-				until not trace.entity and hasDistance(trace.endPoint, 0.5, 10, badPoints)
+				until not trace.entity and hasDistance(trace.endPoint, 0.5, 10, spawnPoints, math.ceil(#spawnPoints/10))
 
 				modPanel:SetOrigin(trace.endPoint - modPanel.offset)
 
