@@ -41,6 +41,7 @@ end
 
 function ModPanel:SetOrigin(origin)
 	Entity.SetOrigin(self, origin)
+	self:ReInitialize()
 end
 
 if Client then
@@ -98,7 +99,8 @@ if Client then
 	local kRecreationInterval = 5
 	function ModPanel:OnUpdateRender()
 		if Shared.GetTime() - self.lastUpdate > kRecreationInterval then
-			self:ReInitialize()
+			--self:ReInitialize()
+			self.panel:SetIndices(self.indices, #self.indices)
 		end
 		local player = Client.GetLocalPlayer()
 		local coords = Coords.GetLookAt(self:GetOrigin() + self.offset, player:GetEyePos(), up)
@@ -108,6 +110,11 @@ else
 	function ModPanel:ReInitialize()
 		if type(self.offset) == "table" then
 			self.offset = Vector(self.offset[1], self.offset[2], self.offset[3])
+		end
+		if self.modPanelId ~= 0 then
+			for k, v in pairs(kModPanels[self.modPanelId]) do
+				self[k] = v
+			end
 		end
 	end
 end
@@ -140,7 +147,7 @@ function ModPanel:GetCanBeUsed(player, useSuccessTable)
 end
 
 function ModPanel:GetUsablePoints()
-	return {self:GetOrigin() + self.offset}
+	return {self:GetPanelOrigin()}
 end
 
 if Client then
