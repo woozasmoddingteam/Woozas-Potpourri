@@ -65,7 +65,7 @@ if Client then
 		end
 
 		self.panel = Client.CreateRenderDynamicMesh(RenderScene.Zone_Default)
-        self.panel:SetMaterial(self.material)
+		self.panel:SetMaterial(self.material)
 
 		local vertices
 
@@ -99,8 +99,7 @@ if Client then
 	local kRecreationInterval = 5
 	function ModPanel:OnUpdateRender()
 		if Shared.GetTime() - self.lastUpdate > kRecreationInterval then
-			--self:ReInitialize()
-			self.panel:SetIndices(self.indices, #self.indices)
+			self:ReInitialize()
 		end
 		local player = Client.GetLocalPlayer()
 		local coords = Coords.GetLookAt(self:GetOrigin() + self.offset, player:GetEyePos(), up)
