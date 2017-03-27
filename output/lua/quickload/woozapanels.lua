@@ -24,4 +24,10 @@ if AddModPanel then
 		size     = {0.5, 0.5},
 		name     = "steam_group"
 	}
+	AddModPanel {
+		material = "materials/ns2-log-archive-panel.material",
+		url      = "http://steamcommunity.com/groups/Apheriox#announcements/detail/568983756002184197",
+		size     = {0.5, 0.5},
+		name     = "ns2-log-archive-panel"
+	}
 end
