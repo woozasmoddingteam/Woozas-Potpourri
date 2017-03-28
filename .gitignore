@@ -48,5 +48,6 @@ Temporary Items
 
 source
 output
-synchroniser
+synchroniser.exe
+synchroniser.obj
 synchroniser.o
