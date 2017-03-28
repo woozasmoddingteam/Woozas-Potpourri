@@ -1,0 +1,3 @@
+[submodule "submodules/ModPanelsPlusPlus"]
+	path = submodules/ModPanelsPlusPlus
+	url = https://github.com/Laaas/ModPanelsPlusPlus.git
