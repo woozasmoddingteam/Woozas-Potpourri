@@ -37,11 +37,15 @@ void main() {
 			} else if(path.exists) {
 				stderr.writefln("Already exists: %s!", path);
 			} else {
-				char[] relative_path;
-				foreach(i; 0 .. path.count('/'))
-					relative_path ~= "../";
-				relative_path ~= entry;
-				symlink(relative_path, path);
+				version(Posix) {
+					char[] relative_path;
+					foreach(i; 0 .. path.count('/'))
+						relative_path ~= "../";
+					relative_path ~= entry;
+					symlink(relative_path, path);
+				} else {
+					copy(entry, path);
+				}
 			}
 		}
 	}
