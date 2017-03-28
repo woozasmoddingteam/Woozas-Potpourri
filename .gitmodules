@@ -1,3 +1,9 @@
 [submodule "submodules/ModPanelsPlusPlus"]
 	path = submodules/ModPanelsPlusPlus
 	url = https://github.com/Laaas/ModPanelsPlusPlus.git
+[submodule "submodules/Shine-Epsilon"]
+	path = submodules/Shine-Epsilon
+	url = https://github.com/GhoulofGSG9/Shine-Epsilon.git
+[submodule "submodules/BadgesPlus"]
+	path = submodules/BadgesPlus
+	url = https://github.com/GhoulofGSG9/BadgesPlus.git
