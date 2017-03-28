@@ -10,7 +10,7 @@ import core.stdc.stdlib : exit;
 void main() {
 	// Update submodules
 	if(auto err = spawnProcess(["git", "submodule", "update"]).wait) {
-		writefln("git returned error code %s!", err);
+		stderr.writefln("git returned error code %s!", err);
 		exit(1);
 	}
 	
