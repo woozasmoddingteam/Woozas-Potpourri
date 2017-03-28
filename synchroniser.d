@@ -30,7 +30,8 @@ void main() {
 		writefln("Output folder for %s: %s", modfolder, output);
 		foreach(string entry; output.dirEntries(SpanMode.breadth)) {
 			string path = chainPath("output", entry.chompPrefix(output)).array;
-			if(entry.baseName[0] == '.' || entry.baseName == "LICENSE.txt" || entry.baseName == "README.md") {
+			auto normalised_name = entry.baseName.toLower.stripExtension;
+			if(normalised_name[0] == '.' || normalised_name == "license" || normalised_name == "readme") {
 				writefln("Ignored %s!", entry);
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
