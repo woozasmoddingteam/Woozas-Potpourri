@@ -1,7 +1,9 @@
 name        = "Wooza's Potpourri - Beta"
 source_dir  = "source"
 output_dir  = "output"
-description = [=[]=]
+description = [=[
+modid: 34e28e40
+]=]
 image       = "preview.jpg"
 tag_modtype = "Tool"
 tag_support = "Must be run on Server"
