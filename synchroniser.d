@@ -11,12 +11,12 @@ import core.stdc.stdlib : exit;
 void main() {
 	// Update submodules
 	writeln("Making sure submodules are initialised...");
-	if(auto err = spawnProcess("git submodule init").wait) {
+	if(auto err = spawnProcess(["git", "submodule", "init"]).wait) {
 		stderr.writefln("Could not initialise submodules! Error code: %s", err);
 	}
 
 	writeln("Checking for submodule updates...");
-	if(auto err = spawnProcess("git submodule update --remote").wait) {
+	if(auto err = spawnProcess(["git", "submodule", "update", "--remote"]).wait) {
 		stderr.writefln("Could not update submodules! Error code: %s", err);
 	}
 	
