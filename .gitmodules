@@ -7,3 +7,6 @@
 [submodule "submodules/BadgesPlus"]
 	path = submodules/BadgesPlus
 	url = https://github.com/GhoulofGSG9/BadgesPlus.git
+[submodule "submodules/LocalTalkExtended"]
+	path = submodules/LocalTalkExtended
+	url = https://github.com/Laaas/LocalTalkExtended.git
