@@ -8,21 +8,36 @@ import std.array;
 import std.process;
 import core.stdc.stdlib : exit;
 
-void main() {
-	// Update submodules
-	writeln("Making sure submodules are initialised...");
-	if(auto err = spawnProcess(["git", "submodule", "init"]).wait) {
-		stderr.writefln("Could not initialise submodules! Error code: %s", err);
-	}
+void main(string[] args) {
 
-	writeln("Checking for submodule updates...");
-	if(auto err = spawnProcess(["git", "submodule", "update", "--remote"]).wait) {
-		stderr.writefln("Could not update submodules! Error code: %s", err);
+	bool partial = false;
+
+	if(args.length < 2) {
+		// Update submodules
+		writeln("Making sure submodules are initialised...");
+		if(auto err = spawnProcess(["git", "submodule", "init"]).wait) {
+			stderr.writefln("Could not initialise submodules! Error code: %s", err);
+		}
+
+		writeln("Checking for submodule updates...");
+		if(auto err = spawnProcess(["git", "submodule", "update", "--remote"]).wait) {
+			stderr.writefln("Could not update submodules! Error code: %s", err);
+		}
+
+		if(exists("output"))
+			rmdirRecurse("output");
+		mkdir("output");
+	} else if(args.length > 2) {
+		stderr.writefln("Too many arguments passed!");
+		return;
+	} else if(args[1] == "partial") {
+		if(!exists("output"))
+			mkdir("output");
+		partial = true;
+	} else {
+		stderr.writefln("Incorrect argument passed!");
+		return;
 	}
-	
-	if(exists("output"))
-		rmdirRecurse("output");
-	mkdir("output");
 
 	// Mods that need to be merged
 	foreach(string modfolder; dirEntries("submodules", SpanMode.shallow)) {
@@ -40,9 +55,8 @@ void main() {
 				writefln("Ignored %s!", entry);
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
-			} else if(path.exists) {
-				stderr.writefln("Already exists: %s!", path);
-			} else {
+			} else if(path.exists && !partial) {
+			} else if(!partial || !path.exists || path.timeLastModified != entry.timeLastModified) {
 				version(Posix) {
 					char[] relative_path;
 					foreach(i; 0 .. path.count('/'))
