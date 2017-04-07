@@ -54,6 +54,7 @@ local function request()
 end
 
 function fromDiscord(msg)
+	if #msg == 0 then return end
 	if byte(msg, 1) == 2 then
 		Shine:NotifyColour(nil, 40, 10, 10, "Discord bot is restarting! Connection disrupted for 10 seconds.")
 		Shine.Timer.Simple(10, request)
@@ -78,7 +79,7 @@ function fromDiscord(msg)
 		local client = admin and discord_admin or discord_user
 		Shine:RunCommand(client, cmd, false, unpack(exploded))
 	else
-		original_notify(Shine, nil, 40, 20, 80, "(Discord) " .. name .. ":", 170, 170, 170, message)
+		(original_notify or Shine.NotifyDualColour)(Shine, nil, 40, 20, 80, "(Discord) " .. name .. ":", 170, 170, 170, message)
 	end
 	request()
 end
