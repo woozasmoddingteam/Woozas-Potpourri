@@ -406,8 +406,8 @@ end
 function Plugin:MapChange(map)
 	say {
 		steamid = 0,
-		author  = "[Map Vote]"
-		message = "Changing map to " .. map
+		author  = "[Map Vote]",
+		message = "Changing map to " .. map,
 		color   = 0x808F24
 	}
 end
