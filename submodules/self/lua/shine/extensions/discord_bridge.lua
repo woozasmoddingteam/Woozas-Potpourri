@@ -42,7 +42,7 @@ local function explode(str)
 end
 
 local fromDiscord
-local request()
+local function request()
 	Shared.SendHTTPRequest(inbound, "POST", fromDiscord)
 end
 
@@ -56,6 +56,12 @@ function fromDiscord(msg)
 	local name_len = byte(msg, 2)
 	local name = sub(msg, 3, 2+name_len)
 	local message = sub(msg, 3+name_len)
+	--[=[
+	Log("Admin: %s", admin)
+	Log("Name length: %s", name_len)
+	Log("Name: %s", name)
+	Log("Message: %s", message)
+	--]=]
 	-- Command
 	if false and byte(message, 1) == byte '!' then
 		local exploded = explode(message)
@@ -120,7 +126,7 @@ do
 			goto to_discord
 		end
 
-		return
+		do return end
 
 		::to_discord::
 
@@ -149,14 +155,14 @@ do
 			goto to_discord
 		end
 
-		return
+		do return end
 
 		::to_discord::
 
 		say {
 			steamid = 0,
 			author = prefix,
-			message = message
+			message = message,
 			color = bit.bor(bit.lshift(rp, 16), bit.lshift(gp, 8), bp)
 		}
 	end
@@ -176,7 +182,7 @@ do
 			goto to_discord
 		end
 
-		return
+		do return end
 
 		::to_discord::
 
@@ -188,14 +194,14 @@ do
 		say {
 			steamid = 0,
 			author = prefix,
-			message = message
+			message = message,
 			color = bit.bor(bit.lshift(rp, 16), bit.lshift(gp, 8), bp)
 		}
 	end
 end
 
 local team_colors = {
-	0x4B4E52,
+	[0] = 0x4B4E52,
 	0x327FB4,
 	0xF65C00,
 	0xD3D7CF
@@ -210,7 +216,7 @@ function Plugin:PlayerSay(client, message)
 			steamid = player:GetSteamId(),
 			author  = name,
 			message = message.message,
-			color   = team_colors[team]
+			color   = team_colors[team] or 0x00FF00
 		}
 	end
 end
