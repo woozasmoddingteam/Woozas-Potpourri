@@ -403,6 +403,15 @@ function Plugin:PlayerSay(client, message)
 	end
 end
 
+function Plugin:MapChange(map)
+	say {
+		steamid = 0,
+		author  = "[Map Vote]"
+		message = "Changing map to " .. map
+		color   = 0x808F24
+	}
+end
+
 function Plugin:Initialise()
 	inbound = self.Config.inbound
 	outbound = self.Config.outbound
