@@ -1,12 +1,5 @@
 local Shine = Shine
-local Plugin = {}
-Plugin.NS2Only = false
-Plugin.HasConfig = true
-Plugin.ConfigName = "DiscordBridge.json"
-Plugin.DefaultConfig = {
-	outbound = "localhost:64999/to",
-	inbound  = "localhost:64999/from"
-}
+local Plugin = Plugin
 
 local discord_user = {}
 function discord_user.GetControllingPlayer() end
@@ -21,28 +14,28 @@ local sub  = string.sub
 
 local inbound
 local outbound
+local language
+
 local original_notify
 
 local function say(msg)
 	if outbound then
-		Log("Sending message to discord: %s", msg)
 		Shared.SendHTTPRequest(outbound, "POST", msg)
 	end
 end
 
-local space = byte ' '
 local function explode(str)
 	local ret = {}
 	local last = 1
 	for i = 1, #str do
-		if byte(str, i) == space then
+		if byte(str, i) == byte ' ' then
 			if i ~= last then
 				table.insert(ret, sub(str, last, i-1))
 			end
-			last = i
+			last = i+1
 		end
 	end
-	if last ~= #str then
+	if last <= #str then
 		table.insert(ret, sub(str, last))
 	end
 	return ret
@@ -55,27 +48,28 @@ end
 
 function fromDiscord(msg)
 	if #msg == 0 then return end
-	if byte(msg, 1) == 2 then
-		Shine:NotifyColour(nil, 40, 10, 10, "Discord bot is restarting! Connection disrupted for 10 seconds.")
-		Shine.Timer.Simple(10, request)
-		return
-	end
 	local admin = byte(msg, 1) == 1
 	local name_len = byte(msg, 2)
 	local name = sub(msg, 3, 2+name_len)
 	local message = sub(msg, 3+name_len)
-	--[=[
-	Log("Admin: %s", admin)
-	Log("Name length: %s", name_len)
-	Log("Name: %s", name)
-	Log("Message: %s", message)
-	--]=]
 	-- Command
 	if byte(message, 1) == byte '!' or byte(message, 1) == byte '?' then
 		local exploded = explode(sub(message, 2))
 		local cmd = table.remove(exploded, 1)
-		cmd = byte(message, 1) == byte '!' and Shine.ChatCommands[cmd].ConCmd or cmd
-		Log("Command %s received with arguments %s!", cmd, exploded)
+		if byte(message, 1) == byte '!' then
+			cmd = Shine.ChatCommands[cmd]
+			if not cmd then
+				say {
+					color = 0xFF0000,
+					steamid = 0,
+					author = "DiscordBot",
+					message = "Not a valid command!"
+				}
+				request()
+				return
+			end
+			cmd = cmd.ConCmd
+		end
 		local client = admin and discord_admin or discord_user
 		Shine:RunCommand(client, cmd, false, unpack(exploded))
 	else
@@ -85,6 +79,8 @@ function fromDiscord(msg)
 end
 
 Shine.Hook.Add("OnFirstThink", "OverrideShineLogging", function()
+	local Locale = loadfile("lua/shine/extensions/discord_bridge/locale.lua")(language)
+
 	assert(Shine.Notify)
 	local StringFormat = string.format
 	local Ceil = math.ceil
@@ -167,168 +163,8 @@ Shine.Hook.Add("OnFirstThink", "OverrideShineLogging", function()
 		}
 	end
 
-	--[=[ Server-side Locale lib ]=]
-
-	local LangFiles = {}
-	local Sources   = {
-		core = "locale/shine/core"
-	}
-	local Strings   = {
-		core = {}
-	}
-	Shared.GetMatchingFileNames( "locale/*.json", true, LangFiles )
-	local extensions = {}
-	Shared.GetMatchingFileNames("locale/shine/extensions/*", false, extensions)
-
-	local function baseName(path)
-		for i = #path-1, 1, -1 do
-			if path:byte(i) == byte '/' then
-				return path:sub(i+1)
-			end
-		end
-		return path
-	end
-	for i = 1, #extensions do
-		local path = extensions[i]
-		path = path:sub(1, #path-1)
-		local name = baseName(path)
-		Log("Registered locale %s in path %s!", name, path)
-		Sources[name] = path
-		Strings[name] = {}
-	end
-
-	local LangLookup = {}
-	for i = 1, #LangFiles do
-		LangLookup[ LangFiles[ i ] ] = true
-	end
-
-	local loadstring = loadstring
-	local DefaultDef = {
-		GetPluralForm = function( Value )
-			return Value == 1 and 1 or 2
-		end
-	}
-
-	local pcall = pcall
-	local setfenv = setfenv
-	local StringGSub = string.gsub
-
-	local PermittedKeywords = {
-		[ "and" ] = true,
-		[ "or" ] = true,
-		[ "not" ] = true,
-		[ "n" ] = true
-	}
-
-	local function SanitiseCode( Source )
-		return StringGSub( StringGSub( Source, "[\"'%[%]%.:]", "" ), "%a+", function( Keyword )
-			if not PermittedKeywords[ Keyword ] then return "" end
-		end )
-	end
-
-	local ExpectedDefKeys = {
-		GetPluralForm = function( Lang, Source )
-			if not Source then return DefaultDef.GetPluralForm end
-
-			local Code = StringFormat( "return ( function( n ) return ( %s ) end )( ... )",
-				SanitiseCode( Source ) )
-
-			local PluralFormFunc, Err = loadstring( Code )
-			local function Reject( Error )
-				Print( "[Shine Locale] Error in plural form for %s: %s", Lang, Error )
-				PluralFormFunc = DefaultDef.GetPluralForm
-			end
-
-			if PluralFormFunc then
-				setfenv( PluralFormFunc, {} )
-				local Valid, Err = pcall( PluralFormFunc, 1 )
-				if not Valid then
-					Reject( Err )
-				end
-			else
-				Reject( Err )
-			end
-
-			return PluralFormFunc
-		end
-	}
-
-	local function ResolveFilePath( Folder, Lang )
-		return StringFormat( "%s/%s.json", Folder, Lang )
-	end
-
-	local LanguageDefinitions = {}
-
-	local function GetLanguageDefinition( Lang )
-		Lang = Lang or "enGB"
-
-		if LanguageDefinitions[ Lang ] then
-			return LanguageDefinitions[ Lang ]
-		end
-
-		local Path = ResolveFilePath( "locale/shine", StringFormat( "def-%s", Lang ) )
-		local Def = DefaultDef
-
-		if LangLookup[ Path ] then
-			local LangDefs = Shine.LoadJSONFile( Path )
-			if LangDefs then
-				Def = {}
-
-				for ExpectedKey, Loader in pairs( ExpectedDefKeys ) do
-					Def[ ExpectedKey ] = Loader( Lang, LangDefs[ ExpectedKey ] )
-				end
-			else
-				Def = DefaultDef
-			end
-		end
-
-		LanguageDefinitions[ Lang ] = Def
-
-		return Def
-	end
-
-
-	local function LoadStrings( Source, Lang )
-		local Folder = Sources[ Source ]
-		if not Folder then return nil end
-
-		local Path = ResolveFilePath( Folder, Lang )
-		if not LangLookup[ Path ] then
-			return nil
-		end
-
-		local LanguageStrings = Shine.LoadJSONFile( Path )
-		if LanguageStrings then
-			Strings[ Source ][ Lang ] = LanguageStrings
-		end
-
-		return LanguageStrings
-	end
-
-	local function GetLanguageStrings( Source, Lang )
-		local LoadedStrings = Strings[ Source ]
-		if not LoadedStrings then return nil end
-
-		local LanguageStrings = LoadedStrings[ Lang ]
-		if not LanguageStrings then
-			LanguageStrings = LoadStrings( Source, Lang )
-		end
-
-		return LanguageStrings
-	end
-
-	local function GetLocalisedString( Source, Lang, Key )
-		local LanguageStrings = GetLanguageStrings( Source, Lang )
-		if not LanguageStrings or not LanguageStrings[ Key ] then
-			LanguageStrings = GetLanguageStrings( Source, DefaultLanguage )
-		end
-
-		return LanguageStrings and LanguageStrings[ Key ] or Key
-	end
-
 	local old = assert(Shine.TranslatedNotifyDualColour)
 	function Shine:TranslatedNotifyDualColour(player, rp, gp, bp, prefix, c, g, b, string, source)
-		Log("Message to %s from %s: %s", player, prefix or "[N/A]", string)
 		if player == discord_user or player == discord_admin then
 			goto to_discord
 		end
@@ -343,10 +179,8 @@ Shine.Hook.Add("OnFirstThink", "OverrideShineLogging", function()
 
 		::to_discord::
 
-		source = source and string.UTF8Lower(source) or "core"
-
-		prefix = GetLocalisedString(source, "enGB", prefix)
-		string = GetLocalisedString(source, "enGB", string)
+		prefix = Locale.GetLocalisedString(source, prefix)
+		string = Locale.GetLocalisedString(source, string)
 
 		say {
 			steamid = 0,
@@ -381,6 +215,23 @@ Shine.Hook.Add("OnFirstThink", "OverrideShineLogging", function()
 			color   = 0x808F24
 		}
 	end
+
+	local old = Shine.SendTranslatedCommandError
+	local interpolate = string.Interpolate
+	function Shine:SendTranslatedCommandError(client, name, data, source)
+		if client == discord_user or client == discord_admin then
+			local localised_string = Locale.GetLocalisedString(source, name)
+			local interpolated = interpolate(localised_string, data)
+			say {
+				color   = 0xFF0000,
+				steamid = 0,
+				message = interpolated,
+				author  = "Shine"
+			}
+		else
+			old(self, client, name, data, source)
+		end
+	end
 end)
 
 local team_colors = {
@@ -414,8 +265,12 @@ function Plugin:MapChange(map)
 end
 
 function Plugin:Initialise()
-	inbound = self.Config.inbound
+	inbound  = self.Config.inbound
 	outbound = self.Config.outbound
+	language = self.Config.language
+
+	self:BindCommand("sh_relinkdiscord", "RelinkDiscord", request)
+	
 	self.Enabled = true
 	request()
 
@@ -426,5 +281,3 @@ function Plugin:Cleanup()
 	self.BaseClass.Cleanup(self)
 	inbound, outbound = nil, nil
 end
-
-Shine:RegisterExtension("discord_bridge", Plugin)
