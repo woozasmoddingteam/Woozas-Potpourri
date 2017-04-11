@@ -1,0 +1,4 @@
+
+modEntry = {
+	Predict = "lua/shine/extensions/eastereggs/easteregg.lua"
+}

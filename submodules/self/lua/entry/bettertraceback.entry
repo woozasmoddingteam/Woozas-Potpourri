@@ -19,12 +19,6 @@ local types = {
 		return literal and format("\"%s\"", s) or s
 	end,
 	table = function(t, literal, indent, printed)
-		if printed[t] then
-			return tostring(t)
-		else
-			printed[t] = true
-		end
-
 		local s = "{"
 		local indent = indent or 1
 		for i = 1, #t do
@@ -42,7 +36,7 @@ local types = {
 			end
 		end
 
-		return string.sub(tostring(t), 8) .. ":" .. s .. "\n" .. string.rep("\t", indent-1) .. "}"
+		return s .. "\n" .. string.rep("\t", indent-1) .. "}"
 	end,
 	cdata = function(v, literal)
 		if v.isa then
@@ -82,20 +76,25 @@ function CoordsToString(coords, coordsName)
 end
 
 function ToString(v, literal, indentation, printed)
-	local meta = getmetatable(v)
-	if meta and meta.__tostring then
-		return meta.__tostring(v)
+	if v == nil then
+		return "nil"
 	end
 
+	printed = printed or {}
+	local meta = getmetatable(v)
 	local entry = types[type(v)]
-	if entry then
-		return entry(v, literal, indentation, printed or {})
+
+	if (not meta or not meta.__tostring) and not printed[v] and entry then
+		printed[v] = true
+		return "(" .. tostring(v) .. "):" .. entry(v, literal, indentation, printed)
 	else
-		return tostring(v)
+		printed[v] = true
+		return "(" .. tostring(v) .. ")"
 	end
 end
 
 debug.traceback = function(message, level)
+	local printed = {}
 	if not level then
 		level = message and message + 1 or 2
 		message = ""
@@ -108,7 +107,7 @@ debug.traceback = function(message, level)
 		local j = 1
 		local name, value = debug.getlocal(i, j)
 		while name do
-			str = str .. ("\n\t\t%s = %s"):format(name, ToString(value, 3))
+			str = str .. ("\n\t\t%s = %s"):format(name, ToString(value, true, 3, printed))
 			j = j + 1
 			name, value = debug.getlocal(i, j)
 		end
