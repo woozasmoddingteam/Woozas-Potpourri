@@ -1,4 +1,0 @@
-modEntry = {
-	Shared = "lua/anniversary/Shared.lua",
-	FileHooks = "lua/anniversary/FileHooks.lua"
-};
