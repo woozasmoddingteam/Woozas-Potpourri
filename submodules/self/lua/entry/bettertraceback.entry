@@ -2,13 +2,13 @@ local format = string.format
 
 local cdata_types = {
 	Vector = function(v, literal)
-		return format("Vector(%f, %f, %f)", v.x, v.y, v.z)
+		return format(literal and "Vector(%f, %f, %f)" or "%f, %f, %f", v.x, v.y, v.z)
 	end,
 	Color = function(c, literal)
-		return format("Color(%f, %f, %f, %f)", c.r, c.g, c.b, c.a)
+		return format(literal and "Color(%f, %f, %f, %f)" or "%f, %f, %f, %f", c.r, c.g, c.b, c.a)
 	end,
 	Angles = function(a, literal)
-		return format("Angles{yaw = %f, pitch = %f, roll = %f}", a.yaw, a.pitch, a.roll)
+		return format(literal and "Angles{yaw = %f, pitch = %f, roll = %f}" or "yaw: %f, pitch: %f, roll: %f", a.yaw, a.pitch, a.roll)
 	end,
 	Coords = function(c, literal)
 		return CoordsToString(c)
@@ -16,9 +16,19 @@ local cdata_types = {
 }
 local types = {
 	string = function(s, literal)
-		return literal and format("\"%s\"", s) or s
+		if literal then
+			return "\"" .. s .. "\""
+		else
+			return s
+		end
 	end,
 	table = function(t, literal, indent, printed)
+		if printed[t] then
+			return tostring(t)
+		end
+
+		printed[t] = true
+
 		local s = "{"
 		local indent = indent or 1
 		for i = 1, #t do
@@ -36,18 +46,28 @@ local types = {
 			end
 		end
 
-		return s .. "\n" .. string.rep("\t", indent-1) .. "}"
+		if literal then
+			return s .. "\n" .. string.rep("\t", indent-1) .. "}"
+		else
+			return AddressOf(t) .. ":" .. s .. "\n" .. string.rep("\t", indent-1) .. "}"
+		end
 	end,
 	cdata = function(v, literal)
 		if v.isa then
+			local s
 			if v:isa "Vector" then
-				return cdata_types.Vector(v, literal)
+				s = cdata_types.Vector(v, literal)
 			elseif v:isa "Color" then
-				return cdata_types.Color(v, literal)
+				s = cdata_types.Color(v, literal)
 			elseif v:isa "Angles" then
-				return cdata_types.Angles(v, literal)
+				s = cdata_types.Angles(v, literal)
 			elseif v:isa "Coords" then
-				return cdata_types.Coords(v, literal)
+				s = cdata_types.Coords(v, literal)
+			end
+			if literal then
+				return AddressOf(v) .. ":" .. s
+			else
+				return s
 			end
 		else
 			return tostring(v)
@@ -75,6 +95,10 @@ function CoordsToString(coords, coordsName)
                             coords.zAxis.x, coords.zAxis.y, coords.zAxis.z)
 end
 
+function AddressOf(v)
+	return tostring(v):sub(#v-9)
+end
+
 function ToString(v, literal, indentation, printed)
 	if v == nil then
 		return "nil"
@@ -85,20 +109,15 @@ function ToString(v, literal, indentation, printed)
 	local entry = types[type(v)]
 
 	if (not meta or not meta.__tostring) and not printed[v] and entry then
-		printed[v] = true
-		return "(" .. tostring(v) .. "):" .. entry(v, literal, indentation, printed)
+		return entry(v, literal, indentation, printed)
 	else
-		printed[v] = true
-		return "(" .. tostring(v) .. ")"
+		return tostring(v)
 	end
 end
 
 debug.traceback = function(message, level)
 	local printed = {}
-	if not level then
-		level = message and message + 1 or 2
-		message = ""
-	end
+	level   = level and level + 1 or 2
 	local str = "Call stack:"
 	local i = level
 	local func = debug.getinfo(i)
@@ -114,7 +133,15 @@ debug.traceback = function(message, level)
 		i = i + 1
 		func = debug.getinfo(i)
 	end
-	return message .. "\n" .. str
+	if message then
+		return message .. "\n" .. str
+	else
+		return str
+	end
 end
+
+Log(debug.traceback("TEST:"))
+
+Script.CallStack = debug.traceback
 
 modEntry = {}
