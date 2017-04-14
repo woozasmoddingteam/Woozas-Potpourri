@@ -1,6 +1,9 @@
 local Shine = Shine
+local Plugin = Plugin
 
-local count = 0
+local function invalid(v)
+	return v.x == 0 and v.y == 0 and v.z == 0
+end
 
 local function new(client, name)
 	local player = client:GetControllingPlayer()
@@ -8,22 +11,47 @@ local function new(client, name)
 	local startPoint = player:GetEyePos()
 	local viewCoords = player:GetViewCoords()
 
-	local endPoint = startPoint + viewCoords.zAxis * max
+	local endPoint = startPoint + viewCoords.zAxis * 100
 
-	local endPoint = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon())).endPoint
+	local t = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()))
+	endPoint = t.endPoint
+
+	local normal = t.normal
 
 	local ent = CreateEntity("easteregg")
 
 	local coords = Coords()
-	coords.yAxis = t.normal
-	local direction = player:GetViewCoords().zAxis
-	coords.xAxis = -t.normal:CrossProduct(direction)
-	coords.zAxis = coords.yAxis:CrossProduct(coords.xAxis)
+
+	coords.yAxis = invalid(normal) and Vector(0, 1, 0) or normal
+	local direction = viewCoords.zAxis
+	local x = -normal:CrossProduct(direction)
+	coords.xAxis = invalid(x) and Vector(-1, 0, 0) or x
+	local z = normal:CrossProduct(coords.xAxis)
+	coords.zAxis = invalid(z) and Vector(0, 0, 1) or z
+	coords.origin = endPoint
 
 	ent:SetCoords(coords)
 	ent:SetName(name)
+end
 
-	count = count + 1
+local function show()
+	local eggs = Plugin.Config.Saved[Shared.GetMapName()]
+
+	for i = 1, #eggs do
+		local data = eggs[i]
+		local dcoords = data.coords
+		local egg = CreateEntity("easteregg")
+		local coords = Coords()
+		coords.origin = Vector(dcoords[1], dcoords[2], dcoords[3])
+		coords.xAxis  = Vector(dcoords[4], dcoords[5], dcoords[6])
+		coords.yAxis  = Vector(dcoords[7], dcoords[8], dcoords[9])
+		coords.zAxis  = Vector(dcoords[10], dcoords[11], dcoords[12])
+		egg:SetName(data.name)
+		egg:SetCoords(coords)
+		egg:SetModel(data.model)
+	end
+
+	Plugin.Config.Saved[Shared.GetMapName()] = {}
 end
 
 local function hide()
@@ -33,14 +61,17 @@ local function hide()
 	for i = 1, #eggs do
 		local egg = eggs[i]
 		local coords = egg:GetCoords()
-		local xAxis = coords.xAxis
-		local yAxis = coords.yAxis
-		local zAxis = coords.zAxis
+		local xAxis  = coords.xAxis
+		local yAxis  = coords.yAxis
+		local zAxis  = coords.zAxis
+		local origin = coords.origin
 		saved[i] = {
 			name = egg:GetName(),
 			model = egg:GetModelName(),
 			coords = {
-				origin,
+				origin.x,
+				origin.y,
+				origin.z,
 				xAxis.x,
 				xAxis.y,
 				xAxis.z,
@@ -55,35 +86,10 @@ local function hide()
 		Server.DestroyEntity(egg)
 	end
 
-	Plugin.Config.Saved[Shared.GetMapName()] = saved
+	table.copy(saved, Plugin.Config.Saved[Shared.GetMapName()], true)
 
 	Plugin:SaveConfig()
-
-	count = 0
 end
-
-local function show()
-	hide()
-	local eggs = Plugin.Config.Saved[Shared.GetMapName()]
-
-	for i = 1, #eggs do
-		local data = eggs[i]
-		local dcoords = data.coords
-		local egg = CreateEntity("EasterEgg")
-		egg:SetName(data.name)
-		local coords = Coords()
-		coords.origin = dcoords[1]
-		coords.xAxis = Vector(dcoords[2], dcoords[3], dcoords[4])
-		coords.yAxis = Vector(dcoords[5], dcoords[6], dcoords[7])
-		coords.zAxis = Vector(dcoords[8], dcoords[9], dcoords[10])
-		egg:SetCoords(coords)
-	end
-
-	count = #eggs
-end
-
-local handler = Shine.BuildErrorHandler("TEST")
-handler()
 
 function Plugin:Initialise()
 	config = self.Config

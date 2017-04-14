@@ -11,7 +11,7 @@ local cdata_types = {
 		return format(literal and "Angles{yaw = %f, pitch = %f, roll = %f}" or "yaw: %f, pitch: %f, roll: %f", a.yaw, a.pitch, a.roll)
 	end,
 	Coords = function(c, literal)
-		return CoordsToString(c)
+		return CoordsToString(c, not literal and "" or nil)
 	end
 }
 local types = {
@@ -46,7 +46,7 @@ local types = {
 			end
 		end
 
-		if literal then
+		if not literal then
 			return s .. "\n" .. string.rep("\t", indent-1) .. "}"
 		else
 			return AddressOf(t) .. ":" .. s .. "\n" .. string.rep("\t", indent-1) .. "}"
@@ -64,11 +64,7 @@ local types = {
 			elseif v:isa "Coords" then
 				s = cdata_types.Coords(v, literal)
 			end
-			if literal then
-				return AddressOf(v) .. ":" .. s
-			else
-				return s
-			end
+			return s
 		else
 			return tostring(v)
 		end
@@ -79,24 +75,25 @@ local types = {
 			return tostring(u)
 		elseif meta.__towatch then
 			return ToString(meta.__towatch(u), literal)
-        else
-            return "(" .. tostring(meta) .. "):(" .. tostring(u) .. ")"
-        end
+		else
+			return "(" .. tostring(meta) .. "):(" .. tostring(u) .. ")"
+		end
 	end
 }
 table.tostring = types.table
 
-function CoordsToString(coords, coordsName)
-    local name = ConditionalValue(coordsName ~= nil, tostring(coordsName), "Coords ")
-    return StringFormat("%s{ origin: (%0.2f, %0.2f, %0.2f) xAxis: (%0.2f, %0.2f, %0.2f) yAxis: (%0.2f, %0.2f, %0.2f) zAxis: (%0.2f, %0.2f, %0.2f) }",
-                            name, coords.origin.x, coords.origin.y, coords.origin.z,
-                            coords.xAxis.x, coords.xAxis.y, coords.xAxis.z,
-                            coords.yAxis.x, coords.yAxis.y, coords.yAxis.z,
-                            coords.zAxis.x, coords.zAxis.y, coords.zAxis.z)
+function CoordsToString(coords, name)
+	name = name or "Coords "
+	return format("%s{ origin = (%0.2f, %0.2f, %0.2f), xAxis = (%0.2f, %0.2f, %0.2f), yAxis = (%0.2f, %0.2f, %0.2f), zAxis = (%0.2f, %0.2f, %0.2f) }",
+							name, coords.origin.x, coords.origin.y, coords.origin.z,
+							coords.xAxis.x, coords.xAxis.y, coords.xAxis.z,
+							coords.yAxis.x, coords.yAxis.y, coords.yAxis.z,
+							coords.zAxis.x, coords.zAxis.y, coords.zAxis.z)
 end
 
 function AddressOf(v)
-	return tostring(v):sub(#v-9)
+	local s = tostring(v)
+	return s:sub(#s-9)
 end
 
 function ToString(v, literal, indentation, printed)
@@ -115,6 +112,7 @@ function ToString(v, literal, indentation, printed)
 	end
 end
 
+debug.originaltraceback = debug.traceback
 debug.traceback = function(message, level)
 	local printed = {}
 	level   = level and level + 1 or 2
@@ -122,7 +120,11 @@ debug.traceback = function(message, level)
 	local i = level
 	local func = debug.getinfo(i)
 	while func do
-		str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined)
+		if func.linedefined == 0 then
+			str = str .. ("\n\t#%d: %s:%d"):format(i-level+1, func.source:sub(2), func.currentline)
+		else
+			str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined)
+		end
 		local j = 1
 		local name, value = debug.getlocal(i, j)
 		while name do
@@ -139,8 +141,6 @@ debug.traceback = function(message, level)
 		return str
 	end
 end
-
-Log(debug.traceback("TEST:"))
 
 Script.CallStack = debug.traceback
 

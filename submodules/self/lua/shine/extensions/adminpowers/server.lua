@@ -1,8 +1,12 @@
 local Shine = Shine
-local Plugin = {
-	Version = "1.0",
-	NS2Only = false
-}
+local Plugin = Plugin
+
+local function invalid(client, ent)
+	if not ent then
+		Shine:NotifyError(client, "Not a valid target!")
+		return true
+	end
+end
 
 local function trace(client, max)
 	max = max or 100
@@ -14,13 +18,16 @@ local function trace(client, max)
 
 	local endPoint = startPoint + viewCoords.zAxis * max
 
-	return Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()))
+	local t = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()))
+	return t, player, startPoint
 end
 
 local function changeAngles(client, prop, amount)
 	local ent = trace(client).entity
 
-	if not ent then return end
+	if invalid(client, ent) then
+		return
+	end
 
 	local angles = ent:GetAngles()
 
@@ -41,23 +48,39 @@ local function increasePitch(client, amount)
 	changeAngles(client, "pitch", amount)
 end
 
+local function scale(client, x, y, z)
+	local ent = trace(client).entity
+
+	if invalid(client, ent) then
+		return
+	end
+
+	ent.scale.x = x
+	ent.scale.y = y
+	ent.scale.z = z
+end
+
 local function pushRelative(client, amount)
-	local t = trace(client)
+	local t, _, startPoint = trace(client)
 	local endPoint = t.endPoint
 	local ent = t.entity
 
-	if not ent then return end
+	if invalid(client, ent) then
+		return
+	end
 
 	local origin = ent:GetOrigin()
 	ent:SetOrigin((endPoint - startPoint) * amount + startPoint + origin - endPoint)
 end
 
 local function pushAbsolute(client, amount)
-	local t = trace(client)
+	local t, _, startPoint = trace(client)
 	local endPoint = t.endPoint
 	local ent = t.entity
 
-	if not ent then return end
+	if invalid(client, ent) then
+		return
+	end
 
 	local origin = ent:GetOrigin()
 	local hoffset = origin - endPoint
@@ -94,6 +117,16 @@ function Plugin:Initialise()
 		Type = "number"
 	}
 
+	command = self:BindCommand("sh_push_rel", "PushRelative", pushRelative, false, true)
+	command:AddParam {
+		Type = "number"
+	}
+
+	command = self:BindCommand("sh_push_abs", "PushAbsolute", pushAbsolute, false, true)
+	command:AddParam {
+		Type = "number"
+	}
+
 	command = self:BindCommand("sh_flash", "Flash", flash, false, true)
 	command:AddParam {
 		Type = "number",
@@ -103,5 +136,3 @@ function Plugin:Initialise()
 	self.Enabled = true
 	return true
 end
-
-Shine:RegisterExtension("adminpowers", Plugin)

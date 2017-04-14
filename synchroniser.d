@@ -46,21 +46,26 @@ void main(string[] args) {
 		foreach(string entry; modfolder.dirEntries(SpanMode.shallow)) if(entry.isDir && entry.baseName == "output") {
 			output = entry;
 		}
-		output ~= '/';
+		output ~= dirSeparator;
 		writefln("Output folder for %s: %s", modfolder, output);
-		foreach(string entry; output.dirEntries(SpanMode.breadth)) {
-			string path = chainPath("output", entry.chompPrefix(output)).array;
-			auto normalised_name = entry.baseName.toLower.stripExtension;
-			if(normalised_name[0] == '.' || normalised_name == "license" || normalised_name == "readme") {
-				writefln("Ignored %s!", entry);
+		outer: foreach(string entry; output.dirEntries(SpanMode.breadth)) {
+			string rpath = entry.chompPrefix(output);
+			auto normalised_name = rpath.toLower.stripExtension;
+			auto parts = rpath.split(dirSeparator);
+			auto path = chainPath("output", rpath).array;
+			foreach(part; parts[0 .. $-1]) if(part[0] == '.')
+				continue outer;
+			if(parts[$-1][0] == '.' || normalised_name == "license" || normalised_name == "readme") {
+				writefln("Ignored %s!", rpath);
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
 			} else if(path.exists && !partial) {
+				writefln("Duplicate file %s!", path);
 			} else if(!partial || !path.exists || path.timeLastModified != entry.timeLastModified) {
 				version(Posix) {
 					char[] relative_path;
-					foreach(i; 0 .. path.count('/'))
-						relative_path ~= "../";
+					foreach(i; 0 .. path.count(dirSeparator))
+						relative_path ~= ".." ~ dirSeparator;
 					relative_path ~= entry;
 					symlink(relative_path, path);
 				} else {
