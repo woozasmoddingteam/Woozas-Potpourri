@@ -22,8 +22,17 @@ local Plugin = {
 ]=]
 Shine.Hook.Add("PostLoadScript", "EasterEggs", function(script)
 	if script == "lua/Class.lua" then
-		assert(loadfile "lua/shine/extensions/eastereggs/easteregg.lua")(Plugin)
+		assert(loadfile "lua/shine/extensions/eastereggs/EasterEgg.lua")(Plugin)
 	end
 end)
+
+function Plugin:PostLoadScript(script)
+	if script == "lua/NS2Utility.lua" then
+		local old = CanEntityDoDamageTo
+		function CanEntityDoDamageTo(attacker, target, cheats, dev, ff, type)
+			return target:isa "EasterEgg" or old(attacker, target, cheats, dev, ff, type)
+		end
+	end
+end
 
 Shine:RegisterExtension("eastereggs", Plugin)
