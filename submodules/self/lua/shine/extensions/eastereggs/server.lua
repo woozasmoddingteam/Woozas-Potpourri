@@ -2,6 +2,9 @@ local Shine = Shine
 local Plugin = Plugin
 
 local saved
+local eggindices = setmetatable({}, {
+	__mode = "k"
+})
 
 local function invalid(v)
 	return v.x == 0 and v.y == 0 and v.z == 0
@@ -14,6 +17,7 @@ local function encode(egg)
 	local zAxis  = coords.zAxis
 	local origin = coords.origin
 	return {
+		room = egg:GetLocationName(),
 		name = egg:GetName(),
 		model = egg:GetModelName(),
 		coords = {
@@ -62,10 +66,29 @@ local function new(client, name)
 	ent:SetName(name)
 
 	table.insert(saved, encode(ent))
+	eggindices[ent] = #saved
 end
 
-local function hide(self)
-	Log("Hiding eggs!")
+local function sanitise()
+	--[=[
+		Clear our unused entries
+	]=]
+	local i = 1
+	while true do
+		if i > #saved then
+			break
+		elseif saved[i] == false then
+			table.remove(saved, i)
+		else
+			i = i + 1
+		end
+	end
+
+	Plugin:SaveConfig()
+end
+
+local function hide()
+	sanitise()
 
 	local eggs = GetEntities "EasterEgg"
 	for i = 1, #eggs do
@@ -90,20 +113,25 @@ local function show()
 		egg:SetName(data.name)
 		egg:SetCoords(coords)
 		egg:SetModel(data.model)
+		eggindices[egg] = i
 	end
-end
-
-local function save(self)
-	Plugin:SaveConfig()
-	saved = Plugin.Config.Saved[Shared.GetMapName()]
 end
 
 local function reload()
 	Plugin:LoadConfig()
-	saved = Plugin.Config.Saved
+	saved = Plugin.Config.Saved[Shared.GetMapName()]
+end
+
+function Plugin.remove(egg)
+	saved[eggindices[egg]] = false
 end
 
 local function void() end
+
+local function endEvent()
+	hide()
+	GetGamerules():ResetGame()
+end
 
 local function startEvent(client, cls)
 	if not _G[cls] or not _G[cls].kMapName then
@@ -111,55 +139,61 @@ local function startEvent(client, cls)
 		return
 	end
 	local base = Script.GetBaseClass(cls)
+	local spawnPoints = GetBeaconPointsForTechPoint(GetEntities("TechPoint")[1]:GetId())
+	local commmandstructures = GetEntities "CommandStructure"
+	for i = 1, #commmandstructures do
+		commmandstructures[i].OnUse = void
+	end
 	if base == "ClipWeapon" or base == "Weapon" then
-		local spawnPoints = GetBeaconPointsForTechPoint(GetEntities("TechPoint")[1]:GetId())
-		GetGamerules():ResetGame()
-		local commmandstructures = GetEntities "CommandStructure"
-		for i = 1, #commmandstructures do
-			Server.DestroyEntity(commmandstructures[i])
-		end
 		local idx = 1
 		while true do
-			local player = Server.GetClientById(idx):GetControllingPlayer()
-			if not player then break end
+			local client = Server.GetClientById(idx)
+			if not client then break end
 
-			Log("Replacing player %s...", player)
+			local player = client:GetControllingPlayer()
 
-			player = player:Replace(Marine.kMapName, kMarineTeamType, false, spawnPoints[i])
-			player:GiveItem(_G[cls].kMapName)
-			player.SetActiveWeapon = void
-			player.ProcessBuyAction = void
-			show()
-			return
+			if player then
+				Log("Replacing player %s...", player)
+
+				player = player:Replace(Marine.kMapName, kMarineTeamType, false, spawnPoints[i])
+		        local wep = CreateEntity(_G[cls].kMapName, player:GetEyePos(), player:GetTeamNumber())
+				local hudslot = wep:GetHUDSlot()
+				local current = player:GetWeaponInHUDSlot(hudslot)
+				if current:GetMapName() == wep:GetMapName() then
+					Server.DestroyEntity(wep)
+					player:SetActiveWeapon(current:GetMapName())
+				else
+					player:AddWeapon(wep, true)
+				end
+				player.SetActiveWeapon = void
+				player.ProcessBuyAction = void
+			end
+
+			idx = idx + 1
 		end
 	elseif cls == "Exo" or cls == "Marine" or base == "Marine" or base == "Alien" then
-		local spawnPoints = GetBeaconPointsForTechPoint(GetEntities("TechPoint")[1]:GetId())
-		GetGamerules():ResetGame()
-		local commmandstructures = GetEntities "CommandStructure"
-		for i = 1, #commmandstructures do
-			Server.DestroyEntity(commmandstructures[i])
-		end
 		local idx = 1
 		while true do
-			local player = Server.GetClientById(idx):GetControllingPlayer()
-			if not player then break end
+			local client = Server.GetClientById(idx)
+			if not client then break end
 
-			Log("Replacing player %s...", player)
+			local player = client:GetControllingPlayer()
 
-			player = player:Replace(_G[cls].kMapName, kMarineTeamType, false, spawnPoints[i])
-			player.ProcessBuyAction = void
-			show()
-			return
+			if player then
+				Log("Replacing player %s...", player)
+
+				player = player:Replace(_G[cls].kMapName, base == "Alien" and kAlienTeamType or kMarineTeamType, false, spawnPoints[i])
+				player.ProcessBuyAction = void
+			end
+
+			idx = idx + 1
 		end
 	else
 		Shine:NotifyError(client, "Not a valid class for this event!")
+		endEvent()
 		return
 	end
-end
-
-local function endEvent()
-	hide()
-	GetGamerules():ResetGame()
+	show()
 end
 
 function Plugin:MapPostLoad()
@@ -179,14 +213,13 @@ function Plugin:MapPostLoad()
 	}
 
 	command = self:BindCommand("sh_hide_easter_eggs", "HideEasterEggs", hide)
-
-	command = self:BindCommand("sh_save_easter_eggs", "SaveEasterEggs", save)
-	command:Help "Saves the eggs to the configuration file. Done automatically at map change."
+	command:Help "Hides all eggs and saves their placements. Done automatically before map change."
 
 	command = self:BindCommand("sh_show_easter_eggs", "ShowEasterEggs", show)
+	command:Help "Hide but recreates all eggs again."
 
 	command = self:BindCommand("sh_reload_easter_eggs", "ReloadEasterEggs", reload)
-	command:Help "Save before you reload, because eggs created after the last save will be ignored by the reload!"
+	command:Help "Reloads the configuration file. Save before you reload, because eggs created after the last save will be ignored by the reload!"
 
 	command = self:BindCommand("sh_begin_easter", "BeginEaster", startEvent)
 	command:AddParam {
@@ -198,7 +231,10 @@ function Plugin:MapPostLoad()
 end
 
 function Plugin:Initialise()
-	Script.AddShutdownFunction(save)
+	Script.AddShutdownFunction(function()
+		sanitise()
+		Plugin:SaveConfig()
+	end)
 	self.Enabled = true
 	return true
 end

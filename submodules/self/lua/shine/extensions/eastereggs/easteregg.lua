@@ -26,8 +26,8 @@ AddMixinNetworkVars(BaseModelMixin, networkVars)
 AddMixinNetworkVars(LiveMixin, networkVars)
 
 function EasterEgg.Initialise(shine, plugin)
-	Shine = shine
-	Plugin = Plugin
+	Log "Initialising easter eggs!"
+	Shine, Plugin = assert(shine), assert(plugin)
 end
 
 function EasterEgg:OnCreate()
@@ -37,7 +37,6 @@ function EasterEgg:OnCreate()
 		count = count + 1
 	end
 
-	Log("%s", debug.compacttraceback())
     InitMixin(self, BaseModelMixin)
 	InitMixin(self, LiveMixin)
 	self:SetMaxHealth(1)
@@ -84,7 +83,12 @@ function EasterEgg:AttemptToKill(_, player)
 
 	local entry = Plugin.Config.Winners[player:GetSteamId()]
 
-	return not entry or #entry < Plugin.Config.Limit
+	local b = not entry or #entry < Plugin.Config.Limit
+	if not b then
+		Shine:NotifyError(player, ("You have reached the maximum limit of %s eggs!"):format(Plugin.Config.Limit))
+	end
+
+	return b
 end
 
 function EasterEgg:GetName()
@@ -117,10 +121,16 @@ function EasterEgg:OnKill(attacker, _)
 	Winners[id] = Winners[id] or {}
 	Winners[id].name = attacker:GetName()
 
+	local origin = self:GetOrigin()
+
 	table.insert(Winners[id], {
 		name = self:GetName(),
 		room = self:GetLocationName(),
-		pos  = self:GetOrigin(),
+		pos  = {
+			x = origin.x,
+			y = origin.y,
+			z = origin.z
+		},
 		map  = Shared.GetMapName()
 	})
 
@@ -128,7 +138,17 @@ function EasterEgg:OnKill(attacker, _)
 		("Player %s found the easter egg '%s'! %i easter eggs remaining!"):format(attacker:GetName(), self:GetName(), count - 1)
 	)
 
+	Plugin.remove(self)
+
 	Server.DestroyEntity(self)
+end
+
+--[=[
+	How **not** to do object orientation:
+	Basically a lot of code depends on all live entities having the team mixin implicitly.
+]=]
+function EasterEgg:GetTeamNumber()
+	return -1
 end
 
 Shared.LinkClassToMap("EasterEgg", EasterEgg.kMapName, networkVars)
