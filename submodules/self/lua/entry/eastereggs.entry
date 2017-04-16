@@ -1,4 +1,4 @@
 
 modEntry = {
-	Predict = "lua/shine/extensions/eastereggs/EasterEgg.lua"
+	Shared = "lua/shine/extensions/eastereggs/EasterEgg.lua"
 }
