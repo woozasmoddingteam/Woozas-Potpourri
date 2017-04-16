@@ -112,7 +112,27 @@ function ToString(v, literal, indentation, printed)
 	end
 end
 
-debug.originaltraceback = debug.traceback
+debug.compacttraceback = function(message, level)
+	local printed = {}
+	level   = level and level + 1 or 2
+	local str = "Call stack:"
+	local i = level
+	local func = debug.getinfo(i)
+	while func do
+		if func.linedefined == 0 then
+			str = str .. ("\n\t#%d: %s:%d"):format(i-level+1, func.source:sub(2), func.currentline)
+		else
+			str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined)
+		end
+		i = i + 1
+		func = debug.getinfo(i)
+	end
+	if message then
+		return message .. "\n" .. str
+	else
+		return str
+	end
+end
 debug.traceback = function(message, level)
 	local printed = {}
 	level   = level and level + 1 or 2
@@ -145,3 +165,21 @@ end
 Script.CallStack = debug.traceback
 
 modEntry = {}
+
+local function newLoadScript(script, reload)
+	if reload or not Script.includes[script] then
+		local f, msg = loadfile(script)
+		Script.includes[script] = true
+		if not f then
+			error(msg, 2)
+		else
+			f()
+		end
+	end
+end
+
+local i = 1
+while assert(debug.getupvalue(Script.Load, i)) ~= "oldScriptLoad" do
+	i = i + 1
+end
+debug.setupvalue(Script.Load, i, newLoadScript)

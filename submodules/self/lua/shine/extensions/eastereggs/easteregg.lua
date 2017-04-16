@@ -7,8 +7,8 @@
 	Plugin is only valid when we get loaded from shared.lua,
 	Predict won't need it anyway, so it's not a problem.
 ]=]
-local Shine = Shine
-local Plugin = ...
+local Shine
+local Plugin
 
 Script.Load("lua/ScriptActor.lua")
 
@@ -25,6 +25,11 @@ local networkVars = {}
 AddMixinNetworkVars(BaseModelMixin, networkVars)
 AddMixinNetworkVars(LiveMixin, networkVars)
 
+function EasterEgg.Initialise(shine, plugin)
+	Shine = shine
+	Plugin = Plugin
+end
+
 function EasterEgg:OnCreate()
     ScriptActor.OnCreate(self)
 
@@ -32,6 +37,7 @@ function EasterEgg:OnCreate()
 		count = count + 1
 	end
 
+	Log("%s", debug.compacttraceback())
     InitMixin(self, BaseModelMixin)
 	InitMixin(self, LiveMixin)
 	self:SetMaxHealth(1)

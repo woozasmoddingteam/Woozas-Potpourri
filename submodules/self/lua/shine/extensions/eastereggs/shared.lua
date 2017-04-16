@@ -22,7 +22,7 @@ local Plugin = {
 ]=]
 Shine.Hook.Add("PostLoadScript", "EasterEggs", function(script)
 	if script == "lua/Class.lua" then
-		assert(loadfile "lua/shine/extensions/eastereggs/EasterEgg.lua")(Plugin)
+		EasterEgg.Initialise(Shine, Plugin)
 	end
 end)
 
