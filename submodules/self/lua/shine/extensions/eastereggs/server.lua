@@ -128,72 +128,146 @@ end
 
 local function void() end
 
+local oldReplace
+local oldSendTeamMessage
+local oldJoinTeam
+local oldOnClientConnect
+local oldGetWarmUpPlayerLimit
+
 local function endEvent()
 	hide()
-	GetGamerules():ResetGame()
+	local idx = 1
+	while true do
+		local client = Server.GetClientById(idx)
+		if not client then break end
+
+		local player = client:GetControllingPlayer()
+
+		if player then
+			if player.Replace == Player.Replace then
+				player.Replace = oldReplace
+			end
+		end
+
+		idx = idx + 1
+	end
+	Player.Replace = oldReplace
+	GetGamerules().JoinTeam = oldJoinTeam
+	GetGamerules().OnClientConnect = oldOnClientConnect
+	GetGamerules().GetWarmUpPlayerLimit = oldGetWarmUpPlayerLimit
+	SendTeamMessage = oldSendTeamMessage
+
+	oldReplace, oldSendTeamMessage, oldJoinTeam, oldOnClientConnect = nil, nil, nil, nil
+
+	GetGamerules():ResetGame(kGameState.NotStarted)
+	Shared.ConsoleCommand("sh_csay Easter has ended!")
+	Plugin:DestroyTimer("advert")
+end
+
+local function advert()
+	Shine:NotifyDualColour(nil, 0xB5, 0xDA, 0xAC, "[Easter Eggs]", 0xF0, 0xF0, 0xF0, ("Kill the easter eggs! %i easter eggs remaining!"):format(EasterEgg.GetCount()))
+end
+
+local function jointeam(self, player)
+	return false, player
 end
 
 local function startEvent(client, cls)
+	if oldReplace then
+		Shine:NotifyError(client, "Easter is already in progress!")
+		return
+	end
+
 	if not _G[cls] or not _G[cls].kMapName then
 		Shine:NotifyError(client, "Not a class!")
 		return
 	end
+
 	local base = Script.GetBaseClass(cls)
 	local spawnPoints = GetBeaconPointsForTechPoint(GetEntities("TechPoint")[1]:GetId())
-	local commmandstructures = GetEntities "CommandStructure"
-	for i = 1, #commmandstructures do
-		commmandstructures[i].OnUse = void
-	end
+
+	local map = _G[cls].kMapName
+
+	oldReplace = Player.Replace
+
 	if base == "ClipWeapon" or base == "Weapon" then
-		local idx = 1
-		while true do
-			local client = Server.GetClientById(idx)
-			if not client then break end
-
-			local player = client:GetControllingPlayer()
-
-			if player then
-				Log("Replacing player %s...", player)
-
-				player = player:Replace(Marine.kMapName, kMarineTeamType, false, spawnPoints[i])
-		        local wep = CreateEntity(_G[cls].kMapName, player:GetEyePos(), player:GetTeamNumber())
-				local hudslot = wep:GetHUDSlot()
-				local current = player:GetWeaponInHUDSlot(hudslot)
-				if current:GetMapName() == wep:GetMapName() then
-					Server.DestroyEntity(wep)
-					player:SetActiveWeapon(current:GetMapName())
-				else
-					player:AddWeapon(wep, true)
-				end
-				player.SetActiveWeapon = void
-				player.ProcessBuyAction = void
+		function Player:Replace()
+			self = oldReplace(self, Marine.kMapName, kMarineTeamType, false)
+			local wep = CreateEntity(map, self:GetEyePos(), self:GetTeamNumber())
+			local hudslot = wep:GetHUDSlot()
+			local current = self:GetWeaponInHUDSlot(hudslot)
+			if current:GetMapName() == map then
+				Server.DestroyEntity(wep)
+				self:SetActiveWeapon(map)
+			else
+				self:AddWeapon(wep, true)
 			end
-
-			idx = idx + 1
+			self.SetActiveWeapon = void
+			self.ProcessBuyAction = void
+			self.GetCanDie = function() return false end
+			return self
 		end
 	elseif cls == "Exo" or cls == "Marine" or base == "Marine" or base == "Alien" then
-		local idx = 1
-		while true do
-			local client = Server.GetClientById(idx)
-			if not client then break end
-
-			local player = client:GetControllingPlayer()
-
-			if player then
-				Log("Replacing player %s...", player)
-
-				player = player:Replace(_G[cls].kMapName, base == "Alien" and kAlienTeamType or kMarineTeamType, false, spawnPoints[i])
-				player.ProcessBuyAction = void
-			end
-
-			idx = idx + 1
+		function Player:Replace()
+			self = oldReplace(self, map, base == "Alien" and kAlienTeamType or kMarineTeamType, false)
+			self.ProcessBuyAction = void
+			self.GetCanDie = function() return false end
+			return self
 		end
 	else
 		Shine:NotifyError(client, "Not a valid class for this event!")
-		endEvent()
+		oldReplace = nil
 		return
 	end
+
+	oldSendTeamMessage = SendTeamMessage
+	oldJoinTeam = GetGamerules().JoinTeam
+	oldOnClientConnect = GetGamerules().OnClientConnect
+	oldGetWarmUpPlayerLimit = GetGamerules().GetWarmUpPlayerLimit
+
+	GetGamerules().JoinTeam = jointeam
+	GetGamerules().OnClientConnect = function(self, client)
+		local player = oldOnClientConnect(self, client)
+		local idx = math.random(math.ceil(#spawnPoints/2))
+		player:SetOrigin(spawnPoints[idx])
+		player:Replace()
+	end
+	GetGamerules().GetWarmUpPlayerLimit = function()
+		return 2048
+	end
+	SendTeamMessage = void
+
+	GetGamerules():SetGameState(kGameState.NotStarted)
+
+	local commandstructures = GetEntities "CommandStructure"
+	for i = 1, #commandstructures do
+		commandstructures[i].OnUse = void
+	end
+
+	local idx = 1
+	while true do
+		local client = Server.GetClientById(idx)
+		if not client then break end
+
+		local player = client:GetControllingPlayer()
+
+		if player then
+			Log("Replacing player %s...", player)
+
+			player:SetOrigin(spawnPoints[idx])
+			if player.Replace == oldReplace then
+				player.Replace = Player.Replace
+			end
+			player:Replace()
+		end
+
+		idx = idx + 1
+	end
+
 	show()
+	Shared.ConsoleCommand("sh_csay Easter has begun! Find all easter eggs and kill them!")
+	advert()
+	Plugin:CreateTimer("advert", 60, -1, advert)
 end
 
 function Plugin:MapPostLoad()

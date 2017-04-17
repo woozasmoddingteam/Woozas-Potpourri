@@ -134,9 +134,15 @@ function EasterEgg:OnKill(attacker, _)
 		map  = Shared.GetMapName()
 	})
 
-	Shine:NotifyDualColour(nil, 0x80, 0xB5, 0x8B, "[Easter Eggs] ", 0xA0, 0xEF, 0xEF,
-		("Player %s found the easter egg '%s'! %i easter eggs remaining!"):format(attacker:GetName(), self:GetName(), count - 1)
-	)
+	if self:GetName() then
+		Shine:NotifyDualColour(nil, 0x80, 0xB5, 0x8B, "[Easter Eggs] ", 0xA0, 0xEF, 0xEF,
+			("Player %s killed the easter egg '%s'! %i easter eggs remaining!"):format(attacker:GetName(), self:GetName(), count - 1)
+		)
+	else
+		Shine:NotifyDualColour(nil, 0x80, 0xB5, 0x8B, "[Easter Eggs] ", 0xA0, 0xEF, 0xEF,
+			("Player %s killed an easter egg! %i easter eggs remaining!"):format(attacker:GetName(), self:GetName(), count - 1)
+		)
+	end
 
 	Plugin.remove(self)
 
