@@ -23,7 +23,7 @@ local types = {
 		end
 	end,
 	table = function(t, literal, indent, printed)
-		if printed[t] then
+		if not printed or printed[t] then
 			return tostring(t)
 		end
 
@@ -101,11 +101,13 @@ function ToString(v, literal, indentation, printed)
 		return "nil"
 	end
 
-	printed = printed or {}
+	if printed == nil then
+		printed = {}
+	end
 	local meta = getmetatable(v)
 	local entry = types[type(v)]
 
-	if (not meta or not meta.__tostring) and not printed[v] and entry then
+	if (not meta or not meta.__tostring) and entry then
 		return entry(v, literal, indentation, printed)
 	else
 		return tostring(v)
@@ -133,7 +135,7 @@ debug.compacttraceback = function(message, level)
 		return str
 	end
 end
-debug.traceback = function(message, level)
+debug.fulltraceback = function(message, level)
 	local printed = {}
 	level   = level and level + 1 or 2
 	local str = "Call stack:"
@@ -149,6 +151,33 @@ debug.traceback = function(message, level)
 		local name, value = debug.getlocal(i, j)
 		while name do
 			str = str .. ("\n\t\t%s = %s"):format(name, ToString(value, true, 3, printed))
+			j = j + 1
+			name, value = debug.getlocal(i, j)
+		end
+		i = i + 1
+		func = debug.getinfo(i)
+	end
+	if message then
+		return message .. "\n" .. str
+	else
+		return str
+	end
+end
+debug.traceback = function(message, level)
+	level   = level and level + 1 or 2
+	local str = "Call stack:"
+	local i = level
+	local func = debug.getinfo(i)
+	while func do
+		if func.linedefined == 0 then
+			str = str .. ("\n\t#%d: %s:%d"):format(i-level+1, func.source:sub(2), func.currentline)
+		else
+			str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined)
+		end
+		local j = 1
+		local name, value = debug.getlocal(i, j)
+		while name do
+			str = str .. ("\n\t\t%s = %s"):format(name, ToString(value, true, 3, false))
 			j = j + 1
 			name, value = debug.getlocal(i, j)
 		end
