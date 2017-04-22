@@ -1,0 +1,3 @@
+shader = "shaders/ModPanel.surface_shader"
+panel  = "modpanels/wooza/eastereggs.dds"
+size   = {0.5, 1.22}
