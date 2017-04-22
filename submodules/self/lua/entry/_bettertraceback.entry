@@ -1,0 +1,223 @@
+local format = string.format
+
+local cdata_types = {
+	Vector = function(v, literal)
+		return format(literal and "Vector(%f, %f, %f)" or "%f, %f, %f", v.x, v.y, v.z)
+	end,
+	Color = function(c, literal)
+		return format(literal and "Color(%f, %f, %f, %f)" or "%f, %f, %f, %f", c.r, c.g, c.b, c.a)
+	end,
+	Angles = function(a, literal)
+		return format(literal and "Angles{yaw = %f, pitch = %f, roll = %f}" or "yaw: %f, pitch: %f, roll: %f", a.yaw, a.pitch, a.roll)
+	end,
+	Coords = function(c, literal)
+		return CoordsToString(c, not literal and "" or nil)
+	end
+}
+local types = {
+	string = function(s, literal)
+		if literal then
+			return "\"" .. s .. "\""
+		else
+			return s
+		end
+	end,
+	table = function(t, literal, indent, printed)
+		if not printed or printed[t] then
+			return tostring(t)
+		end
+
+		printed[t] = true
+
+		local s = "{"
+		local indent = indent or 1
+		for i = 1, #t do
+			s = s .. "\n" .. string.rep("\t", indent) .. ToString(t[i], true, indent + 1, printed) .. ","
+		end
+
+		for k, v in pairs(t) do
+			if type(k) ~= "number" or k > #t then
+				s = s .. "\n" .. string.rep("\t", indent) .. (
+					type(k) == "string" and
+						k
+					or
+						"[" .. ToString(k, true, indent + 1, printed) .. "]"
+					) .. " = " .. ToString(v, true, indent + 1, printed) .. ", "
+			end
+		end
+
+		if not literal then
+			return s .. "\n" .. string.rep("\t", indent-1) .. "}"
+		else
+			return AddressOf(t) .. ":" .. s .. "\n" .. string.rep("\t", indent-1) .. "}"
+		end
+	end,
+	["function"] = function(f, literal, indent, printed)
+		return tostring(f) .. "|" .. ToString(debug.getinfo(f), literal, indent, printed)
+	end,
+	cdata = function(v, literal)
+		if v.isa then
+			local s
+			if v:isa "Vector" then
+				s = cdata_types.Vector(v, literal)
+			elseif v:isa "Color" then
+				s = cdata_types.Color(v, literal)
+			elseif v:isa "Angles" then
+				s = cdata_types.Angles(v, literal)
+			elseif v:isa "Coords" then
+				s = cdata_types.Coords(v, literal)
+			end
+			return s
+		else
+			return tostring(v)
+		end
+	end,
+	userdata = function(u, literal)
+		local meta = getmetatable(u)
+		if type(meta) ~= "table" then
+			return tostring(u)
+		elseif meta.__towatch then
+			return ToString(meta.__towatch(u), literal)
+		else
+			return tostring(meta) .. "|" .. tostring(u)
+		end
+	end
+}
+table.tostring = types.table
+
+function CoordsToString(coords, name)
+	name = name or "Coords "
+	return format("%s{ origin = (%0.2f, %0.2f, %0.2f), xAxis = (%0.2f, %0.2f, %0.2f), yAxis = (%0.2f, %0.2f, %0.2f), zAxis = (%0.2f, %0.2f, %0.2f) }",
+							name, coords.origin.x, coords.origin.y, coords.origin.z,
+							coords.xAxis.x, coords.xAxis.y, coords.xAxis.z,
+							coords.yAxis.x, coords.yAxis.y, coords.yAxis.z,
+							coords.zAxis.x, coords.zAxis.y, coords.zAxis.z)
+end
+
+function AddressOf(v)
+	local s = tostring(v)
+	return s:sub(#s-9)
+end
+
+function ToString(v, literal, indentation, printed)
+	if v == nil then
+		return "nil"
+	end
+
+	if printed == nil then
+		printed = {}
+	end
+	local meta = getmetatable(v)
+	local entry = types[type(v)]
+
+	if (not meta or not meta.__tostring) and entry then
+		return entry(v, literal, indentation, printed)
+	else
+		return tostring(v)
+	end
+end
+
+debug.compacttraceback = function(message, level)
+	local printed = {}
+	level   = level and level + 1 or 2
+	local str = "Call stack:"
+	local i = level
+	local func = debug.getinfo(i)
+	while func do
+		if func.linedefined == 0 then
+			str = str .. ("\n\t#%d: %s:%d"):format(i-level+1, func.source:sub(2), func.currentline)
+		else
+			str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined)
+		end
+		i = i + 1
+		func = debug.getinfo(i)
+	end
+	if message then
+		return message .. "\n" .. str
+	else
+		return str
+	end
+end
+debug.fulltraceback = function(message, level)
+	local printed = {}
+	level   = level and level + 1 or 2
+	local str = "Call stack:"
+	local i = level
+	local func = debug.getinfo(i)
+	while func do
+		if func.linedefined == 0 then
+			str = str .. ("\n\t#%d: %s:%d"):format(i-level+1, func.source:sub(2), func.currentline)
+		else
+			str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name, func.currentline, func.source, func.linedefined)
+		end
+		local j = 1
+		local name, value = debug.getlocal(i, j)
+		while name do
+			str = str .. ("\n\t\t%s = %s"):format(name, ToString(value, true, 3, printed))
+			j = j + 1
+			name, value = debug.getlocal(i, j)
+		end
+		i = i + 1
+		func = debug.getinfo(i)
+	end
+	if message then
+		return message .. "\n" .. str
+	else
+		return str
+	end
+end
+debug.traceback = function(message, level)
+	level   = level and level + 1 or 2
+	local str = "Call stack:"
+	local i = level
+	local func = debug.getinfo(i)
+	while func do
+		if func.linedefined == 0 then
+			str = str .. ("\n\t#%d: %s:%d"):format(i-level+1, func.source:sub(2), func.currentline)
+		else
+			str = str .. ("\n\t#%d: %s:%i%s:%i"):format(i-level+1, func.name or "[anonymous]", func.currentline, func.source, func.linedefined)
+		end
+		local j = 1
+		local name, value = debug.getlocal(i, j)
+		while name do
+			str = str .. ("\n\t\t%s = %s"):format(name, ToString(value, true, 3, false))
+			j = j + 1
+			name, value = debug.getlocal(i, j)
+		end
+		i = i + 1
+		func = debug.getinfo(i)
+	end
+	if message then
+		return message .. "\n" .. str
+	else
+		return str
+	end
+end
+
+Script.CallStack = debug.traceback
+
+modEntry = {}
+
+local i = 1
+while assert(debug.getupvalue(Script.Load, i)) ~= "oldScriptLoad" do
+	i = i + 1
+end
+local _, old_script_load = debug.getupvalue(Script.Load, i)
+
+local function handler(err)
+	Shared.Message(debug.traceback("Could not load file: " .. err))
+end
+
+local function newLoadScript(script, reload)
+	if reload or not Script.includes[script] then
+		local f, msg = loadfile(script)
+		Script.includes[script] = true
+		if not f then
+			Shared.Message(debug.compacttraceback("Could not load file: " .. msg, 2))
+		else
+			xpcall(f, handler)
+		end
+	end
+end
+
+debug.setupvalue(Script.Load, i, newLoadScript)
