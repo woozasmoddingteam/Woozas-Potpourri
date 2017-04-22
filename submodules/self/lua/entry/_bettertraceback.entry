@@ -55,7 +55,7 @@ local types = {
 	["function"] = function(f, literal, indent, printed)
 		Shared.Message "Getting information for function"
 		if not printed or printed[f] then
-			return tostring(t)
+			return tostring(f)
 		end
 
 		printed[f] = true
