@@ -22,6 +22,7 @@ local Plugin = {
 ]=]
 Shine.Hook.Add("PostLoadScript", "EasterEggs", function(script)
 	if script == "lua/Class.lua" then
+		Script.Load "lua/shine/extensions/eastereggs/easteregg.lua"
 		EasterEgg.Initialise(Shine, Plugin)
 	elseif script == "lua/NS2Utility.lua" then
 		local old = CanEntityDoDamageTo
