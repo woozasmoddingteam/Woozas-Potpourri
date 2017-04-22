@@ -53,7 +53,13 @@ local types = {
 		end
 	end,
 	["function"] = function(f, literal, indent, printed)
-		return tostring(f) .. "|" .. ToString(debug.getinfo(f), literal, indent, printed)
+		Shared.Message "Getting information for function"
+		if not printed or printed[f] then
+			return tostring(t)
+		end
+
+		printed[f] = true
+		return tostring(f) .. " " .. ToString(debug.getinfo(f), literal, indent, printed)
 	end,
 	cdata = function(v, literal)
 		if v.isa then
@@ -221,3 +227,8 @@ local function newLoadScript(script, reload)
 end
 
 debug.setupvalue(Script.Load, i, newLoadScript)
+
+local function a_function()
+end
+
+Log("a_function: %s", a_function)
