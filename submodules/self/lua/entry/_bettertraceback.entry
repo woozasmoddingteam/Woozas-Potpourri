@@ -202,27 +202,3 @@ end
 Script.CallStack = debug.traceback
 
 modEntry = {}
-
-local i = 1
-while assert(debug.getupvalue(Script.Load, i)) ~= "oldScriptLoad" do
-	i = i + 1
-end
-local _, old_script_load = debug.getupvalue(Script.Load, i)
-
-local function handler(err)
-	Shared.Message(debug.traceback("Could not load file: " .. err))
-end
-
-local function newLoadScript(script, reload)
-	if reload or not Script.includes[script] then
-		local f, msg = loadfile(script)
-		Script.includes[script] = true
-		if not f then
-			Shared.Message(debug.compacttraceback("Could not load file: " .. msg, 2))
-		else
-			xpcall(f, handler)
-		end
-	end
-end
-
-debug.setupvalue(Script.Load, i, newLoadScript)
