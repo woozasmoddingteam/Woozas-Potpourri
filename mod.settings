@@ -29,6 +29,11 @@ Mod contains:
 - Crazy Mines (by Nin)
 - Egg Spawning Rebalance (by Nin)
 
+Several smaller things are also included:
+- Custom Shine adverts
+- An easter egg mod
+- Less restricted command station for aliens in pregame
+
 Thank you all for providing and sharing the code.]=]
 image       = "preview.jpg"
 tag_modtype = "Tool"
