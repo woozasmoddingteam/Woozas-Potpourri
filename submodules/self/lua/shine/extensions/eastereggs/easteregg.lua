@@ -140,7 +140,7 @@ function EasterEgg:OnKill(attacker, _)
 		)
 	else
 		Shine:NotifyDualColour(nil, 0x80, 0xB5, 0x8B, "[Easter Eggs] ", 0xA0, 0xEF, 0xEF,
-			("Player %s killed an easter egg! %i easter eggs remaining!"):format(attacker:GetName(), self:GetName(), count - 1)
+			("Player %s killed an easter egg! %i easter eggs remaining!"):format(attacker:GetName(), count - 1)
 		)
 	end
 
