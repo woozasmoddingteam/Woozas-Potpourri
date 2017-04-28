@@ -26,7 +26,6 @@ AddMixinNetworkVars(BaseModelMixin, networkVars)
 AddMixinNetworkVars(LiveMixin, networkVars)
 
 function EasterEgg.Initialise(shine, plugin)
-	Log "Initialising easter eggs!"
 	Shine, Plugin = assert(shine), assert(plugin)
 end
 
@@ -82,6 +81,7 @@ function EasterEgg:AttemptToKill(_, player)
 	end
 
 	local entry = Plugin.Config.Winners[player:GetSteamId()]
+	entry = entry and entry.gorges
 
 	local b = not entry or #entry < Plugin.Config.Limit
 	if not b then
@@ -118,12 +118,14 @@ function EasterEgg:OnKill(attacker, _)
 
 	local id = attacker:GetSteamId()
 
-	Winners[id] = Winners[id] or {}
+	Winners[id] = Winners[id] or {gorges = {}}
 	Winners[id].name = attacker:GetName()
+
+	local gorges = Winners[id].gorges
 
 	local origin = self:GetOrigin()
 
-	table.insert(Winners[id], {
+	table.insert(gorges, {
 		name = self:GetName(),
 		room = self:GetLocationName(),
 		pos  = {
