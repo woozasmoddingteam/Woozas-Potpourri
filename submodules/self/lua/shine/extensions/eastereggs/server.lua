@@ -94,8 +94,6 @@ local function hide()
 	for i = 1, #eggs do
 		Server.DestroyEntity(eggs[i])
 	end
-
-	Plugin:SaveConfig()
 end
 
 local function show()
@@ -119,7 +117,8 @@ end
 
 local function reload()
 	Plugin:LoadConfig()
-	saved = Plugin.Config.Saved[Shared.GetMapName()]
+	saved = Plugin.Config.Saved[Shared.GetMapName()] or {}
+	Plugin.Config.Saved[Shared.GetMapName()] = saved
 end
 
 function Plugin.remove(egg)
@@ -130,12 +129,15 @@ local function void() end
 
 local oldReplace
 local oldSendTeamMessage
-local oldJoinTeam
 local oldOnClientConnect
 local oldGetWarmUpPlayerLimit
+local oldJoinTeam
 
 local function endEvent()
 	hide()
+	if not oldReplace then
+		return
+	end
 	local idx = 1
 	while true do
 		local client = Server.GetClientById(idx)
@@ -190,9 +192,12 @@ local function startEvent(client, cls)
 
 	oldReplace = Player.Replace
 
+	local team = kMarineTeamType
+
 	if base == "ClipWeapon" or base == "Weapon" then
 		function Player:Replace()
 			self = oldReplace(self, Marine.kMapName, kMarineTeamType, false)
+			self.Replace = self.Replace == oldReplace and Player.Replace or self.Replace
 			local wep = CreateEntity(map, self:GetEyePos(), self:GetTeamNumber())
 			local hudslot = wep:GetHUDSlot()
 			local current = self:GetWeaponInHUDSlot(hudslot)
@@ -209,7 +214,9 @@ local function startEvent(client, cls)
 		end
 	elseif cls == "Exo" or cls == "Marine" or base == "Marine" or base == "Alien" then
 		function Player:Replace()
-			self = oldReplace(self, map, base == "Alien" and kAlienTeamType or kMarineTeamType, false)
+			team = base == "Alien" and kAlienTeamType or kMarineTeamType
+			self = oldReplace(self, map, team, false)
+			self.Replace = self.Replace == oldReplace and Player.Replace or self.Replace
 			self.ProcessBuyAction = void
 			self.GetCanDie = function() return false end
 			return self
@@ -221,19 +228,42 @@ local function startEvent(client, cls)
 	end
 
 	oldSendTeamMessage = SendTeamMessage
-	oldJoinTeam = GetGamerules().JoinTeam
 	oldOnClientConnect = GetGamerules().OnClientConnect
 	oldGetWarmUpPlayerLimit = GetGamerules().GetWarmUpPlayerLimit
+	oldJoinTeam = GetGamerules().JoinTeam
 
-	GetGamerules().JoinTeam = jointeam
+	GetGamerules().JoinTeam = function(self, player, new_team)
+		if new_team ~= kTeamReadyRoom then
+			if player.Replace == oldReplace then
+				player.Replace = Player.Replace
+			end
+			local _
+			_, player = oldJoinTeam(self, player, team, true)
+			local idx = math.random(math.ceil(#spawnPoints/2))
+			player:SetOrigin(spawnPoints[idx])
+		else
+			--[=[ Horrible hack ]=]
+			local temp = Player.Replace
+			Player.Replace = oldReplace
+			if player.Replace == temp then
+				player.Replace = oldReplace
+			end
+			local _
+			_, player = oldJoinTeam(self, player, new_team, true)
+			Player.Replace = temp
+		end
+	end
 	GetGamerules().OnClientConnect = function(self, client)
 		local player = oldOnClientConnect(self, client)
+		if player.Replace == oldReplace then
+			player.Replace = Player.Replace
+		end
 		local idx = math.random(math.ceil(#spawnPoints/2))
 		player:SetOrigin(spawnPoints[idx])
 		player:Replace()
 	end
 	GetGamerules().GetWarmUpPlayerLimit = function()
-		return 2048
+		return 2^50
 	end
 	SendTeamMessage = void
 
@@ -252,8 +282,6 @@ local function startEvent(client, cls)
 		local player = client:GetControllingPlayer()
 
 		if player then
-			Log("Replacing player %s...", player)
-
 			player:SetOrigin(spawnPoints[idx])
 			if player.Replace == oldReplace then
 				player.Replace = Player.Replace
@@ -270,9 +298,12 @@ local function startEvent(client, cls)
 	Plugin:CreateTimer("advert", 60, -1, advert)
 end
 
-function Plugin:MapPostLoad()
-	saved = self.Config.Saved[Shared.GetMapName()] or {}
-	self.Config.Saved[Shared.GetMapName()] = saved
+function Plugin:Initialise()
+	local map = Shared.GetMapName()
+	if #map ~= 0 then
+		saved = self.Config.Saved[map] or {}
+		self.Config.Saved[map] = saved
+	end
 
 	local command
 
@@ -302,15 +333,18 @@ function Plugin:MapPostLoad()
 	}
 
 	command = self:BindCommand("sh_end_easter", "EndEaster", endEvent)
-end
 
-function Plugin:Initialise()
 	Script.AddShutdownFunction(function()
 		sanitise()
-		Plugin:SaveConfig()
 	end)
+
 	self.Enabled = true
 	return true
 end
 
-Plugin.Cleanup = hide
+function Plugin:MapPostLoad()
+	saved = self.Config.Saved[Shared.GetMapName()] or {}
+	self.Config.Saved[Shared.GetMapName()] = saved
+end
+
+Plugin.Cleanup = endEvent
