@@ -201,7 +201,7 @@ local function startEvent(client, cls)
 			local wep = CreateEntity(map, self:GetEyePos(), self:GetTeamNumber())
 			local hudslot = wep:GetHUDSlot()
 			local current = self:GetWeaponInHUDSlot(hudslot)
-			if current:GetMapName() == map then
+			if current and current:GetMapName() == map then
 				Server.DestroyEntity(wep)
 				self:SetActiveWeapon(map)
 			else
