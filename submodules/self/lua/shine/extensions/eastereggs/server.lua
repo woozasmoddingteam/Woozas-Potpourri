@@ -209,7 +209,7 @@ local function startEvent(client, cls)
 			end
 			self.SetActiveWeapon = void
 			self.ProcessBuyAction = void
-			self.GetCanDie = function() return false end
+			self:SetDarwinMode(true)
 			return self
 		end
 	elseif cls == "Exo" or cls == "Marine" or base == "Marine" or base == "Alien" then
@@ -218,7 +218,7 @@ local function startEvent(client, cls)
 			self = oldReplace(self, map, team, false)
 			self.Replace = self.Replace == oldReplace and Player.Replace or self.Replace
 			self.ProcessBuyAction = void
-			self.GetCanDie = function() return false end
+			self:SetDarwinMode(true)
 			return self
 		end
 	else
