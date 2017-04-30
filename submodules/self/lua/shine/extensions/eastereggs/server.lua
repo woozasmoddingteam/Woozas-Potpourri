@@ -11,13 +11,14 @@ local function invalid(v)
 end
 
 local function encode(egg)
+	Log("Location ID for %s: %s", egg:GetName(), egg.locationId)
 	local coords = egg:GetCoords()
 	local xAxis  = coords.xAxis
 	local yAxis  = coords.yAxis
 	local zAxis  = coords.zAxis
 	local origin = coords.origin
 	return {
-		room = egg:GetLocationName(),
+		room = GetLocationForPoint(origin).name,
 		name = egg:GetName(),
 		model = egg:GetModelName(),
 		coords = {
