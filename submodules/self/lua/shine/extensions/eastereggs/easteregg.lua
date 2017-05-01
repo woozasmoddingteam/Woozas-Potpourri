@@ -125,11 +125,11 @@ function EasterEgg:OnKill(attacker, _)
 
 	local origin = self:GetOrigin()
 
-	local room = GetLocationForPoint(origin).name
+	local room = GetLocationForPoint(origin)
 
 	table.insert(gorges, {
 		name = self:GetName(),
-		room = room,
+		room = room and room.name,
 		pos  = {
 			x = origin.x,
 			y = origin.y,
@@ -140,11 +140,11 @@ function EasterEgg:OnKill(attacker, _)
 
 	if self:GetName() then
 		Shine:NotifyDualColour(nil, 0x80, 0xB5, 0x8B, "[Easter Eggs] ", 0xA0, 0xEF, 0xEF,
-			("Player %s killed the easter egg '%s' in room '%s'! %i easter eggs remaining!"):format(attacker:GetName(), self:GetName(), room, count - 1)
+			("Player %s killed the easter egg '%s' in room '%s'! %i easter eggs remaining!"):format(attacker:GetName(), self:GetName(), room and room.name, count - 1)
 		)
 	else
 		Shine:NotifyDualColour(nil, 0x80, 0xB5, 0x8B, "[Easter Eggs] ", 0xA0, 0xEF, 0xEF,
-			("Player %s killed an easter egg in room '%s'! %i easter eggs remaining!"):format(attacker:GetName(), room, count - 1)
+			("Player %s killed an easter egg in room '%s'! %i easter eggs remaining!"):format(attacker:GetName(), room and room.name, count - 1)
 		)
 	end
 

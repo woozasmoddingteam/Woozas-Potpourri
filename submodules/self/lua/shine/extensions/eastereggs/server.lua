@@ -17,8 +17,9 @@ local function encode(egg)
 	local yAxis  = coords.yAxis
 	local zAxis  = coords.zAxis
 	local origin = coords.origin
+	local location = GetLocationForPoint(origin)
 	return {
-		room = GetLocationForPoint(origin).name,
+		room = location and location.name,
 		name = egg:GetName(),
 		model = egg:GetModelName(),
 		coords = {
