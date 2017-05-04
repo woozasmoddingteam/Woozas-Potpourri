@@ -166,7 +166,7 @@ function Plugin:Initialise()
 		Default = nil
 	}
 
-	command = self:BindCommand("sh_save_easter_eggs", "ShowEasterEggs", show)
+	command = self:BindCommand("sh_show_easter_eggs", "ShowEasterEggs", show)
 	command:Help "Hide but recreates all eggs again."
 
 	command = self:BindCommand("sh_reload_easter_eggs", "ReloadEasterEggs", reload)
@@ -242,6 +242,9 @@ function Plugin:MapPreLoad()
 		return 2^52
 	end
 	local team = Script.GetBaseClass(class) == "Alien" and 2 or 1
+	function NS2Gamerules:GetCanJoinTeamNumber()
+		return true
+	end
 	local old = NS2Gamerules.JoinTeam
 	function NS2Gamerules:JoinTeam(player, new_team)
 		if new_team == kTeamReadyRoom then
