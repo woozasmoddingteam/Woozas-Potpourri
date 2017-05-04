@@ -1,16 +1,10 @@
 local Plugin = {
 	Version = "2.0",
 	NS2Only = false,
-	HasConfig = true,
-	ConfigName = "EasterEggs.json",
-	DefaultConfig = {
-		Limit = 2,
-		Winners = {},
-		Saved = {}
-	},
 	Conflicts = {
 		DisableThem = {
-			"jointeam"
+			"jointeam",
+			"enforceteamsizes"
 		}
 	}
 }
