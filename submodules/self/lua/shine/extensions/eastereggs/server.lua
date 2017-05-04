@@ -1,5 +1,14 @@
 local Shine = Shine
 local Plugin = Plugin
+Plugin.HasConfig = true
+Plugin.ConfigName = "EasterEggs.json"
+Plugin.DefaultConfig = {
+	Limit   = 2,
+	Winners = {},
+	Class   = false,
+	Weapons = false,
+	Saved   = {}
+}
 
 local saved
 local eggindices = setmetatable({}, {
@@ -129,175 +138,13 @@ end
 
 local function void() end
 
-local oldReplace
-local oldSendTeamMessage
-local oldOnClientConnect
-local oldGetWarmUpPlayerLimit
-local oldJoinTeam
-
-local function endEvent()
-	hide()
-	if not oldReplace then
-		return
-	end
-	local idx = 1
-	while true do
-		local client = Server.GetClientById(idx)
-		if not client then break end
-
-		local player = client:GetControllingPlayer()
-
-		if player then
-			if player.Replace == Player.Replace then
-				player.Replace = oldReplace
-			end
-		end
-
-		idx = idx + 1
-	end
-	Player.Replace = oldReplace
-	GetGamerules().JoinTeam = oldJoinTeam
-	GetGamerules().OnClientConnect = oldOnClientConnect
-	GetGamerules().GetWarmUpPlayerLimit = oldGetWarmUpPlayerLimit
-	SendTeamMessage = oldSendTeamMessage
-
-	oldReplace, oldSendTeamMessage, oldJoinTeam, oldOnClientConnect = nil, nil, nil, nil
-
-	GetGamerules():ResetGame(kGameState.NotStarted)
-	Shared.ConsoleCommand("sh_csay Easter has ended!")
-	Plugin:DestroyTimer("advert")
-end
-
 local function advert()
-	Shine:NotifyDualColour(nil, 0xB5, 0xDA, 0xAC, "[Easter Eggs]", 0xF0, 0xF0, 0xF0, ("Kill the easter eggs! %i easter eggs remaining!"):format(EasterEgg.GetCount()))
+	Shine:NotifyDualColour(nil, 0xB5, 0xDA, 0xAC, "[Easter Eggs]", 0xF0, 0xF0, 0xF0, ("Kill the easter eggs! %i easter eggs remaining! Look at the mod panel in ready room for more information."):format(EasterEgg.GetCount()))
 end
 
-local function jointeam(self, player)
-	return false, player
-end
-
-local function startEvent(client, cls)
-	if oldReplace then
-		Shine:NotifyError(client, "Easter is already in progress!")
-		return
-	end
-
-	if not _G[cls] or not _G[cls].kMapName then
-		Shine:NotifyError(client, "Not a class!")
-		return
-	end
-
-	local base = Script.GetBaseClass(cls)
-	local spawnPoints = GetBeaconPointsForTechPoint(GetEntities("TechPoint")[1]:GetId())
-
-	local map = _G[cls].kMapName
-
-	oldReplace = Player.Replace
-
-	local team = kMarineTeamType
-
-	if base == "ClipWeapon" or base == "Weapon" then
-		function Player:Replace()
-			self = oldReplace(self, Marine.kMapName, kMarineTeamType, false)
-			self.Replace = self.Replace == oldReplace and Player.Replace or self.Replace
-			local wep = CreateEntity(map, self:GetEyePos(), self:GetTeamNumber())
-			local hudslot = wep:GetHUDSlot()
-			local current = self:GetWeaponInHUDSlot(hudslot)
-			if current and current:GetMapName() == map then
-				Server.DestroyEntity(wep)
-				self:SetActiveWeapon(map)
-			else
-				self:AddWeapon(wep, true)
-			end
-			self.SetActiveWeapon = void
-			self.ProcessBuyAction = void
-			self:SetDarwinMode(true)
-			return self
-		end
-	elseif cls == "Exo" or cls == "Marine" or base == "Marine" or base == "Alien" then
-		function Player:Replace()
-			team = base == "Alien" and kAlienTeamType or kMarineTeamType
-			self = oldReplace(self, map, team, false)
-			self.Replace = self.Replace == oldReplace and Player.Replace or self.Replace
-			self.ProcessBuyAction = void
-			self:SetDarwinMode(true)
-			return self
-		end
-	else
-		Shine:NotifyError(client, "Not a valid class for this event!")
-		oldReplace = nil
-		return
-	end
-
-	oldSendTeamMessage = SendTeamMessage
-	oldOnClientConnect = GetGamerules().OnClientConnect
-	oldGetWarmUpPlayerLimit = GetGamerules().GetWarmUpPlayerLimit
-	oldJoinTeam = GetGamerules().JoinTeam
-
-	GetGamerules().JoinTeam = function(self, player, new_team)
-		if new_team ~= kTeamReadyRoom then
-			if player.Replace == oldReplace then
-				player.Replace = Player.Replace
-			end
-			local _
-			_, player = oldJoinTeam(self, player, team, true)
-			local idx = math.random(math.ceil(#spawnPoints/2))
-			player:SetOrigin(spawnPoints[idx])
-		else
-			--[=[ Horrible hack ]=]
-			local temp = Player.Replace
-			Player.Replace = oldReplace
-			if player.Replace == temp then
-				player.Replace = oldReplace
-			end
-			local _
-			_, player = oldJoinTeam(self, player, new_team, true)
-			Player.Replace = temp
-		end
-	end
-	GetGamerules().OnClientConnect = function(self, client)
-		local player = oldOnClientConnect(self, client)
-		if player.Replace == oldReplace then
-			player.Replace = Player.Replace
-		end
-		local idx = math.random(math.ceil(#spawnPoints/2))
-		player:SetOrigin(spawnPoints[idx])
-		player:Replace()
-	end
-	GetGamerules().GetWarmUpPlayerLimit = function()
-		return 2^50
-	end
-	SendTeamMessage = void
-
-	GetGamerules():SetGameState(kGameState.NotStarted)
-
-	local commandstructures = GetEntities "CommandStructure"
-	for i = 1, #commandstructures do
-		commandstructures[i].OnUse = void
-	end
-
-	local idx = 1
-	while true do
-		local client = Server.GetClientById(idx)
-		if not client then break end
-
-		local player = client:GetControllingPlayer()
-
-		if player then
-			player:SetOrigin(spawnPoints[idx])
-			if player.Replace == oldReplace then
-				player.Replace = Player.Replace
-			end
-			player:Replace()
-		end
-
-		idx = idx + 1
-	end
-
-	show()
-	Shared.ConsoleCommand("sh_csay Easter has begun! Find all easter eggs and kill them!")
-	advert()
-	Plugin:CreateTimer("advert", 60, -1, advert)
+function Plugin:PostLoadScript(script)
+	local class = self.Config.Class
+	if not class then return end
 end
 
 function Plugin:Initialise()
@@ -319,27 +166,17 @@ function Plugin:Initialise()
 		Default = nil
 	}
 
-	command = self:BindCommand("sh_hide_easter_eggs", "HideEasterEggs", hide)
-	command:Help "Hides all eggs and saves their placements. Done automatically before map change."
-
-	command = self:BindCommand("sh_show_easter_eggs", "ShowEasterEggs", show)
+	command = self:BindCommand("sh_save_easter_eggs", "ShowEasterEggs", show)
 	command:Help "Hide but recreates all eggs again."
 
 	command = self:BindCommand("sh_reload_easter_eggs", "ReloadEasterEggs", reload)
 	command:Help "Reloads the configuration file. Save before you reload, because eggs created after the last save will be ignored by the reload!"
 
-	command = self:BindCommand("sh_begin_easter", "BeginEaster", startEvent)
-	command:AddParam {
-		Type = "string",
-		Help = "Class to use, can be weapon or player type."
-	}
-
-	command = self:BindCommand("sh_end_easter", "EndEaster", endEvent)
-
 	Script.AddShutdownFunction(function()
 		sanitise()
 	end)
 
+	Plugin:CreateTimer("advert", 60, -1, advert)
 	self.Enabled = true
 	return true
 end
@@ -349,4 +186,84 @@ function Plugin:MapPostLoad()
 	self.Config.Saved[Shared.GetMapName()] = saved
 end
 
-Plugin.Cleanup = endEvent
+local function ReplaceMethodInDerivedClasses(cls, method, original)
+
+	local classes = Script.GetDerivedClasses(cls)
+
+	for _, subcls in ipairs(classes) do
+		if _G[subcls][method] == original then
+			_G[subcls][method] = _G[cls][method]
+			ReplaceMethodInDerivedClasses(subcls, method, original)
+		end
+	end
+end
+
+function Plugin:MapPreLoad()
+	local class = self.Config.Class
+	local weapons = self.Config.Weapons
+
+	if not class then return end
+	local tbl = _G[class]
+
+	--[=[I am a monster]=]
+	if not tbl or not tbl.kMapName then return Log("ERROR: eastereggs: %s is not a valid class!", class) end
+
+	local old = Player.OnCreate
+	function Player:OnCreate()
+		old(self)
+		self.darwinMode = true
+	end
+	ReplaceMethodInDerivedClasses("Player", "OnCreate", old)
+	local old = Player.UseTarget
+	function Player:UseTarget(ent, time)
+		if not ent:isa "CommandStructure" then
+			return old(self, ent, time)
+		else
+			return false
+		end
+	end
+	ReplaceMethodInDerivedClasses("Player", "UseTarget", old)
+	local old = Player.SetDarwinMode
+	Player.SetDarwinMode = void
+	ReplaceMethodInDerivedClasses("Player", "SetDarwinMode", old)
+	local old = Player.ProcessBuyAction
+	Player.ProcessBuyAction = void
+	ReplaceMethodInDerivedClasses("Player", "ProcessBuyAction", old)
+	local old = Player.Buy
+	Player.Buy = void
+	ReplaceMethodInDerivedClasses("Player", "Buy", old)
+	local old = Marine.Drop
+	Marine.Drop = void
+	ReplaceMethodInDerivedClasses("Marine", "Drop", old)
+	local old = Alien.ProcessBuyAction
+	Alien.ProcessBuyAction = void
+	ReplaceMethodInDerivedClasses("Alien", "ProcessBuyAction", old)
+	function NS2Gamerules:GetWarmUpPlayerLimit()
+		return 2^52
+	end
+	local team = Script.GetBaseClass(class) == "Alien" and 2 or 1
+	local old = NS2Gamerules.JoinTeam
+	function NS2Gamerules:JoinTeam(player, new_team)
+		if new_team == kTeamReadyRoom then
+			return old(self, player, kTeamReadyRoom, true, true)
+		else
+			return old(self, player, team, true, true)
+		end
+	end
+	local team_class = team == 2 and AlienTeam or MarineTeam
+	local old = team_class.Initialize
+	team_class.Initialize = function(self, name, number)
+		old(self, name, number)
+		self.respawnEntity = _G[class].kMapName
+	end
+	SendTeamMessage = void
+
+	if not weapons then return end
+
+	local old = tbl.InitWeapons
+	tbl.InitWeapons = function(self)
+		for i = 1, #weapons do
+			self:GiveItem(_G[weapons[i]].kMapName)
+		end
+	end
+end
