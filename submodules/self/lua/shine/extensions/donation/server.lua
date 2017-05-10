@@ -7,8 +7,7 @@ local Plugin = Plugin
 Plugin.HasConfig = true
 Plugin.ConfigName = "Donation.json"
 
-local webUrl = "http://bit.ly/1WOwpcR"
-
+local webUrl = "http://apheriox.com/news/donations/
 Plugin.DefaultConfig = {
 	ShowMenuEntry = true
 }

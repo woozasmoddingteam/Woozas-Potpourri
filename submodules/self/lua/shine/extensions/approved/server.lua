@@ -7,7 +7,7 @@ local Plugin = Plugin
 Plugin.HasConfig = true
 Plugin.ConfigName = "Approved.json"
 
-local webUrl = "http://apheriox.com/showthread.php/2493-Wooza-Approved"
+local webUrl = "http://apheriox.com/news/hall-of-wooza-approved/"
 
 Plugin.DefaultConfig = {
 	ShowMenuEntry = true
