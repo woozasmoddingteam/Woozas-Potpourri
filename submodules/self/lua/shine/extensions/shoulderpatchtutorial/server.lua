@@ -7,7 +7,7 @@ local Plugin = Plugin
 Plugin.HasConfig = true
 Plugin.ConfigName = "ShoulderPatchTutorial.json"
 
-local webUrl = "http://apheriox.com/showthread.php/2856-HOW-TO-Create-your-own-Shoulder-Patch?p=4187#post4187"
+local webUrl = "http://apheriox.com/shoulder-patches-tutorial/"
 
 Plugin.DefaultConfig = {
 	ShowMenuEntry = true

@@ -7,7 +7,7 @@ local Plugin = Plugin
 Plugin.HasConfig = true
 Plugin.ConfigName = "CustomBadgesTutorial.json"
 
-local webUrl = "http://apheriox.com/showthread.php/12-HOW-TO-Create-your-own-Badge"
+local webUrl = "http://apheriox.com/custom-badges-tutorial/"
 
 Plugin.DefaultConfig = {
 	ShowMenuEntry = true
