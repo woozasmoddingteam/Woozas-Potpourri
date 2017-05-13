@@ -37,6 +37,9 @@ kShoulderPatchNames = {
 	"Patch52",
 	"Rose",
 	"QuackerJack",
-	"MalpraveShoulder"
+	"MalpraveShoulder",
+	"Yolo2",
+	"Yolo3",
+	"8Bit"
 	
 }
