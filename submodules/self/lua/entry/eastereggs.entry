@@ -1,4 +1,0 @@
-
-modEntry = {
-	Shared = "lua/shine/extensions/eastereggs/easteregg.lua"
-}
