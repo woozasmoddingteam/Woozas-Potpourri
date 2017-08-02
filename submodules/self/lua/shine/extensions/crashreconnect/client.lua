@@ -1,8 +1,5 @@
 local Plugin = Plugin
 
-local usableConnectionAt = 0
-local queriedServerStatusAt = 0
-
 function Plugin:Initialise()
 	self:CreateTimer("ConnectionProblems", 2, -1, function() self:ConnectionProblems() end)
 	self:CreateTimer("ContinousConnectionProblems", 0, -1, function() self:ContinousConnectionProblems() end)
