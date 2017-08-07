@@ -2,7 +2,7 @@ local Plugin = Plugin
 
 function Plugin:Initialise()
 	self:CreateTimer("ConnectionProblems", 2, -1, function() self:ConnectionProblems() end)
-	self:CreateTimer("ContinousConnectionProblems", 0, -1, function() self:ContinousConnectionProblems() end)
+	self:CreateTimer("ContinuousConnectionProblems", 0, -1, function() self:ContinuousConnectionProblems() end)
 
 	self:PauseTimer  "ContinuousConnectionProblems" -- Disabled by default
 
