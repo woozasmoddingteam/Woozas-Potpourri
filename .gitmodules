@@ -10,3 +10,6 @@
 [submodule "submodules/LocalTalkExtended"]
 	path = submodules/LocalTalkExtended
 	url = https://github.com/Laaas/LocalTalkExtended.git
+[submodule "submodules/wonitor-mod"]
+	path = submodules/wonitor-mod
+	url = git@github.com:eBrute/wonitor-mod.git
