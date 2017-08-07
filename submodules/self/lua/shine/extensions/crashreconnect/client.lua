@@ -12,7 +12,7 @@ function Plugin:Initialise()
 end
 
 function Plugin:ContinuousConnectionProblems()
-	if not (Client.GetConnectionProblems() and Client.GetConnectedServerPerformanceScore() == -99) then
+	if not Client.GetConnectionProblems() then
 		self:PauseTimer  "ContinuousConnectionProblems"
 		self:ResumeTimer "ConnectionProblems"
 	elseif Shared.GetTime() - self.problemStart >= 5 then
@@ -21,7 +21,7 @@ function Plugin:ContinuousConnectionProblems()
 end
 
 function Plugin:ConnectionProblems()
-	if Client.GetConnectionProblems() and Client.GetConnectedServerPerformanceScore() == -99 then
+	if Client.GetConnectionProblems() then
 		self.problemStart = Shared.GetTime()
 		self:ResumeTimer "ContinuousConnectionProblems"
 		self:PauseTimer "ConnectionProblems"
