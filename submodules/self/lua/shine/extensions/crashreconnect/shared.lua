@@ -1,4 +1,5 @@
 local Plugin = {}
+Plugin.Version = "1.0"
 
 function Plugin:Initialise()
 	self.Enabled = true
