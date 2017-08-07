@@ -1,4 +1,5 @@
 local Plugin = Plugin
+local Shine = Shine
 
 function Plugin:Initialise()
 	self:CreateTimer("ConnectionProblems", 2, -1, function() self:ConnectionProblems() end)
