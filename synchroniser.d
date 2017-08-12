@@ -43,13 +43,14 @@ void main(string[] args) {
 	foreach(string modfolder; dirEntries("submodules", SpanMode.shallow)) {
 		// Look for output folder
 		string output = modfolder;
-		foreach(string entry; modfolder.dirEntries(SpanMode.shallow)) if(entry.isDir && entry.baseName == "output") {
+		foreach(string entry; modfolder.dirEntries(SpanMode.shallow)) if(entry.isDir && entry.baseName == "source")
 			output = entry;
-		}
+		foreach(string entry; modfolder.dirEntries(SpanMode.shallow)) if(entry.isDir && entry.baseName == "output")
+			output = entry;
 		output ~= dirSeparator;
 		writefln("Output folder for %s: %s", modfolder, output);
 		outer: foreach(string entry; output.dirEntries(SpanMode.breadth)) {
-			string rpath = entry.chompPrefix(output);
+			string rpath = entry[output.length .. $];
 			auto normalised_name = rpath.toLower.stripExtension;
 			auto parts = rpath.split(dirSeparator);
 			auto path = chainPath("output", rpath).array;
