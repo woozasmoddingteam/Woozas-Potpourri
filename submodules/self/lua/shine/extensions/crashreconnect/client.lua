@@ -7,21 +7,24 @@ function Plugin:Initialise()
 
 	self:PauseTimer  "ContinuousConnectionProblems" -- Disabled by default
 
-	self.Enabled = true
-	return true
+	self.Enabled = false
+	return false
 end
 
 function Plugin:ContinuousConnectionProblems()
 	if not Client.GetConnectionProblems() then
+		Shared.Message "No problems!)"
 		self:PauseTimer  "ContinuousConnectionProblems"
 		self:ResumeTimer "ConnectionProblems"
 	elseif Shared.GetTime() - self.problemStart >= 5 then
+		Shared.Message "Reconnecting!"
 		Shared.ConsoleCommand "retry"
 	end
 end
 
 function Plugin:ConnectionProblems()
 	if Client.GetConnectionProblems() then
+		Shared.Message "ConnectionProblems()"
 		self.problemStart = Shared.GetTime()
 		self:ResumeTimer "ContinuousConnectionProblems"
 		self:PauseTimer "ConnectionProblems"
