@@ -4,6 +4,7 @@ local Plugin = {}
 Plugin.Version = "1.1"
 Plugin.DefaultState = true
 Plugin.HasConfig = true
+Plugin.ConfigName = "CrashReconnect.json"
 Plugin.DefaultConfig = {
 	Timeout = 10
 }
@@ -28,7 +29,7 @@ function Plugin:ContinuousConnectionProblems()
 	elseif Shared.GetTime() - self.problemStart >= self.Config.Timeout then
 		-- TODO: Make this a callback for an HTTP request
 		-- That way we will not reconnect, if we have lost internet connection.
-		(function
+		(function()
 			Shared.Message "Reconnecting!"
 			Shared.ConsoleCommand "retry"
 		end)()
