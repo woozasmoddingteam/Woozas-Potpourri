@@ -1,8 +1,6 @@
 local Shine = Shine
 
-local Plugin = {}
-Plugin.Version = "1.1"
-Plugin.DefaultState = true
+local Plugin = Plugin
 Plugin.HasConfig = true
 Plugin.ConfigName = "CrashReconnect.json"
 Plugin.DefaultConfig = {
@@ -44,5 +42,3 @@ function Plugin:ConnectionProblems()
 		self:PauseTimer "ConnectionProblems"
 	end
 end
-
-Shine:RegisterExtension("crashreconnect", Plugin)
