@@ -1,5 +1,14 @@
-local Plugin = Plugin
 local Shine = Shine
+
+local Plugin = {}
+Plugin.Version = "1.1"
+Plugin.DefaultState = true
+Plugin.HasConfig = true
+Plugin.DefaultConfig = {
+	Timeout = 10
+}
+Plugin.CheckConfig = true
+Plugin.CheckConfigTypes = true
 
 function Plugin:Initialise()
 	self:CreateTimer("ConnectionProblems", 2, -1, function() self:ConnectionProblems() end)
@@ -7,18 +16,22 @@ function Plugin:Initialise()
 
 	self:PauseTimer  "ContinuousConnectionProblems" -- Disabled by default
 
-	self.Enabled = false
-	return false
+	self.Enabled = true
+	return true
 end
 
 function Plugin:ContinuousConnectionProblems()
 	if not Client.GetConnectionProblems() then
-		Shared.Message "No problems!)"
+		Shared.Message "No problems!"
 		self:PauseTimer  "ContinuousConnectionProblems"
 		self:ResumeTimer "ConnectionProblems"
-	elseif Shared.GetTime() - self.problemStart >= 5 then
-		Shared.Message "Reconnecting!"
-		Shared.ConsoleCommand "retry"
+	elseif Shared.GetTime() - self.problemStart >= self.Config.Timeout then
+		-- TODO: Make this a callback for an HTTP request
+		-- That way we will not reconnect, if we have lost internet connection.
+		(function
+			Shared.Message "Reconnecting!"
+			Shared.ConsoleCommand "retry"
+		end)()
 	end
 end
 
@@ -30,3 +43,5 @@ function Plugin:ConnectionProblems()
 		self:PauseTimer "ConnectionProblems"
 	end
 end
+
+Shine:RegisterExtension("crashreconnect", Plugin)
