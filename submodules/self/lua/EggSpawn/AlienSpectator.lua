@@ -1,1 +1,0 @@
-function AlienSpectator:SetEggId(id)    self.eggId = id        if self.eggId == Entity.invalidId then        self.autoSpawnTime = 0    else        self.autoSpawnTime = Shared.GetTime() + kEmbryoGestateTime    end    end

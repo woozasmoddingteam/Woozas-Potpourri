@@ -1,1 +1,0 @@
-kAlienSpawnTime = 8 -- was 10kEmbryoGestateTime = 3 -- was never defined, but was effectively 0
