@@ -6,31 +6,48 @@ import std.path;
 import std.string;
 import std.array;
 import std.process;
-import core.stdc.stdlib : exit;
 
-void main(string[] args) {
+int main(string[] args) {
 
 	bool partial = false;
 
-	if(args.length < 2) {
+	switch (args.length) {
+	case 2:
 		// Update submodules
 		writeln("Making sure submodules are initialised...");
 		if(auto err = spawnProcess(["git", "submodule", "init"]).wait) {
 			stderr.writefln("Could not initialise submodules! Error code: %s", err);
+			return 1;
 		}
 
 		writeln("Checking for submodule updates...");
 		if(auto err = spawnProcess(["git", "submodule", "update", "--remote"]).wait) {
 			stderr.writefln("Could not update submodules! Error code: %s", err);
+			return 2;
 		}
+
 
 		if(exists("output"))
 			rmdirRecurse("output");
 		mkdir("output");
-	} else if(args.length > 2) {
-		stderr.writefln("Too many arguments passed!");
-		return;
-	} else if(args[1] == "partial") {
+
+		auto mod = args[1];
+		version(Posix) {
+			std.file.remove("mod.settings");
+			symlink("mod.settings." ~ mod, "mod.settings");
+		} else {
+			copy("mod.settings." ~ mod, "mod.settings");
+		}
+
+		break;
+	case 3:
+		if (args[2] != "partial") {
+			stderr.writeln("The second argument can only be \"partial\"!");
+			return 3;
+		}
+
+		partial = true;
+
 		version(Posix) {
 			if(exists("output"))
 				rmdirRecurse("output");
@@ -39,10 +56,19 @@ void main(string[] args) {
 			if(!exists("output"))
 				mkdir("output");
 		}
-		partial = true;
-	} else {
-		stderr.writefln("Incorrect argument passed!");
-		return;
+
+		auto mod = args[1];
+		version(Posix) {
+			std.file.remove("mod.settings");
+			symlink("mod.settings." ~ mod, "mod.settings");
+		} else {
+			copy("mod.settings." ~ mod, "mod.settings");
+		}
+
+		break;
+	default:
+		stderr.writeln("synchroniser.d <mod> [partial]");
+		return 4;
 	}
 
 	// Mods that need to be merged
@@ -66,9 +92,13 @@ void main(string[] args) {
 				writefln("Ignored %s!", rpath);
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
-			} else if(path.exists && !partial) {
-				writefln("Duplicate file %s!", path);
-			} else if(!partial || !path.exists || path.timeLastModified != entry.timeLastModified) {
+			} else if(path.exists) {
+				version(Posix) {
+					writefln("Duplicate file %s!", path);
+				} else if (!partial) {
+					writefln("Duplicate file %s!", path);
+				}
+			} else {
 				version(Posix) {
 					symlink(entry.absolutePath, path);
 				} else {
@@ -77,4 +107,6 @@ void main(string[] args) {
 			}
 		}
 	}
+
+	return 0;
 }
