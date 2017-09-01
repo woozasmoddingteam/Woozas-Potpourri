@@ -31,8 +31,14 @@ void main(string[] args) {
 		stderr.writefln("Too many arguments passed!");
 		return;
 	} else if(args[1] == "partial") {
-		if(!exists("output"))
+		version(Posix) {
+			if(exists("output"))
+				rmdirRecurse("output");
 			mkdir("output");
+		} else {
+			if(!exists("output"))
+				mkdir("output");
+		}
 		partial = true;
 	} else {
 		stderr.writefln("Incorrect argument passed!");
@@ -64,11 +70,7 @@ void main(string[] args) {
 				writefln("Duplicate file %s!", path);
 			} else if(!partial || !path.exists || path.timeLastModified != entry.timeLastModified) {
 				version(Posix) {
-					char[] relative_path;
-					foreach(i; 0 .. path.count(dirSeparator))
-						relative_path ~= ".." ~ dirSeparator;
-					relative_path ~= entry;
-					symlink(relative_path, path);
+					symlink(entry.absolutePath, path);
 				} else {
 					copy(entry, path);
 				}
