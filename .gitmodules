@@ -13,3 +13,6 @@
 [submodule "submodules/wonitor-mod"]
 	path = submodules/wonitor-mod
 	url = https://github.com/eBrute/wonitor-mod.git
+[submodule "submodules/ns2_discord_bridge_mod"]
+	path = submodules/ns2_discord_bridge_mod
+	url = https://github.com/eBrute/ns2_discord_bridge_mod
