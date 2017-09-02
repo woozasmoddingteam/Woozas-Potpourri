@@ -1,4 +1,0 @@
-modEntry = {
-FileHooks = "lua/EggSpawn/FileHooks.lua",
-Priority = 51
-}
