@@ -1,0 +1,1 @@
+ModLoader.SetupFileHook( "lua/Shared.lua", "lua/SW/SW_Shared.lua", "post")
