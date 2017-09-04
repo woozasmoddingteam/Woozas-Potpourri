@@ -1,0 +1,4 @@
+modEntry = {
+	Shared = "lua/SW/sw_Shared.lua",
+	Priority = 10 --make sure this is higher than any UWE extension
+}
