@@ -50,6 +50,6 @@ function Plugin:CreateCommands()
 	local ShowShoulderPatchTutorialCommand = self:BindCommand( "sh_showshoulderpatchtutorial", "showshoulderpatchtutorial", ShowShoulderPatchTutorial)
 	ShowShoulderPatchTutorialCommand:AddParam{ Type = "client" }
 	ShowShoulderPatchTutorialCommand:Help( "<player> Shows the ShoulderPatchTutorial page to the given player." )
-	
+
 
 end

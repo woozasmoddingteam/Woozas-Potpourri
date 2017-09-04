@@ -7,7 +7,7 @@ local Shine = Shine
 
 function Plugin:Initialise()
 	self:UpdateMenuEntry( self.dt.ShowMenuEntry )
-	
+
 	self.Enabled = true
 
 	return true

@@ -50,6 +50,6 @@ function Plugin:CreateCommands()
 	local ShowDiscordCommand = self:BindCommand( "sh_showdiscord", "showdiscord", ShowDiscord)
 	ShowDiscordCommand:AddParam{ Type = "client" }
 	ShowDiscordCommand:Help( "<player> Shows the Discord page to the given player." )
-	
+
 
 end

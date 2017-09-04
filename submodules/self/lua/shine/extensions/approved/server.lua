@@ -50,6 +50,6 @@ function Plugin:CreateCommands()
 	local ShowApprovedCommand = self:BindCommand( "sh_showapproved", "showapproved", ShowApproved)
 	ShowApprovedCommand:AddParam{ Type = "client" }
 	ShowApprovedCommand:Help( "<player> Shows the Wooza Approved page to the given player." )
-	
+
 
 end
