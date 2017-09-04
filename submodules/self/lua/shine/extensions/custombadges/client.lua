@@ -34,5 +34,3 @@ function Plugin:Cleanup()
 
 	self.Enabled = false
 end
-
-

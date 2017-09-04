@@ -23,11 +23,11 @@ function Plugin:UpdateClient()
     local gameTime = PlayerUI_GetGameStartTime()
 
     if gameTime ~= 0 then
-        gameTime = math.floor(Shared.GetTime()) - PlayerUI_GetGameStartTime()
+	gameTime = math.floor(Shared.GetTime()) - PlayerUI_GetGameStartTime()
     end
     if player ~= nil and gameTime > 0 and self.cinematic ~= nil then
-        Client.DestroyCinematic(self.cinematic)
-        self.cinematic = nil
+	Client.DestroyCinematic(self.cinematic)
+	self.cinematic = nil
     end
 end
 
@@ -43,21 +43,21 @@ function Plugin:ReceiveRaveCinematic(message)
     local coords = Coords()
     coords.origin = message.origin
     if self.cinematic ~= nil or message.stop == true then
-        self:StopRaveCinematic()
+	self:StopRaveCinematic()
     else
-        self.cinematic = Client.CreateCinematic(RenderScene.Zone_Default)
-        self.cinematic:SetCinematic("cinematics/RAVE.cinematic")
-        self.cinematic:SetCoords(coords)
-        self.cinematic:SetIsVisible(true)
-        self.cinematic:SetRepeatStyle(Cinematic.Repeat_Loop)
+	self.cinematic = Client.CreateCinematic(RenderScene.Zone_Default)
+	self.cinematic:SetCinematic("cinematics/RAVE.cinematic")
+	self.cinematic:SetCoords(coords)
+	self.cinematic:SetIsVisible(true)
+	self.cinematic:SetRepeatStyle(Cinematic.Repeat_Loop)
     end
 end
 
 
 function Plugin:StopRaveCinematic()
     if self.cinematic ~= nil then
-        Client.DestroyCinematic(self.cinematic)
-        self.cinematic = nil
+	Client.DestroyCinematic(self.cinematic)
+	self.cinematic = nil
     end
 end
 

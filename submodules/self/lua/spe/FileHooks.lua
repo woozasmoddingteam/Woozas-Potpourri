@@ -1,5 +1,5 @@
 --[[
- 	ShoulderPatchesExtra
+	ShoulderPatchesExtra
 	ZycaR (c) 2016
 ]]
 

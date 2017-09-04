@@ -15,8 +15,8 @@ function CommandStation:GetUsablePoints()
 
 	if gameinfo:GetGameStarted() then
 
-    	local loginPoint = self:GetAttachPointOrigin(kLoginAttachPoint)
-    	return { loginPoint }
+	local loginPoint = self:GetAttachPointOrigin(kLoginAttachPoint)
+	return { loginPoint }
 
 	end
 

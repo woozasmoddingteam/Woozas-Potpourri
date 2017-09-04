@@ -52,4 +52,3 @@ function Plugin:CreateCommands()
 	ShowWoozanewsCommand:Help( "<player> Shows Wooza's News to the given player." )
 
 end
-

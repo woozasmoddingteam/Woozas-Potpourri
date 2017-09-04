@@ -1,5 +1,5 @@
 --[[
- 	ShoulderPatchesExtra
+	ShoulderPatchesExtra
 	ZycaR (c) 2016
 ]]
 Script.Load("lua/spe/ShoulderPatchesConfig.lua")
@@ -38,9 +38,9 @@ function GUIMainMenu:CreateCustomizeWindow()
     self.spe:SetCSSClass("shoulder_patches_wrapper")
 
     self.customizeFrame:AddEventCallbacks({
-        OnHide = function(self)
-            self.scriptHandle.spe:SetIsVisible(false)
-        end
+	OnHide = function(self)
+	    self.scriptHandle.spe:SetIsVisible(false)
+	end
     })
 
     -- create form
@@ -62,24 +62,24 @@ function GUIMainMenu:CreateCustomizeWindow()
     input:SetTopOffset(35)
 
     local function OnMouseInFn(self)
-        local showModelType = "decal"
-        local currentModel = Client.GetOptionString("currentModel", "")
-        Client.SetOptionString("currentModel", input:GetFormElementName())
+	local showModelType = "decal"
+	local currentModel = Client.GetOptionString("currentModel", "")
+	Client.SetOptionString("currentModel", input:GetFormElementName())
 
-        if input:GetFormElementName() ~= currentModel or menuRefresed == true then
-            if Client.GetOptionString("lastShownModel", "") ~= showModelType then
-                MenuPoses_SetPose("idle", showModelType, true)
-                MenuPoses_Function():SetCoordsOffset(showModelType)
-            end
+	if input:GetFormElementName() ~= currentModel or menuRefresed == true then
+	    if Client.GetOptionString("lastShownModel", "") ~= showModelType then
+		MenuPoses_SetPose("idle", showModelType, true)
+		MenuPoses_Function():SetCoordsOffset(showModelType)
+	    end
 
-            Client.SetOptionString("lastShownModel", showModelType)
-            Client.SetOptionString("lastModel", input:GetFormElementName())
-            menuRefresed = false
-        end
+	    Client.SetOptionString("lastShownModel", showModelType)
+	    Client.SetOptionString("lastModel", input:GetFormElementName())
+	    menuRefresed = false
+	end
     end
 
     for index, child in ipairs(input:GetChildren()) do
-        child:AddEventCallbacks({ OnMouseIn = OnMouseInFn })
+	child:AddEventCallbacks({ OnMouseIn = OnMouseInFn })
     end
 
     self.customizeElements[speMenuOptions.name] = input
