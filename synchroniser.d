@@ -33,7 +33,7 @@ int main(string[] args) {
 
 		auto mod = args[1];
 		version(Posix) {
-			std.file.remove("mod.settings");
+			if(exists("mod.settings")) std.file.remove("mod.settings");
 			symlink("mod.settings." ~ mod, "mod.settings");
 		} else {
 			copy("mod.settings." ~ mod, "mod.settings");
