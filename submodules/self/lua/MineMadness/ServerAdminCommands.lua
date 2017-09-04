@@ -13,26 +13,26 @@ local function AllPlayers(doThis)
 
     return function(client)
     
-        local playerList = GetPlayerList()
-        for p = 1, #playerList do
-        
-            local player = playerList[p]
-            doThis(player, client, p)
-            
-        end
-        
+	local playerList = GetPlayerList()
+	for p = 1, #playerList do
+	
+	    local player = playerList[p]
+	    doThis(player, client, p)
+	    
+	end
+	
     end
     
 end
 local function GiveCrazyMines()
     
     local function GetMarines(player, client)
-        if player:isa("Marine") then
-            local newItem = player:GiveItem('minecrazy', nil, true)
-            if newItem and newItem.UpdateWeaponSkins then
-                newItem:UpdateWeaponSkins( client )
-            end
-        end
+	if player:isa("Marine") then
+	    local newItem = player:GiveItem('minecrazy', nil, true)
+	    if newItem and newItem.UpdateWeaponSkins then
+		newItem:UpdateWeaponSkins( client )
+	    end
+	end
     end
     AllPlayers(GetMarines)()
 end

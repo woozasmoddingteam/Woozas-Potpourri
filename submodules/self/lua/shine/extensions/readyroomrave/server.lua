@@ -44,7 +44,7 @@ local soundList = {
 
 function Plugin:PrecacheAssets()
     for _, sound in ipairs(soundList) do
-        PrecacheAsset("sound/comtaunts.fev/taunts/" .. sound)
+	PrecacheAsset("sound/comtaunts.fev/taunts/" .. sound)
     end
     PrecacheAsset("cinematics/RAVE.cinematic")
 end
@@ -60,20 +60,20 @@ function Plugin:OnConsoleSound(client, name)
     if (Shared.GetTime() - self.commandTime < 3.5) then return end
 
     if name == "ayumi" or name == "nancy" then
-        -- only during pregame or in readyroom
-        if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
+	-- only during pregame or in readyroom
+	if not ( GetGamerules():GetGameState() < kGameState.Started or player:GetIsPlaying() == false or Shared.GetCheatsEnabled() ) then return end
 
-        StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.Config.musicVolume or 0.4)
-        self.commandTime = Shared.GetTime()
+	StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.Config.musicVolume or 0.4)
+	self.commandTime = Shared.GetTime()
     else
-        for _,v in pairs(soundList) do
-            if name == v then
-                StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.Config.tauntVolume or 1)
-                self.commandTime = Shared.GetTime()
-                return
-            end
-        end
-        Shared.Message(" Error: Sound " .. name .. " does not exist")
+	for _,v in pairs(soundList) do
+	    if name == v then
+		StartSoundEffectAtOrigin("sound/comtaunts.fev/taunts/" .. name, origin, self.Config.tauntVolume or 1)
+		self.commandTime = Shared.GetTime()
+		return
+	    end
+	end
+	Shared.Message(" Error: Sound " .. name .. " does not exist")
     end
 
 end
@@ -103,7 +103,7 @@ end
 
 function Plugin:SetGameState( Gamerules, GameState )
     if GameState > kGameState.PreGame and GameState <= kGameState.Started then
-        self:SendNetworkMessage( nil, "RaveCinematic", { origin = Vector(0,0,0), stop = true }, true )
+	self:SendNetworkMessage( nil, "RaveCinematic", { origin = Vector(0,0,0), stop = true }, true )
     end
 end
 
@@ -118,13 +118,13 @@ function Plugin:GetDecalPath(client)
 
     -- check user config first
     if userData.Decal and userData.Decal[1] then
-        return userData.Decal[1]
+	return userData.Decal[1]
     end
 
     -- now check user's group config
     local groupData = Shine:GetGroupData( userData.Group )
     if groupData and groupData.Decal and groupData.Decal[1] then
-        return groupData.Decal[1]
+	return groupData.Decal[1]
     end
 
     -- no decal configured, return nil
@@ -152,40 +152,40 @@ function Plugin:OnConsoleCreateSpray(client)
     local trace = Shared.TraceRay(startPoint, endPoint, CollisionRep.Default, PhysicsMask.Bullets, EntityFilterAll())
 
     if trace.fraction ~= 1 then
-        local direction = startPoint - trace.endPoint
-        local distance = direction:GetLength()
-        direction:Normalize()
-        if distance > maxSprayDistance then return end
+	local direction = startPoint - trace.endPoint
+	local distance = direction:GetLength()
+	direction:Normalize()
+	if distance > maxSprayDistance then return end
 
-        local coords = Coords.GetIdentity()
-        if trace.normal:CrossProduct(Vector(0,1,0)):GetLength() < 0.35 then
-            -- we are looking at the floor, a slope or the ceiling, so rotate decal to face us
-            local isFacingUp = trace.normal:DotProduct(Vector(0,1,0)) > 0
-            coords.origin = trace.endPoint - 0.5 * trace.normal
-            coords.yAxis = trace.normal
-            if isFacingUp then
-                coords.xAxis = direction
-            else
-                coords.xAxis = -direction
-            end
-            coords.zAxis = coords.xAxis:CrossProduct(coords.yAxis)
-            coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
-        else
-            -- we are looking at a wall, decal is always upright
-            coords.origin = trace.endPoint - 0.5 * direction
-            coords.yAxis = trace.normal
-            coords.zAxis = coords.yAxis:GetPerpendicular()
-            coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
-        end
+	local coords = Coords.GetIdentity()
+	if trace.normal:CrossProduct(Vector(0,1,0)):GetLength() < 0.35 then
+	    -- we are looking at the floor, a slope or the ceiling, so rotate decal to face us
+	    local isFacingUp = trace.normal:DotProduct(Vector(0,1,0)) > 0
+	    coords.origin = trace.endPoint - 0.5 * trace.normal
+	    coords.yAxis = trace.normal
+	    if isFacingUp then
+		coords.xAxis = direction
+	    else
+		coords.xAxis = -direction
+	    end
+	    coords.zAxis = coords.xAxis:CrossProduct(coords.yAxis)
+	    coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
+	else
+	    -- we are looking at a wall, decal is always upright
+	    coords.origin = trace.endPoint - 0.5 * direction
+	    coords.yAxis = trace.normal
+	    coords.zAxis = coords.yAxis:GetPerpendicular()
+	    coords.xAxis = coords.yAxis:CrossProduct(coords.zAxis)
+	end
 
-        local angles = Angles()
-        angles:BuildFromCoords(coords)
+	local angles = Angles()
+	angles:BuildFromCoords(coords)
 
-        local nearbyPlayers = GetEntitiesWithinRange("Player", origin, 20)
-        for p = 1, #nearbyPlayers do
-            self:SendNetworkMessage( nearbyPlayers[p], "CreateSpray", { originX = coords.origin.x, originY = coords.origin.y, originZ = coords.origin.z,
-            yaw = angles.yaw, pitch = angles.pitch, roll = angles.roll, path = ToString(decalPath) }, true )
-        end
+	local nearbyPlayers = GetEntitiesWithinRange("Player", origin, 20)
+	for p = 1, #nearbyPlayers do
+	    self:SendNetworkMessage( nearbyPlayers[p], "CreateSpray", { originX = coords.origin.x, originY = coords.origin.y, originZ = coords.origin.z,
+	    yaw = angles.yaw, pitch = angles.pitch, roll = angles.roll, path = ToString(decalPath) }, true )
+	end
     end
 end
 
@@ -193,20 +193,20 @@ end
 function Plugin:CreateCommands()
 
     local function OnConsoleSound( Client, Name )
-        self:OnConsoleSound( Client, Name )
+	self:OnConsoleSound( Client, Name )
     end
     self:BindCommand( "sh_sound", "sound", OnConsoleSound, true, false )
     :AddParam{ Type = "string", Optional = true, TakeRestOfLine = true, Default = "dance", MaxLength = 100, Help = "[mess|better|dead|dance|dosomething] or [nancy|ayumi](pregame only)" }
     :Help( "<soundname> Plays the specified sound if it exists." )
 
     local function OnConsoleRave( Client )
-        self:OnConsoleRave( Client )
+	self:OnConsoleRave( Client )
     end
     self:BindCommand( "sh_rave", "rave", OnConsoleRave, false, false )
     :Help( "Starts a rave." )
 
     local function OnConsoleCreateSpray( Client )
-        self:OnConsoleCreateSpray( Client )
+	self:OnConsoleCreateSpray( Client )
     end
     self:BindCommand( "sh_spray", "spray", OnConsoleCreateSpray, false, false ):Help( "Sprays a decal." )
 end

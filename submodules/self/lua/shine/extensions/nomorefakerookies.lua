@@ -96,4 +96,3 @@ function Plugin:Cleanup()
 end
 
 Shine:RegisterExtension("nomorefakerookies", Plugin)
-

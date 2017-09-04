@@ -10,14 +10,14 @@ function BaseModelMixin:UpdateModelCoords()
     local modelCoords = nil
     local physicsModel = self.physicsModel
     if physicsModel and physicsType == PhysicsType.Dynamic then
-        modelCoords = physicsModel:GetCoords()
+	modelCoords = physicsModel:GetCoords()
     else
-        modelCoords = self:GetCoords()
+	modelCoords = self:GetCoords()
     end
 
     local OnAdjustModelCoords = self.OnAdjustModelCoords
     if OnAdjustModelCoords then
-        modelCoords = OnAdjustModelCoords(self, modelCoords)
+	modelCoords = OnAdjustModelCoords(self, modelCoords)
     end
 
 	self:ModifyModelCoords(modelCoords)

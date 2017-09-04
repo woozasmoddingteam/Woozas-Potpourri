@@ -169,7 +169,7 @@ end
 function Plugin:SetGameState(gamerules, new, old)
 	for i = 1, #groups do
 		local group = groups[i];
-	 	local v = lshift(1, new-1);
+		local v = lshift(1, new-1);
 		if band(group.createAt, v) ~= 0 and not self:TimerExists(group.name) then
 			initGroup(group)
 		elseif band(group.destroyAt, v) ~= 0 then
