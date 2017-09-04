@@ -49,6 +49,6 @@ function Plugin:CreateCommands()
 	local ShowDonationCommand = self:BindCommand( "sh_showdonation", "showdonation", ShowDonation)
 	ShowDonationCommand:AddParam{ Type = "client" }
 	ShowDonationCommand:Help( "<player> Shows the Donation page to the given player." )
-	
+
 
 end

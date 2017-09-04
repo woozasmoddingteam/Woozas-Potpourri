@@ -50,6 +50,6 @@ function Plugin:CreateCommands()
 	local ShowTraderCommand = self:BindCommand( "sh_showtrader", "showtrader", ShowTrader)
 	ShowTraderCommand:AddParam{ Type = "client" }
 	ShowTraderCommand:Help( "<player> Shows the Trader page to the given player." )
-	
+
 
 end

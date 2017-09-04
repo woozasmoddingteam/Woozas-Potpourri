@@ -1,7 +1,7 @@
 --[[
 	ShoulderPatchesExtra
 	ZycaR (c) 2016
-	
+
 NOTE: Shared message from clients to server.
 Should be included in any file working with message
 ]]
@@ -13,11 +13,11 @@ if not kSetShoulderPatchMessage then
     }
 
     Shared.RegisterNetworkMessage("SetShoulderPatch", kSetShoulderPatchMessage)
-    
+
     if Client then
 	function SendShoulderPatchUpdate(index)
 	    if MainMenu_IsInGame and MainMenu_IsInGame() then
-		Client.SendNetworkMessage("SetShoulderPatch", { 
+		Client.SendNetworkMessage("SetShoulderPatch", {
 		    spePatchIndex = index
 		}, true)
 	    end
@@ -29,8 +29,8 @@ if not kSetShoulderPatchMessage then
 	    local player = client and client:GetControllingPlayer()
 	    if player and HasMixin(player, "ShoulderPatches") then
 		player:SetShoulderPatchIndex(message.spePatchIndex or 0)
-		
-		
+
+
 		local steamId = tostring(client:GetUserId())
 		Shared.Message(".. SPE SteamID: ".. steamId .. " - Index: ".. tostring(message.spePatchIndex))
 	    end
@@ -46,23 +46,23 @@ if not kShoulderPatchEffectMessage then
 	spePatchEffect = "integer (0 to 1)",
     }
     Shared.RegisterNetworkMessage("ShoulderPatchEffect", kShoulderPatchEffectMessage)
-    
+
     if Client then
 	function SendShoulderPatchEffect(effect)
-	    Client.SendNetworkMessage("ShoulderPatchEffect", { 
+	    Client.SendNetworkMessage("ShoulderPatchEffect", {
 		spePatchEffect = effect
 	    }, true)
 	end
 
 	local function OnCommandEffect(effect)
-	    return function() 
+	    return function()
 		Shared.Message("SPE Effect Command:" .. tostring(effect))
 		SendShoulderPatchEffect(effect)
 	    end
 	end
 	Event.Hook( "Console_spe_default", OnCommandEffect(0.0) )
 	Event.Hook( "Console_spe_rotate", OnCommandEffect(1.0) )
-	
+
     end
 
     if Server then

@@ -42,5 +42,5 @@ kShoulderPatchNames = {
 	"Yolo3",
 	"8Bit",
 	"Fire"
-	
+
 }

@@ -41,7 +41,7 @@ local function __LogClientData(client)
     local steamId = tostring(client:GetUserId())
     Shared.Message(".. SPE SteamID: ".. steamId)
     local player = client:GetControllingPlayer()
-    if player then 
+    if player then
 	Shared.Message(".. .. spePatches: [" .. player.spePatches .. "]")
 	Shared.Message(".. .. spePatchIndex: [" .. tostring(player.spePatchIndex) .. "]")
 	Shared.Message(".. .. speOptionsSent: [" .. tostring(player.speOptionsSent) .. "]")
@@ -77,7 +77,7 @@ if Server then
 	self.speOptionsSent = true
 	self.spePatchIndex = value
     end
-    
+
     function ShoulderPatchesMixin:SetShoulderPatchEffect(value)
 	self.spePatchEffect = value
     end
@@ -91,7 +91,7 @@ if Client then
     for _, texture in ipairs(ShoulderPatchesMixin.kPatchMaps) do
 	PrecacheAsset(texture)
     end
-    
+
     function ShoulderPatchesMixin:GetValidShoulderPatchIndex()
 	if not self.speOptionsSent and not self._speInternalSent
 	   and self.spePatches and self.spePatches ~= ""
@@ -104,7 +104,7 @@ if Client then
 	end
 	return self.spePatchIndex
     end
-    
+
     function ShoulderPatchesMixin:OnUpdateRender()
 	local model = self:GetRenderModel()
 	if model ~= nil then
@@ -112,5 +112,5 @@ if Client then
 	    model:SetMaterialParameter("spePatchEffect", self.spePatchEffect or 0)
 	end
     end
-    
+
 end -- Client

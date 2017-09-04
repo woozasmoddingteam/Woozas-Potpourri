@@ -50,6 +50,6 @@ function Plugin:CreateCommands()
 	local ShowcustombadgesCommand = self:BindCommand( "sh_showcustombadges", "showcustombadges", Showcustombadges)
 	ShowcustombadgesCommand:AddParam{ Type = "client" }
 	ShowcustombadgesCommand:Help( "<player> Shows the Apheriox custom badges  Tutorial to the player" )
-	
+
 
 end
