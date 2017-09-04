@@ -16,3 +16,6 @@
 [submodule "submodules/ns2_discord_bridge_mod"]
 	path = submodules/ns2_discord_bridge_mod
 	url = https://github.com/eBrute/ns2_discord_bridge_mod
+[submodule "submodules/FewerBuildRestrictions"]
+	path = submodules/FewerBuildRestrictions
+	url = https://github.com/Laaas/FewerBuildRestrictions.git
