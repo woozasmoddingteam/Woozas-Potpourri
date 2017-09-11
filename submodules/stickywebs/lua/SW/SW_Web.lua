@@ -63,5 +63,11 @@ local function NewCheckForIntersection(self, fromPlayer)
 
 end 
 
+function Web:ModifyDamageTaken(damageTable, attacker, doer, damageType, hitPoint)
+    if doer ~= nil and (doer:isa "Grenade" or doer:isa "ClusterGrenade") or damageType ~= kDamageType.Flame then
+        damageTable.damage = 0
+    end
+end
+
 ReplaceLocals(  Web.OnUpdate, { CheckForIntersection = NewCheckForIntersection } )
 ReplaceLocals(  Web.UpdateWebOnProcessMove, { CheckForIntersection = NewCheckForIntersection } )
