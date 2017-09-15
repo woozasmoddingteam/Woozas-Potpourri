@@ -19,3 +19,6 @@
 [submodule "submodules/FewerBuildRestrictions"]
 	path = submodules/FewerBuildRestrictions
 	url = https://github.com/Laaas/FewerBuildRestrictions.git
+[submodule "submodules/JoinTeam"]
+	path = submodules/JoinTeam
+	url = https://github.com/BenjaminJacobs1/JoinTeam.git
