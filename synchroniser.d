@@ -3,6 +3,7 @@
 import std.stdio;
 import std.file;
 import std.path;
+import core.sys.posix.unistd;
 import std.string;
 import std.array;
 import std.process;
@@ -43,10 +44,17 @@ int main(string[] args) {
 
 		partial = true;
 
-		if(!exists("output"))
+		version(Posix) {
+			if(exists("output"))
+				rmdirRecurse("output");
 			mkdir("output");
+		} else {
+			if(!exists("output"))
+				mkdir("output");
+		}
 
-		copy("mod.settings." ~ args[1], "mod.settings");
+		auto mod = args[1];
+		copy("mod.settings." ~ mod, "mod.settings");
 
 		break;
 	default:
@@ -84,7 +92,11 @@ int main(string[] args) {
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
 			} else {
-				copy(entry, path);
+				version(Posix) {
+					link(entry.absolutePath, path);
+				} else {
+					copy(entry, path);
+				}
 			}
 		}
 	}
