@@ -1,0 +1,5 @@
+shader = "models/marine/marine.surface_shader"
+albedoMap = "models/marine/flame_sentry/flame_sentry.dds"
+specularMap = "models/marine/flame_sentry/flame_sentry_spec.dds"
+normalMap = "models/marine/flame_sentry/flame_sentry_normal.dds"
+emissiveMap = "models/marine/flame_sentry/flame_sentry_illum.dds"
