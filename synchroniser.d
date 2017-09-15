@@ -83,10 +83,6 @@ int main(string[] args) {
 				writefln("Ignored %s!", rpath);
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
-			} else if(path.exists) {
-				if (!partial) {
-					writefln("Duplicate file %s!", path);
-				}
 			} else {
 				copy(entry, path);
 			}
