@@ -1,13 +1,6 @@
-local function GetDistance(self, fromPlayer)
+local GetDistance
 
-	local tranformCoords = self:GetCoords():GetInverse()
-	local relativePoint = tranformCoords:TransformPoint(fromPlayer:GetOrigin())
-
-	return math.abs(relativePoint.x), relativePoint.y
-
-end
-
-local function NewCheckForIntersection(self, fromPlayer)
+debug.replaceupvalue(Web.UpdateWebOnProcessMove, "CheckForIntersection", function(self, fromPlayer)
 
 	if not self.endPoint then
 		self.endPoint = self:GetOrigin() + self.length * self:GetCoords().zAxis
@@ -36,9 +29,7 @@ local function NewCheckForIntersection(self, fromPlayer)
 
 			if horizontalOk and verticalOk then
 
-				if not fromPlayer:GetIsWebbed() then
-					fromPlayer:SetWebbed(kWebbedDuration)
-				end
+				fromPlayer:SetWebbed(kWebbedDuration)
 
 				--FIXME Web seems to not have Owner applied, because this is running in ProcessMove
 				--	Owner only accessible on ServerVM ...
@@ -61,14 +52,11 @@ local function NewCheckForIntersection(self, fromPlayer)
 
 	end
 
-end
+end)
 
-function Web:ModifyDamageTaken(damageTable, attacker, doer, damageType, hitPoint)
+debug.replacemethod("Web", "ModifyDamageTaken", function(self, damageTable, attacker, doer, damageType, hitPoint)
 	Log("Web:ModifyDamageTaken(%s, %s, %s, %s, %s)", damageTable, attacker, doer, damageType, hitPoint)
-	if doer ~= nil and (doer:isa "Grenade" or doer:isa "ClusterGrenade") or damageType ~= kDamageType.Flame then
+	if doer ~= nil and (doer:isa "Grenade" or doer:isa "ClusterGrenade" or doer:isa "ClusterFragment") or damageType ~= kDamageType.Flame then
 		damageTable.damage = 0
 	end
-end
-
-ReplaceLocals(	Web.OnUpdate, { CheckForIntersection = NewCheckForIntersection } )
-ReplaceLocals(	Web.UpdateWebOnProcessMove, { CheckForIntersection = NewCheckForIntersection } )
+end)
