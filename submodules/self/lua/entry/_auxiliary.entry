@@ -124,6 +124,19 @@ function ToString(v, literal, indentation, printed)
 	end
 end
 
+function Log(formatString, ...)
+    local args = {}
+    for i = 1, select('#', ...) do
+        local v = select(i, ...)
+        table.insert(args, ToString(v, true))
+    end
+    if #args > 0 then
+        HPrint(formatString, unpack(args))
+    else
+        HPrint(formatString)
+    end
+end
+
 debug.compacttraceback = function(message, level)
 	local printed = {}
 	level   = level and level + 1 or 2
@@ -226,7 +239,7 @@ do
 			end
 		until
 			n == nil or n == up
-		
+
 		-- Do a recursive search
 		if n == nil then
 			for _, subf in ipairs(funcs) do
@@ -248,7 +261,7 @@ do
 		if type(up) ~= "string" then
 			return old(f, up, v)
 		end
-		
+
 		local _, f, i = debug.getupvalue(f, up, recursive)
 		old(f, i, v)
 	end
@@ -261,6 +274,8 @@ do
 	-- see the changes.
 	-- Extras is extra upvalues to be set
 	local function joinupvalues(dest, src, extras)
+		assert(type(dest) == "function", "first argument is not a function!")
+		assert(type(src)  == "function", "second argument is not a function!")
 		local i, n, v = 0
 		while true do
 			i = i + 1
@@ -289,6 +304,16 @@ do
 		end
 	end
 	debug.joinupvalues = joinupvalues
+end
+
+do
+	local function replaceupvalue(f, up, v, recursive)
+		local original, owner_func, i = debug.getupvalue(f, up, recursive)
+		assert(owner_func, "Could not find the specified upvalue!")
+		debug.joinupvalues(v, original)
+		debug.setupvalue(owner_func, i, v)
+	end
+	debug.replaceupvalue = replaceupvalue
 end
 
 -- Example of debug.joinupvalues
@@ -338,6 +363,7 @@ do
 	end
 
 	function debug.replacemethod(classname, n, v)
+		assert(type(v) == "function", "third argument is not a function!")
 		local class = _G[classname]
 		local original = class[n]
 		debug.joinupvalues(v, original)
