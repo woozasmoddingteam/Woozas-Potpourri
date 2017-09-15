@@ -88,7 +88,15 @@ int main(string[] args) {
 			auto path = chainPath("output", rpath).array;
 			foreach(part; parts[0 .. $-1]) if(part[0] == '.')
 				continue outer;
-			if(parts[$-1][0] == '.' || normalised_name == "license" || normalised_name == "readme") {
+			if(
+				rpath.extension == ".deuser" ||
+				rpath.extension == ".deproj" ||
+				rpath == "mod.settings" ||
+				rpath == "preview.jpg" ||
+				parts[$-1][0] == '.' ||
+				normalised_name == "license" ||
+				normalised_name == "readme"
+			) {
 				writefln("Ignored %s!", rpath);
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
