@@ -32,12 +32,7 @@ int main(string[] args) {
 		mkdir("output");
 
 		auto mod = args[1];
-		version(Posix) {
-			if(exists("mod.settings")) std.file.remove("mod.settings");
-			symlink("mod.settings." ~ mod, "mod.settings");
-		} else {
-			copy("mod.settings." ~ mod, "mod.settings");
-		}
+		copy("mod.settings." ~ mod, "mod.settings");
 
 		break;
 	case 3:
@@ -48,22 +43,10 @@ int main(string[] args) {
 
 		partial = true;
 
-		version(Posix) {
-			if(exists("output"))
-				rmdirRecurse("output");
+		if(!exists("output"))
 			mkdir("output");
-		} else {
-			if(!exists("output"))
-				mkdir("output");
-		}
 
-		auto mod = args[1];
-		version(Posix) {
-			std.file.remove("mod.settings");
-			symlink("mod.settings." ~ mod, "mod.settings");
-		} else {
-			copy("mod.settings." ~ mod, "mod.settings");
-		}
+		copy("mod.settings." ~ args[1], "mod.settings");
 
 		break;
 	default:
@@ -101,17 +84,11 @@ int main(string[] args) {
 			} else if(entry.isDir) {
 				if(!path.exists) path.mkdir;
 			} else if(path.exists) {
-				version(Posix) {
-					writefln("Duplicate file %s!", path);
-				} else if (!partial) {
+				if (!partial) {
 					writefln("Duplicate file %s!", path);
 				}
 			} else {
-				version(Posix) {
-					symlink(entry.absolutePath, path);
-				} else {
-					copy(entry, path);
-				}
+				copy(entry, path);
 			}
 		}
 	}
