@@ -93,7 +93,7 @@ int main(string[] args) {
 				if(!path.exists) path.mkdir;
 			} else {
 				version(Posix) {
-					link(entry.absolutePath, path);
+					link(entry.toStringz, path.toStringz);
 				} else {
 					copy(entry, path);
 				}
