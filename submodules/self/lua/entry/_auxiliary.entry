@@ -1,3 +1,5 @@
+-- Has to load first!
+
 local format = string.format
 
 local cdata_types = {
@@ -199,6 +201,149 @@ debug.traceback = function(message, level)
 	end
 end
 
-Script.CallStack = debug.traceback
+if Script then
+	Script.CallStack = debug.traceback
+end
+
+do
+	local old = debug.getupvalue
+	local function getupvalue(f, up, recursive)
+		if type(up) ~= "string" then
+			return old(f, up)
+		end
+
+		if recursive == nil then
+			recursive = true
+		end
+
+		local funcs   = {}
+		local i, n, v = 0
+		repeat
+			i = i + 1
+			n, v = old(f, i)
+			if recursive and type(v) == "function" then
+				table.insert(funcs, v)
+			end
+		until
+			n == nil or n == up
+		
+		-- Do a recursive search
+		if n == nil then
+			for _, subf in ipairs(funcs) do
+				v, f, i = getupvalue(subf, up)
+				if f ~= nil then
+					return v, f, i
+				end
+			end
+		elseif n == up then
+			return v, f, i
+		end
+	end
+	debug.getupvalue = getupvalue
+end
+
+do
+	local old = debug.setupvalue
+	local function setupvalue(f, up, v, recursive)
+		if type(up) ~= "string" then
+			return old(f, up, v)
+		end
+		
+		local _, f, i = debug.getupvalue(f, up, recursive)
+		old(f, i, v)
+	end
+	debug.setupvalue = setupvalue
+end
+
+do
+	-- Iterate through upvalues of dest, and if is nil, get the equivalent upvalue from src instead.
+	-- Furthermore, it keeps the linkage, so functions that use the same locals as src will also
+	-- see the changes.
+	-- Extras is extra upvalues to be set
+	local function joinupvalues(dest, src, extras)
+		local i, n, v = 0
+		while true do
+			i = i + 1
+			n, v = debug.getupvalue(dest, i)
+			if n == nil then
+				break
+			end
+
+			local _, _, src_i = debug.getupvalue(src, n, false)
+			if src_i ~= nil then
+				debug.upvaluejoin(dest, i, src, src_i)
+				if v ~= nil then
+					local _, original = debug.getupvalue(dest, i)
+					if type(original) == "function" and type(v) == "function" then
+						joinupvalues(v, original)
+					end
+					debug.setupvalue(dest, i, v)
+				end
+			end
+		end
+
+		if extras then
+			for k, v in pairs(extras) do
+				debug.setupvalue(src, k, v)
+			end
+		end
+	end
+	debug.joinupvalues = joinupvalues
+end
+
+-- Example of debug.joinupvalues
+-- NB: If you don't use an "upvalue", it won't be an upvalue.
+if false then
+	local a, b
+	do
+		local n     = 0;   -- Refers to new n
+		local delta = 1;
+		local function x() -- Refers to new x
+			print "x 1"
+			n = n - delta
+			return n
+		end
+		a = function()
+			print "a"
+			return x(), delta
+		end
+	end
+	do
+		local delta  -- Refers to original delta
+		local n = 55 -- Overrides original n
+		local function x() -- Overrides original x
+			print "x 2"
+			n = n + delta
+			delta = delta + 1
+			return n
+		end
+		b = function()
+			print "b"
+			return x() * 2 + n
+		end
+	end
+	debug.joinupvalues(b, a)
+end
+
+do
+	local function replacemethod(classname, n, v, original)
+		local derived = Script.GetDerivedClasses(classname)
+		for _, d in ipairs(derived) do
+			local class = _G[d]
+			if class[n] == original then
+				class[n] = v
+				replacemethod(d, n, v, original)
+			end
+		end
+	end
+
+	function debug.replacemethod(classname, n, v)
+		local class = _G[classname]
+		local original = class[n]
+		debug.joinupvalues(v, original)
+		class[n] = v
+		replacemethod(classname, n, v, original)
+	end
+end
 
 modEntry = {}
