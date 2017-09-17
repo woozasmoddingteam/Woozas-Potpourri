@@ -22,3 +22,6 @@
 [submodule "submodules/JoinTeam"]
 	path = submodules/JoinTeam
 	url = https://github.com/BenjaminJacobs1/JoinTeam.git
+[submodule "submodules/ns2-mod-enhancedspectator"]
+	path = submodules/ns2-mod-enhancedspectator
+	url = https://github.com/ailmanki/ns2-mod-enhancedspectator.git
