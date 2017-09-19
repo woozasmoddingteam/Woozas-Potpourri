@@ -22,6 +22,6 @@
 [submodule "submodules/ns2-mod-enhancedspectator"]
 	path = submodules/ns2-mod-enhancedspectator
 	url = https://github.com/ailmanki/ns2-mod-enhancedspectator.git
-[submodule "submodules/JoinTeam"]
-	path = submodules/JoinTeam
-	url = https://github.com/Laaas/JoinTeam.git
+[submodule "submodules/ForceBalance"]
+	path = submodules/ForceBalance
+	url = https://github.com/Laaas/ForceBalance.git
