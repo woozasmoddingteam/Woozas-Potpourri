@@ -55,7 +55,10 @@ debug.replaceupvalue(Web.UpdateWebOnProcessMove, "CheckForIntersection", functio
 end)
 
 debug.replacemethod("Web", "ModifyDamageTaken", function(self, damageTable, attacker, doer, damageType, hitPoint)
-	if doer ~= nil and (doer:isa "Grenade" or doer:isa "ClusterGrenade" or doer:isa "ClusterFragment") or damageType ~= kDamageType.Flame then
+	if damageType ~= kDamageType.Flame then
 		damageTable.damage = 0
+	end
+	if doer ~= nil and (doer:isa "ClusterGrenade" or doer:isa "ClusterFragment") then
+		damageTable.damage = damageTable.damage * 0.2
 	end
 end)
