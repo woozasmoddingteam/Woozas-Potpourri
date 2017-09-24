@@ -59,6 +59,6 @@ debug.replacemethod("Web", "ModifyDamageTaken", function(self, damageTable, atta
 		damageTable.damage = 0
 	end
 	if doer ~= nil and (doer:isa "ClusterGrenade" or doer:isa "ClusterFragment") then
-		damageTable.damage = damageTable.damage * 0.2
+		damageTable.damage = damageTable.damage * 0.1
 	end
 end)
