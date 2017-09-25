@@ -1,2 +1,2 @@
 shader = "shaders/ModPanel.surface_shader"
-panel  = "modpanels/wooza/balance.dds"
+panel  = "modpanels/wooza/balance.tga"
