@@ -22,7 +22,7 @@ int main(string[] args) {
 		}
 
 		writeln("Checking for submodule updates...");
-		if(auto err = spawnProcess(["git", "submodule", "update", "--remote"]).wait) {
+		if(auto err = spawnProcess(["git", "submodule", "update"]).wait) {
 			stderr.writefln("Could not update submodules! Error code: %s", err);
 			return 2;
 		}
