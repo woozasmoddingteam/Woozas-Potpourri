@@ -19,6 +19,7 @@
 [submodule "submodules/FewerBuildRestrictions"]
 	path = submodules/FewerBuildRestrictions
 	url = https://github.com/Laaas/FewerBuildRestrictions.git
+	branch = "minimal"
 [submodule "submodules/ns2-mod-enhancedspectator"]
 	path = submodules/ns2-mod-enhancedspectator
 	url = https://github.com/ailmanki/ns2-mod-enhancedspectator.git
