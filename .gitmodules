@@ -26,3 +26,6 @@
 [submodule "submodules/ForceBalance"]
 	path = submodules/ForceBalance
 	url = https://github.com/Laaas/ForceBalance.git
+[submodule "submodules/Shine"]
+	path = submodules/Shine
+	url = https://github.com/Person8880/Shine.git
