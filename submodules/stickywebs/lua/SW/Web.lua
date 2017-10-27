@@ -1,5 +1,18 @@
 local GetDistance
 
+debug.replaceupvalue(Web.OnCreate, "CheckWebablesInRange", function(self)
+	if self.checkRadius == nil then
+		self.checkRadius = (self:GetOrigin() - self.endPoint):GetLength() * .5 + 1
+		Log("self.checkRadius was not set! %s", self)
+	end
+
+	local webables = GetEntitiesWithMixinForTeamWithinRange("Webable", GetEnemyTeamNumber(self:GetTeamNumber()), self:GetOrigin(), self.checkRadius)
+	self.enemiesInRange = #webables > 0
+	self:SetUpdates(self.enemiesInRange)
+
+	return true
+end)
+
 debug.replaceupvalue(Web.UpdateWebOnProcessMove, "CheckForIntersection", function(self, fromPlayer)
 
 	if not self.endPoint then
