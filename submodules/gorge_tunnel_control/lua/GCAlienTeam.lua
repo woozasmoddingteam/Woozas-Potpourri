@@ -61,33 +61,38 @@ end
 function AlienTeam:AddGorgeStructure(player, structure)
 
     if player ~= nil and structure ~= nil then
-    
+
         local clientId = Server.GetOwner(player):GetUserId()
         local structureId = structure:GetId()
         local techId = structure:GetTechId()
-        
+
         if not self.clientOwnedStructures[clientId] then
-            self.clientOwnedStructures[clientId] = { }
+            table.insert(self.clientStructuresOwner, clientId)
+            self.clientOwnedStructures[clientId] = {
+                techIds = {}
+            }
         end
-        
+
         local structureTypeTable = self.clientOwnedStructures[clientId]
-        
+
         if not structureTypeTable[techId] then
-            structureTypeTable[techId] = { }
+            structureTypeTable[techId] = {}
+            table.insert(structureTypeTable.techIds, techId)
         end
-        
+
         table.insertunique(structureTypeTable[techId], structureId)
-        
+
         ApplyGorgeStructureTheme(structure, player)
-        
+
         local numAllowedStructure = LookupTechData(techId, kTechDataMaxAmount, -1) --* self:GetNumHives()
-        
-        if numAllowedStructure >= 0 and table.count(structureTypeTable[techId]) > numAllowedStructure then
-            RemoveGorgeStructureFromClient(self, techId, clientId, player)
+
+        if numAllowedStructure >= 0 and table.icount(structureTypeTable[techId]) > numAllowedStructure then
+            self:RemoveGorgeStructureFromClient(techId, clientId)
         end
-        
+
     end
-    
+
 end
+
 
 
