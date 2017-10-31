@@ -1,15 +1,14 @@
-
 local function ApplyGorgeStructureTheme(structure, player)
 
     assert(player:isa("Gorge"))
-    
+
     if structure.SetVariant then
         structure:SetVariant(player:GetVariant())
     end
-    
+
 end
 
-local function RemoveGorgeStructureFromClient(self, techId, clientId, player)
+function AlienTeam:RemoveGorgeStructureFromClient(techId, clientId, player)
 
     local structureTypeTable = self.clientOwnedStructures[clientId]
     
@@ -28,6 +27,7 @@ local function RemoveGorgeStructureFromClient(self, techId, clientId, player)
 		if techId == kTechId.GorgeTunnel and player and player:GetCrouching() then
 			skip = true
 		end
+
         for index, id in ipairs(structureTypeTable[techId])  do
         
             if id and not skip then
@@ -87,12 +87,9 @@ function AlienTeam:AddGorgeStructure(player, structure)
         local numAllowedStructure = LookupTechData(techId, kTechDataMaxAmount, -1) --* self:GetNumHives()
 
         if numAllowedStructure >= 0 and table.icount(structureTypeTable[techId]) > numAllowedStructure then
-            self:RemoveGorgeStructureFromClient(techId, clientId)
+            self:RemoveGorgeStructureFromClient(techId, clientId, player)
         end
 
     end
 
 end
-
-
-
