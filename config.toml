@@ -1,0 +1,14 @@
+
+[master]
+name            = "Wooza's Potpourri"
+tags            = ["Tool", "Must be run on Server"]
+autodescription = true
+description     = "README.md"
+preview         = "preview.jpg"
+
+[beta]
+name            = "Wooza's Potpourri - Beta"
+tags            = ["Tool", "Must be run on Server"]
+autodescription = false
+description     = "description.beta.txt"
+preview         = "preview.jpg"
