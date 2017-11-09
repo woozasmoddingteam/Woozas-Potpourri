@@ -125,21 +125,21 @@ function ToString(v, literal, indentation, printed)
 end
 
 function Log(formatString, ...)
-    local args = {}
-    for i = 1, select('#', ...) do
-        local v = select(i, ...)
-        table.insert(args, ToString(v, true))
-    end
-    if #args > 0 then
-        HPrint(formatString, unpack(args))
-    else
-        HPrint(formatString)
-    end
+	local args = {}
+	for i = 1, select('#', ...) do
+		local v = select(i, ...)
+		table.insert(args, ToString(v, true))
+	end
+	if #args > 0 then
+		HPrint(formatString, unpack(args))
+	else
+		HPrint(formatString)
+	end
 end
 
 debug.compacttraceback = function(message, level)
 	local printed = {}
-	level   = level and level + 1 or 2
+	level	= level and level + 1 or 2
 	local str = "Call stack:"
 	local i = level
 	local func = debug.getinfo(i)
@@ -160,7 +160,7 @@ debug.compacttraceback = function(message, level)
 end
 debug.fulltraceback = function(message, level)
 	local printed = {}
-	level   = level and level + 1 or 2
+	level	= level and level + 1 or 2
 	local str = "Call stack:"
 	local i = level
 	local func = debug.getinfo(i)
@@ -187,7 +187,7 @@ debug.fulltraceback = function(message, level)
 	end
 end
 debug.traceback = function(message, level)
-	level   = level and level + 1 or 2
+	level	= level and level + 1 or 2
 	local str = "Call stack:"
 	local i = level
 	local func = debug.getinfo(i)
@@ -321,7 +321,7 @@ end
 if false then
 	local a, b
 	do
-		local n     = 0;   -- Refers to new n
+		local n		= 0;   -- Refers to new n
 		local delta = 1;
 		local function x() -- Refers to new x
 			print "x 1"
@@ -353,6 +353,7 @@ end
 do
 	local function replacemethod(classname, n, v, original)
 		local derived = Script.GetDerivedClasses(classname)
+		if derived == nil then return end
 		for _, d in ipairs(derived) do
 			local class = _G[d]
 			if class[n] == original then
