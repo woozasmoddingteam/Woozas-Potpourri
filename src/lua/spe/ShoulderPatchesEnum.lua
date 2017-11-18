@@ -41,6 +41,7 @@ kShoulderPatchNames = {
 	"Yolo2",
 	"Yolo3",
 	"8Bit",
-	"Fire"
+	"Fire",
+	"MvM Event Nov 2017"
 
 }
