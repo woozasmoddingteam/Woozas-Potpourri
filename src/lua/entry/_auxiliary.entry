@@ -218,6 +218,10 @@ if Script then
 	Script.CallStack = debug.traceback
 end
 
+--[[ Example:
+local kRange = debug.getupvalue(HealSprayMixin.OnTag, "kRange")
+]]
+
 do
 	local old = debug.getupvalue
 	local function getupvalue(f, up, recursive)
@@ -255,6 +259,10 @@ do
 	debug.getupvalue = getupvalue
 end
 
+--[[ Example:
+debug.setupvalue(HealSprayMixin.OnTag, "kRange", 20000)
+]]
+
 do
 	local old = debug.setupvalue
 	local function setupvalue(f, up, v, recursive)
@@ -266,6 +274,36 @@ do
 		old(f, i, v)
 	end
 	debug.setupvalue = setupvalue
+end
+
+-- Example of debug.joinupvalues
+-- NB: If you don't use an "upvalue", it won't be an upvalue.
+if false then
+	local a, b
+	do
+		local n		= 0;   -- Refers to new n
+		local delta = 1;
+		local function x() -- Refers to new x
+			n = n - delta
+			return n
+		end
+		a = function()
+			return x(), delta
+		end
+	end
+	do
+		local delta  -- Refers to original delta
+		local n = 55 -- Overrides original n
+		local function x() -- Overrides original x
+			n = n + delta
+			delta = delta + 1
+			return n
+		end
+		b = function()
+			return x() * 2 + n
+		end
+	end
+	debug.joinupvalues(b, a)
 end
 
 do
@@ -307,6 +345,41 @@ do
 end
 
 do
+	--[[ Example:
+	debug.replaceupvalue(HealSprayMixin.OnTag, "GetEntitiesInCone", function(self, player)
+		local range = 0
+
+		local viewCoords = player:GetViewCoords()
+		local fireDirection = viewCoords.zAxis
+
+		local startPoint = viewCoords.origin + viewCoords.yAxis * kHealCylinderWidth * 0.2
+		local lineTrace1 = Shared.TraceRay(startPoint, startPoint + kRange * fireDirection, CollisionRep.LOS, PhysicsMask.Flame, EntityFilterAll())
+		if (lineTrace1.endPoint - startPoint):GetLength() > range then
+			range = (lineTrace1.endPoint - startPoint):GetLength()
+		end
+
+		startPoint = viewCoords.origin - viewCoords.yAxis * kHealCylinderWidth * 0.2
+		local lineTrace2 = Shared.TraceRay(startPoint, startPoint + kRange * fireDirection, CollisionRep.LOS, PhysicsMask.Flame, EntityFilterAll())
+		if (lineTrace2.endPoint - startPoint):GetLength() > range then
+			range = (lineTrace2.endPoint - startPoint):GetLength()
+		end
+
+		startPoint = viewCoords.origin - viewCoords.xAxis * kHealCylinderWidth * 0.2
+		local lineTrace3 = Shared.TraceRay(startPoint, startPoint + kRange * fireDirection, CollisionRep.LOS, PhysicsMask.Flame, EntityFilterAll())
+		if (lineTrace3.endPoint - startPoint):GetLength() > range then
+			range = (lineTrace3.endPoint - startPoint):GetLength()
+		end
+
+		startPoint = viewCoords.origin + viewCoords.xAxis * kHealCylinderWidth * 0.2
+		local lineTrace4 = Shared.TraceRay(startPoint, startPoint + kRange * fireDirection, CollisionRep.LOS, PhysicsMask.Flame, EntityFilterAll())
+		if (lineTrace4.endPoint - startPoint):GetLength() > range then
+			range = (lineTrace4.endPoint - startPoint):GetLength()
+		end
+
+		return GetEntitiesInCylinder(self, player, viewCoords, range, kHealCylinderWidth)
+	end)
+	]]
+
 	local function replaceupvalue(f, up, v, recursive)
 		local original, owner_func, i = debug.getupvalue(f, up, recursive)
 		assert(owner_func, "Could not find the specified upvalue!")
@@ -314,40 +387,6 @@ do
 		debug.setupvalue(owner_func, i, v)
 	end
 	debug.replaceupvalue = replaceupvalue
-end
-
--- Example of debug.joinupvalues
--- NB: If you don't use an "upvalue", it won't be an upvalue.
-if false then
-	local a, b
-	do
-		local n		= 0;   -- Refers to new n
-		local delta = 1;
-		local function x() -- Refers to new x
-			print "x 1"
-			n = n - delta
-			return n
-		end
-		a = function()
-			print "a"
-			return x(), delta
-		end
-	end
-	do
-		local delta  -- Refers to original delta
-		local n = 55 -- Overrides original n
-		local function x() -- Overrides original x
-			print "x 2"
-			n = n + delta
-			delta = delta + 1
-			return n
-		end
-		b = function()
-			print "b"
-			return x() * 2 + n
-		end
-	end
-	debug.joinupvalues(b, a)
 end
 
 do
@@ -363,6 +402,16 @@ do
 		end
 	end
 
+	--[[ Example:
+	debug.replacemethod("Web", "ModifyDamageTaken", function(self, damageTable, attacker, doer, damageType, hitPoint)
+		if damageType ~= kDamageType.Flame then
+			damageTable.damage = 0
+		end
+		if doer ~= nil and (doer:isa "ClusterGrenade" or doer:isa "ClusterFragment") then
+			damageTable.damage = damageTable.damage * 0.1
+		end
+	end)
+	]]
 	function debug.replacemethod(classname, n, v)
 		assert(type(v) == "function", "third argument is not a function!")
 		local class = _G[classname]
