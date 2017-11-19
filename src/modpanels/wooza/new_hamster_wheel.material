@@ -1,3 +1,0 @@
-shader = "shaders/ModPanel.surface_shader"
-panel  = "modpanels/wooza/new_hamster_wheel.dds"
-url    = "http://apheriox.com/news/relaunching-woozas-hamsterwheel/"

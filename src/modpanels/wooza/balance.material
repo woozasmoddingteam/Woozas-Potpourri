@@ -1,2 +1,0 @@
-shader = "shaders/ModPanel.surface_shader"
-panel  = "modpanels/wooza/balance.dds"
