@@ -29,3 +29,6 @@
 [submodule "dependencies/Shine"]
 	path = dependencies/Shine
 	url = https://github.com/woozasmoddingteam/Shine.git
+[submodule "dependencies/JoinTeam"]
+	path = dependencies/JoinTeam
+	url = https://github.com/BenjaminJacobs1/JoinTeam.git
