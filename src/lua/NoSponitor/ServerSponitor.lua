@@ -1,4 +1,3 @@
-Log "Overriding server sponitor!"
 local void = function() end
 function ServerSponitor()
 	return {
