@@ -1,4 +1,4 @@
 
 modEntry = {
-	FileHooks = "lua/NoSponitor/FileHooks.lua"
+	--FileHooks = "lua/NoSponitor/FileHooks.lua"
 }
