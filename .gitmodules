@@ -15,7 +15,7 @@
 	url = https://github.com/eBrute/wonitor-mod.git
 [submodule "dependencies/ns2_discord_bridge_mod"]
 	path = dependencies/ns2_discord_bridge_mod
-	url = https://github.com/eBrute/ns2_discord_bridge_mod
+	url = https://github.com/Laaas/ns2_discord_bridge_mod
 [submodule "dependencies/FewerBuildRestrictions"]
 	path = dependencies/FewerBuildRestrictions
 	url = https://github.com/Laaas/FewerBuildRestrictions.git
