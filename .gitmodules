@@ -28,7 +28,7 @@
 	url = https://github.com/Laaas/ForceBalance.git
 [submodule "dependencies/Shine"]
 	path = dependencies/Shine
-	url = https://github.com/woozasmoddingteam/Shine.git
+	url = https://github.com/Person8880/Shine.git
 [submodule "dependencies/JoinTeam"]
 	path = dependencies/JoinTeam
 	url = https://github.com/BenjaminJacobs1/JoinTeam.git
