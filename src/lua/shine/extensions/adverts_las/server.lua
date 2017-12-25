@@ -180,7 +180,6 @@ end
 
 function Plugin:ReceiveRequestForGroups(Client)
 	for i = 1, #groups do
-		Log("Sent %s!", groups[i])
 		self:SendNetworkMessage(Client, "Group", groups[i], true)
 	end
 end
