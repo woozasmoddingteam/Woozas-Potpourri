@@ -48,7 +48,7 @@ function Plugin:ReceiveAdvert(msg)
 end
 
 function Plugin:ReceiveGroup(msg)
-	Log("Received %s!", groups[i])
+	Log("Received %s!", msg)
 	local name = msg.name;
 	groups[name] = msg;
 	config[name] = config[name] or false;
