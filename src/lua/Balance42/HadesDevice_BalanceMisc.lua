@@ -1,2 +1,1 @@
-Log "\n\nHadesDevice\n\n"
-kHadesDeviceDamage = 7000
+kHadesDeviceDamage = 10000
