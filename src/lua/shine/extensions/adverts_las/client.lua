@@ -41,7 +41,10 @@ function Plugin:ReceiveAdvert(msg)
 		Shared.Message("AdvertsLasClient: Skipped an advert from the group '" .. msg.group .. "'.");
 		return;
 	end
+	local tmp = StartSoundEffect
+	StartSoundEffect = nil
 	Shine.AddChatText(group.pr, group.pg, group.pb, group.prefix, group.r/255, group.g/255, group.b/255, msg.str);
+	StartSoundEffect = tmp
 end
 
 function Plugin:ReceiveGroup(msg)
