@@ -1,0 +1,1 @@
+kMaxNameLength = 40
