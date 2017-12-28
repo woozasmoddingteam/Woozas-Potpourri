@@ -1,5 +1,5 @@
 
-kFlamethrowerCost = 15
-kFlamethrowerDamage = 4
-kBurnDamagePerSecond = 4
-kFlameThrowerEnergyDamage = 5
+--kFlamethrowerCost = 15
+--kFlamethrowerDamage = 4
+--kBurnDamagePerSecond = 4
+--kFlameThrowerEnergyDamage = 5
