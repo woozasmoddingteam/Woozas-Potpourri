@@ -321,8 +321,8 @@ local function ApplyConeDamage(self, player)
 
             if HasMixin( ent, "Fire" ) then
                 local time = Shared.GetTime()
-                if ( ent:isa("AlienStructure") or HasMixin( ent, "Maturity" ) ) and ent:GetIsOnFire() and (ent.timeBurnInit + time) >= (ent.timeBurnInit + kCompoundFireDamageDelay) then
-                    attackDamage = kFlamethrowerDamage + ( kFlamethrowerDamage * kCompundFireDamageScalar )
+                if (ent:isa "AlienStructure" or HasMixin(ent, "Maturity")) and ent:GetIsOnFire() then
+                    attackDamage = kFlamethrowerDamage * 2.5
                 end
             end
 
