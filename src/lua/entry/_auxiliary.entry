@@ -131,9 +131,9 @@ function Log(formatString, ...)
 		table.insert(args, ToString(v, true))
 	end
 	if #args > 0 then
-		HPrint(formatString, unpack(args))
+		Print(formatString, unpack(args))
 	else
-		HPrint(formatString)
+		Print(formatString)
 	end
 end
 
