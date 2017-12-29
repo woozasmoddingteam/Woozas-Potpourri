@@ -14,6 +14,7 @@ function Plugin:Surrender(team)
 	local gamerules = GetGamerules()
 
 	if team == 1 then -- special case for marines
+		Print "Team voted to surrender!"
 		local marines = gamerules.team1
 		if kNS2OptiConfig then
 			kTechData[kTechId.InfantryPortal][kTechDataImplemented] = false
