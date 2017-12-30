@@ -13,6 +13,8 @@ local commander = {
 function Plugin:Surrender(team)
 	local gamerules = GetGamerules()
 
+	Shine.SendNetworkMessage("TeamConceded", {teamNumber = team})
+
 	if team == 1 then -- special case for marines
 		Print "Team voted to surrender!"
 		local marines = gamerules.team1
@@ -27,11 +29,10 @@ function Plugin:Surrender(team)
 			ip:SetResearching(recycle, commander)
 			ip.PerformAction = void
 		end
+		Shine:NotifyColour(nil, 240, 30, 30, "IPs have been recycled. Commander can drop a hades device.")
 	else
 		gamerules.team2.conceded = true
 	end
-
-	Shine.SendNetworkMessage("TeamConceded", {teamNumber = team})
 
 	self.Surrendered = true
 end
