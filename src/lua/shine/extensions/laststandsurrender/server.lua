@@ -24,7 +24,7 @@ function Plugin:Surrender(team)
 		local ips = GetEntitiesForTeam("InfantryPortal", 1)
 		local recycle = tree:GetTechNode(kTechId.Recycle)
 		for _, ip in ipairs(ips) do
-			ip:SetResearching(recycle, marines:GetCommander() or commander)
+			ip:SetResearching(recycle, commander)
 			ip.PerformAction = void
 		end
 	else
