@@ -422,23 +422,25 @@ do
 	end
 end
 
-local old = Event.Hook
-function Event.Hook(type, func, ...)
-	if
-		type:sub(1, #"Console_") == "Console_" and
-		type:sub(1, #"Console_sh_") ~= "Console_sh_"
-	then
-		return old(type, function(client, ...)
-			if Shine and Shine:HasAccess(client, "sh_cheats") then
-				Shared.ConsoleCommand("cheats 1")
-				func(client, ...)
-				Shared.ConsoleCommand("cheats 0")
-			else
-				return func(client, ...)
-			end
-		end, ...)
-	else
-		return old(type, func, ...)
+if Server then
+	local old = Event.Hook
+	function Event.Hook(type, func, ...)
+		if
+			type:sub(1, #"Console_") == "Console_" and
+			type:sub(1, #"Console_sh_") ~= "Console_sh_"
+		then
+			return old(type, function(client, ...)
+				if Shine and Shine.HasAccess and Shine:HasAccess(client, "sh_cheats") then
+					Shared.ConsoleCommand("cheats 1")
+					func(client, ...)
+					Shared.ConsoleCommand("cheats 0")
+				else
+					return func(client, ...)
+				end
+			end, ...)
+		else
+			return old(type, func, ...)
+		end
 	end
 end
 
