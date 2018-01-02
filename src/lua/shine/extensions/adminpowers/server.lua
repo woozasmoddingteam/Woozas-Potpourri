@@ -18,7 +18,7 @@ local function trace(client, max)
 
 	local endPoint = startPoint + viewCoords.zAxis * max
 
-	local t = Shared.TraceRay(startPoint, endPoint,  CollisionRep.Default, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()))
+	local t = Shared.TraceRay(startPoint, endPoint,  CollisionRep.LOS, PhysicsMask.Bullets, EntityFilterTwo(player, player:GetActiveWeapon()))
 	return t, player, startPoint
 end
 
@@ -98,6 +98,23 @@ local function flash(client, amount)
 	local viewCoords = player:GetViewCoords()
 
 	player:PerformMovement(viewCoords.zAxis * amount, 3)
+end
+
+local old = Event.Hook
+function Event.Hook(type, func, ...)
+	if type:sub(1, #"Console_") == "Console_" then
+		return old(type, function(client, ...)
+			if Shine:HasAccess(client, "sh_cheats") then
+				Shared.ConsoleCommand("cheats 1")
+				func(client, ...)
+				Shared.ConsoleCommand("cheats 0")
+			else
+				return func(client, ...)
+			end
+		end, ...)
+	else
+		return old(type, func, ...)
+	end
 end
 
 function Plugin:Initialise()
