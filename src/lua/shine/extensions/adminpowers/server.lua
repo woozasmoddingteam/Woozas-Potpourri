@@ -99,6 +99,7 @@ local function flash(client, amount)
 	player:PerformMovement(viewCoords.zAxis * amount, 3)
 end
 
+local error_handler = Shine.BuildErrorHandler "Sudo command error"
 local hooks = debug.getregistry()["Event.HookTable"]
 Event.Hook("Console_sudo", function(client, func_name, ...)
 	local event = "Console_" .. func_name
@@ -113,7 +114,7 @@ Event.Hook("Console_sudo", function(client, func_name, ...)
 	end
 	if not Shared.GetCheatsEnabled() then
 		Shared.ConsoleCommand("cheats 1")
-		func(client, ...)
+		xpcall(func, error_handler, client, ...)
 		Shared.ConsoleCommand("cheats 0")
 	else
 		return func(client, ...)
