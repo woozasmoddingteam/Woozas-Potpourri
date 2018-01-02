@@ -99,6 +99,26 @@ local function flash(client, amount)
 	player:PerformMovement(viewCoords.zAxis * amount, 3)
 end
 
+local hooks = debug.getregistry()["Event.HookTable"]
+Event.Hook("Console_sudo", function(client, func_name, ...)
+	local func = hooks["Console_" .. func_name][1]
+	if not func then
+		ServerAdminPrint(client, "No such command!")
+		return
+	end
+	if not Shine:HasAccess(client, "sh_cheats") then
+		ServerAdminPrint(client, "You don't have access to sudo!")
+		return
+	end
+	if not Shared.GetCheatsEnabled() then
+		Shared.ConsoleCommand("cheats 1")
+		func(client, ...)
+		Shared.ConsoleCommand("cheats 0")
+	else
+		return func(client, ...)
+	end
+end)
+
 function Plugin:Initialise()
 	local command
 	command = self:BindCommand("sh_increase_yaw", "IncreaseYaw", increaseYaw, false, true)
