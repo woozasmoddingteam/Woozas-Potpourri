@@ -101,7 +101,8 @@ end
 
 local hooks = debug.getregistry()["Event.HookTable"]
 Event.Hook("Console_sudo", function(client, func_name, ...)
-	local func = hooks["Console_" .. func_name][1]
+	local event = "Console_" .. func_name
+	local func = hooks[event] and hooks[event][1]
 	if not func then
 		ServerAdminPrint(client, "No such command!")
 		return
