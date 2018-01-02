@@ -42,8 +42,7 @@ kShoulderPatchNames = {
 	"Yolo3",
 	"8Bit",
 	"Fire",
-	"MvM Event Nov 2017"
+	"MvM Event Nov 2017",
 	"Allen",
-	"Confederate"
-
+	"Confederate",
 }
