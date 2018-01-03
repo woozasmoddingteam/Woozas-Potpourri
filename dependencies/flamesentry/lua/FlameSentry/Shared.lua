@@ -1,3 +1,5 @@
+Script.Load "lua/FlameSentry/FlameSentry.lua"
+
 table.insert(kGeneralEffectData.spawn.spawnEffects, 1, {
 	cinematic = "cinematics/marine/structures/spawn_building.cinematic",
 	classname = "FlameSentry"})

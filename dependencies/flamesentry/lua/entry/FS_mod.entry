@@ -1,6 +1,0 @@
-modEntry = {
-         Server = "lua/FS_Server.lua",
-         Shared = "lua/FS_Shared.lua",
-         FileHooks = "lua/FS_FileHooks.lua",
-         Priority = 50
-}
