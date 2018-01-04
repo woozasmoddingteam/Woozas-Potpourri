@@ -61,7 +61,7 @@ function FlameSentry:OnInitialized()
 end
 
 function FlameSentry:OnGetMapBlipInfo()
-	return true, kMinimapBlipType.Sentry, self:GetTeamNumber(), self:GetIsInCombat(), self:GetIsParasisted()
+	return true, kMinimapBlipType.Sentry, self:GetTeamNumber(), self:GetIsInCombat(), self:GetIsParasited()
 end
 
 function FlameSentry:GetEyePos()

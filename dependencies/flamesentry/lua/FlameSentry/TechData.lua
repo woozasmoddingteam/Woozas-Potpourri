@@ -13,7 +13,7 @@ local function BuildTechData()
 		[kTechDataDisplayName]              = "FLAME_SENTRY_TURRET",
 		[kTechDataCostKey]                  = kSentryCost,
 		[kTechDataPointValue]               = kSentryPointValue,
-		[kTechDataModel]                    = FlameSentry.kModelName,
+		[kTechDataModel]                    = assert(FlameSentry.kModelName),
 
 		[kTechDataBuildTime]                = kSentryBuildTime,
 		[kTechDataMaxHealth]                = kSentryHealth,
