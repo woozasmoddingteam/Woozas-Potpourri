@@ -32,9 +32,6 @@
 [submodule "dependencies/JoinTeam"]
 	path = dependencies/JoinTeam
 	url = https://github.com/BenjaminJacobs1/JoinTeam.git
-[submodule "dependencies/NS2-Optimizations"]
-	path = dependencies/NS2-Optimizations
-	url = https://github.com/woozasmoddingteam/NS2-Optimizations.git
 [submodule "dependencies/NS2FixedLOS"]
 	path = dependencies/NS2FixedLOS
 	url = https://github.com/Laaas/NS2FixedLOS.git
