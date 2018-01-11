@@ -74,13 +74,13 @@ FlameSentry.kIdleFlame = PrecacheAsset("cinematics/marine/flame_sentry.cinematic
 -- Balance
 
 kFlameSentryEngagementDistance = 10
-kFlameSentryAttackDamageType = kDamageType.Flame
+kFlameSentryAttackDamageType = kDamageType.Normal
 kFlameSentryAttackBaseROF = .15
 kFlameSentryAttackRandROF = 0.0
 kFlameSentryAttackBulletsPerSalvo = 1
 kConfusedFlameSentryBaseROF = 2.0
 
-kFlameSentryDamage = 6 -- kFlamethrowerDamage = 8
+kFlameSentryDamage = 6.00 -- kFlamethrowerDamage = 8
 kFlameSentryEnergyDamage = 1 -- kFlameThrowerEnergyDamage = 3
 
 FlameSentry.kPingInterval = 4
@@ -319,12 +319,12 @@ local function ApplyConeDamage(self, player)
 
             local attackDamage = kFlameSentryDamage
 
-            if HasMixin( ent, "Fire" ) then
-                local time = Shared.GetTime()
-                if (ent:isa "AlienStructure" or HasMixin(ent, "Maturity")) and ent:GetIsOnFire() then
-                    attackDamage = kFlamethrowerDamage * 2.5
-                end
-            end
+            -- if HasMixin( ent, "Fire" ) then
+            --     local time = Shared.GetTime()
+            --     if (ent:isa "AlienStructure" or HasMixin(ent, "Maturity")) and ent:GetIsOnFire() then
+            --         attackDamage = kFlamethrowerDamage * 2.5
+            --     end
+            -- end
 
             self:DoDamage( attackDamage, ent, ent:GetModelOrigin(), toEnemy )
 
