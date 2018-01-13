@@ -29,7 +29,7 @@ function Plugin:Surrender(team)
 			ip:SetResearching(recycle, commander)
 			ip.PerformAction = void
 		end
-		Shine:NotifyColour(nil, 240, 30, 30, "IPs have been recycled. Commander can drop a hades device.")
+		Shine:NotifyColour(nil, 240, 30, 30, "IPs have been recycled")
 	else
 		gamerules.team2.conceded = true
 	end
