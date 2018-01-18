@@ -1,4 +1,0 @@
-modEntry = {
-	Shared    = "lua/FlameSentry/Shared.lua",
-	FileHooks = "lua/FlameSentry/FileHooks.lua",
-}
