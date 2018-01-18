@@ -3,8 +3,8 @@ Script.Load "lua/Weapons/Marine/Flamethrower.lua"
 
 class 'FlameSentry' (Sentry)
 
-FlameSentry.kMapName			 = "flamesentry"
-FlameSentry.kModelName		 = PrecacheAsset("models/marine/flame_sentry/flame_sentry.model")
+FlameSentry.kMapName        = "flamesentry"
+FlameSentry.kModelName      = PrecacheAsset("models/marine/flame_sentry/flame_sentry.model")
 FlameSentry.kAnimationGraph = PrecacheAsset("models/marine/flame_sentry/flame_sentry.animation_graph")
 
 for _, v in ipairs {
