@@ -35,3 +35,6 @@
 [submodule "dependencies/NS2FixedLOS"]
 	path = dependencies/NS2FixedLOS
 	url = https://github.com/Laaas/NS2FixedLOS.git
+[submodule "dependencies/FlameSentry"]
+	path = dependencies/FlameSentry
+	url = https://github.com/woozasmoddingteam/FlameSentry.git
