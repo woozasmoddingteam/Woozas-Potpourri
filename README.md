@@ -1,28 +1,28 @@
-#Wooza's Potpourri
+# Wooza's Potpourri
 
 This mod collects some of the (non-gameplay-changing) mods from the NS2 universe, available on the Steam Workshop together.
 
-##But why?
+## But why?
 Having many mods on a server in NS2 can cause many problems when connecting.
 E.g. clients may fail when downloading one of the mods, and the more mods there are, the higher this chance is of course.
 
 The mod is used on all Apheriox servers (Wooza's Playground, Hamster Wheel, etc.) and is also free to be used by all server operators
 
-#Custom Badges & Shoulder Patches
+# Custom Badges & Shoulder Patches
 
 [Tutorial for making your own badge](http://apheriox.com/showthread.php/12-HOW-TO-Create-your-own-Badge)
 [Tutorial for making your own shoulder patch](http://apheriox.com/showthread.php/2856-HOW-TO-Create-your-own-Shoulder-Patch)
 
 You can send as many as you want. We will try to update the mod every 2 weeks. Please contact us if your badge is not displayed/working.
 
-#Other mods contained (not git submodules)
+# Other mods contained (not git submodules)
 - Gorge Heart Healspay and Cuter Gorge Eyes (by Skie)
 - Shoulder Patches Extra (by ZycaR)
 - [Shine] permamute (by Brute)
 - Mods Map Prefix (by Katzenfleisch)
 - Crazy Mines (by Nin)
 
-#Changelog:
+# Changelog:
 
 v.1.0
 Version one of Potpourri. May it flourish!
