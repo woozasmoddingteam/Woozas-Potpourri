@@ -1,4 +1,0 @@
-modEntry = {
-	FileHooks = "lua/GCFilehooks.lua",
-	Priority = 5 --make sure this is higher than any UWE extension
-}

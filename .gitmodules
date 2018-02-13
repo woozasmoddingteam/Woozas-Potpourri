@@ -1,18 +1,6 @@
 [submodule "dependencies/ModPanelsPlusPlus"]
 	path = dependencies/ModPanelsPlusPlus
 	url = https://github.com/Laaas/ModPanelsPlusPlus.git
-[submodule "dependencies/Shine-Epsilon"]
-	path = dependencies/Shine-Epsilon
-	url = https://github.com/GhoulOfGSG9/Shine-Epsilon.git
-[submodule "dependencies/BadgesPlus"]
-	path = dependencies/BadgesPlus
-	url = https://github.com/GhoulofGSG9/BadgesPlus.git
-[submodule "dependencies/LocalTalkExtended"]
-	path = dependencies/LocalTalkExtended
-	url = https://github.com/Laaas/LocalTalkExtended.git
-[submodule "dependencies/wonitor-mod"]
-	path = dependencies/wonitor-mod
-	url = https://github.com/eBrute/wonitor-mod.git
 [submodule "dependencies/ns2_discord_bridge_mod"]
 	path = dependencies/ns2_discord_bridge_mod
 	url = https://github.com/Laaas/ns2_discord_bridge_mod
@@ -20,21 +8,9 @@
 	path = dependencies/FewerBuildRestrictions
 	url = https://github.com/Laaas/FewerBuildRestrictions.git
 	branch = "minimal"
-[submodule "dependencies/ns2-mod-enhancedspectator"]
-	path = dependencies/ns2-mod-enhancedspectator
-	url = https://github.com/ailmanki/ns2-mod-enhancedspectator.git
 [submodule "dependencies/ForceBalance"]
 	path = dependencies/ForceBalance
 	url = https://github.com/Laaas/ForceBalance.git
-[submodule "dependencies/Shine"]
-	path = dependencies/Shine
-	url = https://github.com/Person8880/Shine.git
-[submodule "dependencies/JoinTeam"]
-	path = dependencies/JoinTeam
-	url = https://github.com/BenjaminJacobs1/JoinTeam.git
-[submodule "dependencies/NS2FixedLOS"]
-	path = dependencies/NS2FixedLOS
-	url = https://github.com/Laaas/NS2FixedLOS.git
 [submodule "dependencies/FlameSentry"]
 	path = dependencies/FlameSentry
 	url = https://github.com/woozasmoddingteam/FlameSentry.git
