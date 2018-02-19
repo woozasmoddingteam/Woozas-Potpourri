@@ -11,6 +11,3 @@
 [submodule "dependencies/ForceBalance"]
 	path = dependencies/ForceBalance
 	url = https://github.com/Laaas/ForceBalance.git
-[submodule "dependencies/FlameSentry"]
-	path = dependencies/FlameSentry
-	url = https://github.com/woozasmoddingteam/FlameSentry.git
