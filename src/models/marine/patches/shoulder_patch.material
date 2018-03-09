@@ -3,7 +3,7 @@ shader = "models/marine/patches/ShoulderPatchesExtra.surface_shader"
 atlas = "materials/dev/black.dds"
 opacityMap = "models/marine/patches/shoulder_patch_opac.dds"
 emissiveMap = "models/marine/patches/shoulder_patch_emissive.dds"
-numRows = 12
+numRows = 14
 numColumns = 1
 surface = "metal"
 
