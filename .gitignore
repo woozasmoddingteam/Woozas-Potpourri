@@ -46,13 +46,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-source
-output
 compiled
-synchroniser.exe
-synchroniser.obj
-synchroniser.o
-mod.settings
 /dependencies/B7149F9/*
 !/dependencies/B7149F9/.laspad_dummy
 /dependencies/287AA07B/*
