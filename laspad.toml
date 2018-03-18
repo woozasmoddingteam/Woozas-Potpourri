@@ -5,6 +5,7 @@ tags            = ["Tool", "Must be run on Server"]
 autodescription = true
 description     = "README.md"
 preview         = "preview.jpg"
+website         = "https://github.com/woozasmoddingteam/Wooza-s-Potpourri/"
 
 [beta]
 name            = "Wooza's Potpourri - Beta"
