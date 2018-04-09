@@ -1,6 +1,3 @@
-[submodule "dependencies/ModPanelsPlusPlus"]
-	path = dependencies/ModPanelsPlusPlus
-	url = https://github.com/Laaas/ModPanelsPlusPlus.git
 [submodule "dependencies/ns2_discord_bridge_mod"]
 	path = dependencies/ns2_discord_bridge_mod
 	url = https://github.com/Laaas/ns2_discord_bridge_mod
