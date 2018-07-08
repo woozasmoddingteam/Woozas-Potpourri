@@ -1,4 +1,0 @@
-modEntry = {
-FileHooks = "lua/MineMadness/FileHooks.lua",
-Priority = 103
-}
