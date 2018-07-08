@@ -65,6 +65,7 @@ local function initGroup(group)
 	local shuffle;
 	if group.randomise then
 		shuffle = table.QuickShuffle;
+		shuffle(messages);
 	else
 		shuffle = function() end
 	end
