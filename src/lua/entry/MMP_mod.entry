@@ -1,4 +1,0 @@
-modEntry = {
-         FileHooks = "lua/MMP_FileHooks.lua",
-         Priority = 7
-}
