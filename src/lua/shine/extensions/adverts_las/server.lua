@@ -61,12 +61,12 @@ local function initGroup(group)
 	end
 
 	local messages = group.messages;
-	local shuffle;
+	if type(messages) == "function" then
+		messages = messages()
+		group.messages = messages
+	end
 	if group.randomise then
-		shuffle = table.QuickShuffle;
-		shuffle(messages);
-	else
-		shuffle = function() end
+		table.QuickShuffle(messages);
 	end
 	local len = #messages;
 	local msg_n = 1;
@@ -102,7 +102,9 @@ local function initGroup(group)
 		msg_n = msg_n + 1;
 		if msg_n > len then
 			msg_n = 1;
-			shuffle(messages);
+			if group.randomise then
+				table.QuickShuffle(messages)
+			end
 		end
 	end
 	Plugin:CreateTimer(group.name, group.interval, -1, func);
