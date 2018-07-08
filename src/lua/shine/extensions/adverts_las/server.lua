@@ -5,7 +5,6 @@ local pairs = pairs;
 local Plugin = Plugin;
 
 Plugin.DefaultConfig = {
-	RandomiseOrder = true;
 	ServerID = "Your (semi-) unique server ID.";
 	TimeToWait = 1;
 	Adverts = {
