@@ -139,7 +139,6 @@ function Plugin:Initialise()
 	timeToWait = self.Config.TimeToWait or 1;
 
 	for k, v in pairs(self.Config.Adverts) do
-
 		local group = {
 			name = k;
 			prefix = v.Prefix or "";
@@ -158,14 +157,20 @@ function Plugin:Initialise()
 			maps = type(v.Maps) == "string" and {v.Maps} or v.Maps; -- Even if v.Maps is nil it will work as expected.
 		};
 		table.insert(groups, group);
-		if group.createAt == 0 then
-			initGroup(groups[#groups]);
-		end
 	end
 
 	self.Enabled = true;
 
 	return true;
+end
+
+function Plugin:MapPostLoad()
+	for i = 1, #groups do
+		local group = groups[i]
+		if group.createAt == 0 then
+			initGroup(group)
+		end
+	end
 end
 
 function Plugin:SetGameState(gamerules, new, old)
