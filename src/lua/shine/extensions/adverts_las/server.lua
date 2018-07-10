@@ -70,9 +70,11 @@ local function initGroup(group)
 	end
 	local len = #messages
 	local msg_n = 1
-	local func
+
 	local maps = group.maps
-	func = function()
+	local timer
+	local function func()
+		timer:SetDelay(group.interval)
 		if maps then
 			local map = Shared.GetMapName()
 			if map:len() == 0 then
@@ -90,7 +92,7 @@ local function initGroup(group)
 		::continue::
 		local now = Shared.GetTime()
 		if lastPrint > now - timeToWait then
-			Plugin:SimpleTimer(timeToWait, func)
+			timer:SetDelay(timeToWait)
 			return
 		end
 		lastPrint = now
@@ -108,7 +110,7 @@ local function initGroup(group)
 			end
 		end
 	end
-	Plugin:CreateTimer(group.name, group.interval, -1, func)
+	timer = Plugin:CreateTimer(group.name, group.interval, -1, func)
 end
 
 local parseTime = function(time)
