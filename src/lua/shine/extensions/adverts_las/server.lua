@@ -65,12 +65,14 @@ local function initGroup(group)
 	local messages = group.messages
 	if type(messages) == "function" then
 		messages = messages()
+		if messages == nil then return end
 		group.messages = messages
 	end
 	if group.randomise then
 		table.QuickShuffle(messages)
 	end
 	local len = #messages
+	if len == 0 then return end
 	local msg_n = 1
 
 	local maps = group.maps
@@ -144,25 +146,27 @@ function Plugin:Initialise()
 	timeToWait = self.Config.TimeToWait or 1
 
 	for k, v in pairs(self.Config.Adverts) do
-		local group = {
-			name = k,
-			prefix = v.Prefix or "",
-			pr = v.PrefixColor and v.PrefixColor[1] or 255,
-			pg = v.PrefixColor and v.PrefixColor[2] or 255,
-			pb = v.PrefixColor and v.PrefixColor[3] or 255,
-			r = v.Color and v.Color[1] or 255,
-			g = v.Color and v.Color[2] or 255,
-			b = v.Color and v.Color[3] or 255,
-			hidable = v.Hidable or false,
-			createAt = parseTime(v.CreateAt),
-			destroyAt = parseTime(v.DestroyAt),
-			randomise = v.Randomise or true,
-			interval = assert(v.Interval, "Interval for " .. k .. " is missing!"),
-			offset = v.Offset or math.random() * v.Interval,
-			messages = v.Messages,
-			maps = type(v.Maps) == "string" and {v.Maps} or v.Maps -- Even if v.Maps is nil it will work as expected.
-		}
-		table.insert(groups, group)
+		if v.Messages ~= nil and (type(v.Messages) ~= "table" or #v.Messages ~= 0) then
+			local group = {
+				name = k,
+				prefix = v.Prefix or "",
+				pr = v.PrefixColor and v.PrefixColor[1] or 255,
+				pg = v.PrefixColor and v.PrefixColor[2] or 255,
+				pb = v.PrefixColor and v.PrefixColor[3] or 255,
+				r = v.Color and v.Color[1] or 255,
+				g = v.Color and v.Color[2] or 255,
+				b = v.Color and v.Color[3] or 255,
+				hidable = v.Hidable or false,
+				createAt = parseTime(v.CreateAt),
+				destroyAt = parseTime(v.DestroyAt),
+				randomise = v.Randomise or true,
+				interval = assert(v.Interval, "Interval for " .. k .. " is missing!"),
+				offset = v.Offset or math.random() * v.Interval,
+				messages = v.Messages,
+				maps = type(v.Maps) == "string" and {v.Maps} or v.Maps -- Even if v.Maps is nil it will work as expected.
+			}
+			table.insert(groups, group)
+		end
 	end
 
 	self.Enabled = true
