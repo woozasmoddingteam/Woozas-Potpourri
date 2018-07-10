@@ -95,7 +95,8 @@ local function initGroup(group)
 		end
 		lastPrint = now;
 		local msg = messages[msg_n];
-		Plugin:SendNetworkMessage(nil, "Advert", {
+		local msgtype = #msg > 256 and "AdvertLong" or #msg > 128 and "AdvertMedium" or "AdvertShort"
+		Plugin:SendNetworkMessage(nil, msgtype, {
 			str = msg;
 			group = group.name;
 		}, true);

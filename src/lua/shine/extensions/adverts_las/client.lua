@@ -30,7 +30,7 @@ function Plugin:Initialise()
 	return true;
 end
 
-function Plugin:ReceiveAdvert(msg)
+function Plugin:ReceiveAdvertShort(msg)
 	if not self.Enabled then return end
 	local group = groups[msg.group];
 	if not group then
@@ -46,6 +46,9 @@ function Plugin:ReceiveAdvert(msg)
 	Shine.AddChatText(group.pr, group.pg, group.pb, group.prefix, group.r/255, group.g/255, group.b/255, msg.str);
 	StartSoundEffect = tmp
 end
+
+Plugin.ReceiveAdvertMedium = Plugin.ReceiveAdvertShort
+Plugin.ReceiveAdvertLong   = Plugin.ReceiveAdvertShort
 
 function Plugin:ReceiveGroup(msg)
 	local name = msg.name;

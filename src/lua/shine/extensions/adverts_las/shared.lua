@@ -18,8 +18,16 @@ local uint8 = "integer (0 to 255)";
 
 function Plugin:SetupDataTable()
 	self:AddDTVar("string (128)", "ServerID", "");
-	self:AddNetworkMessage("Advert", {
+	self:AddNetworkMessage("AdvertShort", {
+		str = "string (128)";
+		group = "string (32)";
+	}, "Client");
+	self:AddNetworkMessage("AdvertMedium", {
 		str = "string (256)";
+		group = "string (32)";
+	}, "Client");
+	self:AddNetworkMessage("AdvertLong", {
+		str = "string (384)";
 		group = "string (32)";
 	}, "Client");
 	self:AddNetworkMessage("RequestForGroups", {}, "Server");
