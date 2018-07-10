@@ -18,6 +18,7 @@ Plugin.DefaultConfig = {
 				176, 127, 0,
 			},
 			Hidable = true,
+			Offset = 40,
 			Interval = 60,
 			DestroyAt = {"Countdown", "Started"},
 			Maps = "ns2_descent",
@@ -36,6 +37,7 @@ Plugin.DefaultConfig = {
 				0, 0, 0,
 			},
 			Hidable = false,
+			Offset = 100,
 			Interval = 20,
 			CreateAt = "Started",
 			Messages = {
@@ -110,7 +112,7 @@ local function initGroup(group)
 			end
 		end
 	end
-	timer = Plugin:CreateTimer(group.name, group.interval, -1, func)
+	timer = Plugin:CreateTimer(group.name, group.offset, -1, func)
 end
 
 local parseTime = function(time)
@@ -156,6 +158,7 @@ function Plugin:Initialise()
 			destroyAt = parseTime(v.DestroyAt),
 			randomise = v.Randomise or true,
 			interval = assert(v.Interval, "Interval for " .. k .. " is missing!"),
+			offset = v.Offset or math.random() * v.Interval,
 			messages = v.Messages,
 			maps = type(v.Maps) == "string" and {v.Maps} or v.Maps -- Even if v.Maps is nil it will work as expected.
 		}
