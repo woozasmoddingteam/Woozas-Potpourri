@@ -1,0 +1,6 @@
+if Client then
+	function Client.GetIsSteamFriend()
+		return false
+	end
+end
+modEntry = {}
