@@ -1,5 +1,28 @@
+version = 1
 
-[master]
+dependencies = [
+	"235EE3A6", # [Shine] Wonitor
+	"287AA07B", # Shine JoinTeam
+	"2EBEDABC", # [Shine] permamute
+	"2EFEE4EC", # Gorge Tunnel Control
+	"31B2A09B", # Crazy Mines
+	"3462371A", # Local Talk Extended
+	"3536F85E", # Mod Panels++
+	"4292CDEC", # NS2 Community Fixes
+	"4384B7FE", # Enhanced Spectator
+	"47A9382E", # Nin's Nebula Skins
+	"47E763F1", # LOS Fix
+	"48E92104", # Sound Test
+	"4A844717", # Debug Exposed
+	"4D43623A", # Disable Healthbars
+	"4DC4502A", # Nin's Mod Map Prefix
+	"4DE41D6E", # Lua Configuration
+	"4FA3146C", # Pregame Peace
+	"B7149F9",  # Badges+
+	"C6FBBB0"   # [Shine] Epsilon
+]
+
+[branch.master]
 name            = "Wooza's Potpourri"
 tags            = ["Tool", "Must be run on Server"]
 autodescription = true
@@ -7,7 +30,7 @@ description     = "README.md"
 preview         = "preview.jpg"
 website         = "https://github.com/woozasmoddingteam/Wooza-s-Potpourri/"
 
-[beta]
+[branch.beta]
 name            = "Wooza's Potpourri - Beta"
 tags            = ["Tool", "Must be run on Server"]
 autodescription = false
