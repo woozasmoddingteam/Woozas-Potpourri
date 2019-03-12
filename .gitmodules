@@ -5,6 +5,3 @@
 	path = dependencies/FewerBuildRestrictions
 	url = https://github.com/Laaas/FewerBuildRestrictions.git
 	branch = "minimal"
-[submodule "dependencies/ForceBalance"]
-	path = dependencies/ForceBalance
-	url = https://github.com/Laaas/ForceBalance.git
