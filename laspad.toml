@@ -5,9 +5,11 @@ dependencies = [
 	"287AA07B", # Shine JoinTeam
 	"2EBEDABC", # [Shine] permamute
 	"2EFEE4EC", # Gorge Tunnel Control
+	"30BF2431", # Creepier Atmosphere
 	"31B2A09B", # Crazy Mines
 	"3462371A", # Local Talk Extended
 	"3536F85E", # Mod Panels++
+	"364799BA", # Smarter MAC
 	"4292CDEC", # NS2 Community Fixes
 	"4384B7FE", # Enhanced Spectator
 	"47A9382E", # Nin's Nebula Skins
@@ -18,8 +20,10 @@ dependencies = [
 	"4DC4502A", # Nin's Mod Map Prefix
 	"4DE41D6E", # Lua Configuration
 	"4FA3146C", # Pregame Peace
+	"54711EA2", # Rebirth Bots
+	"563B607D", # Hide Skill Tiers
 	"B7149F9",  # Badges+
-	"C6FBBB0"   # [Shine] Epsilon
+	"C6FBBB0",  # [Shine] Epsilon
 ]
 
 [branch.master]
