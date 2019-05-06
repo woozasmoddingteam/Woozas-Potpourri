@@ -10,8 +10,8 @@ dependencies = [
 	"3462371A", # Local Talk Extended
 	"3536F85E", # Mod Panels++
 	"364799BA", # Smarter MAC
-	#"4292CDEC", # NS2 Community Fixes
-	"5CC1A441", # NS2 Community Fixes - Beta
+	"4292CDEC", # NS2 Community Fixes
+	#"5CC1A441", # NS2 Community Fixes - Beta
 	#"4384B7FE", # Enhanced Spectator
 	"47A9382E", # Nin's Nebula Skins
 	"47E763F1", # LOS Fix
